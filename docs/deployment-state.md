@@ -11,7 +11,7 @@ This workspace has been prepared from instruction.md and the RTX 5090/RTX 4090 h
 - Model artifacts are stored only under models/ and excluded from Git.
 - Host inventory captured in host-inventory.md with Windows, CPU, RAM, GPU UUIDs, PCI identities, driver, CUDA, CMake, and MSVC details.
 - DFlash2 llama.cpp PR #27342 fetched and pinned at commit 5ecbe1ac17ec0484c5b44af0bd580cdc9c428ed4.
-- Native Windows Release server target built with CUDA 13.3 for CUDA architectures 89 and 120a; the server and matching DLLs are under runtime/llama.cpp-dflash2/build-dflash2/bin/Release/.
+- Native Windows Release server target built with CUDA 13.3 for CUDA architectures 89 and 120a; the server and matching DLLs are under runtime/llama.cpp-dflash2/build-dflash2/bin/Release/. The required server target is the accepted build scope for this checkpoint; optional all-target tooling is not part of the pre-load gate.
 - llama-server --version, --help, and --list-devices checked without model arguments.
 - Required primary and fallback GGUF files downloaded and SHA-256 recorded in model-manifest.md.
 - Canonical per-GPU launch scripts prepared but not invoked.
