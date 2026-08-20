@@ -22,7 +22,7 @@ The physical mapping from host-inventory.md is authoritative:
 
 | Backend | Physical identity | Launch isolation | Port | Initial target | Initial context |
 |---|---|---|---:|---|---:|
-| RTX 5090 | UUID GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0, PCI 00000000:01:00.0 | CUDA_VISIBLE_DEVICES=UUID, runtime CUDA0 | 8080 | UD-Q6_K_M | 131072 |
+| RTX 5090 | UUID GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0, PCI 00000000:01:00.0 | CUDA_VISIBLE_DEVICES=UUID, runtime CUDA0 | 8080 | UD-Q6_K_M | 126976 |
 | RTX 4090 | UUID GPU-eed52936-813f-8d68-1654-bfb56cb42bc3, PCI 00000000:03:00.0 | CUDA_VISIBLE_DEVICES=UUID, runtime CUDA0 | 8081 | UD-Q4_K_XL | 110000 |
 
 ## Initial runtime configuration
@@ -38,6 +38,8 @@ Both launch scripts enforce:
 - `fit off` so automatic fitting cannot silently introduce an invalid production configuration.
 
 The 5090 script starts at batch/ubatch 1024/256 and the 4090 script starts at 512/128, matching the handovers.
+
+The 5090 default context was reduced from 131072 to 126976 after the first sustained test measured only 640 MiB free VRAM at 131072. The 126976 retest measured 1238 MiB on the short sustained workload and 1272 MiB during the 118K deep-context test.
 
 ## Not yet done
 

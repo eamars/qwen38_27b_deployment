@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [int]$Port = 8080,
-    [int]$ContextSize = 131072,
+    [int]$ContextSize = 126976,
     [ValidateSet(4,5,7)][int]$DraftNMax = 5
 )
 

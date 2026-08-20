@@ -1,0 +1,223 @@
+{
+  "generated_at": "2026-08-20T14:36:21.989557+00:00",
+  "results": [
+    {
+      "sent_at": "2026-08-20T14:36:00.757456+00:00",
+      "port": 8080,
+      "model": "qwen3.8-27b-dflash2-5090",
+      "prompt": "Write a compact Python function that validates a UTF-8 JSON document, then explain the edge cases. Unique run nonce: f402adad27a543f58bae5e6e05ef34ca.",
+      "prompt_chars": 150,
+      "max_tokens": 2048,
+      "events": 2051,
+      "output_chars": 8294,
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 104,
+        "total_tokens": 2152,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "ttft_seconds": 0.48280599992722273,
+      "wall_seconds": 18.2555581999477,
+      "prompt_tokens": 104.0,
+      "prompt_tokens_cached": 0.0,
+      "pp_tokens_per_second": 223.95644908436267,
+      "predicted_tokens": 2048.0,
+      "tg_tokens_per_second": 115.236803754199,
+      "draft_verification_steps": 618.0,
+      "drafted_tokens": 3089.0,
+      "accepted_draft_tokens": 1429.0,
+      "acceptance_ratio": 0.46260925865976044,
+      "mean_accepted_per_verification": 2.3122977346278315,
+      "metrics_delta": {
+        "llamacpp:n_decode_total": 621.0,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"3\"}": 191.0,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"4\"}": 134.0,
+        "llamacpp:requests_deferred": 0.0,
+        "llamacpp:prompt_tokens_cached_total": 0.0,
+        "llamacpp:requests_processing": 0.0,
+        "llamacpp:tokens_predicted_seconds_total": 17.7721,
+        "llamacpp:predicted_tokens_seconds": 115.181,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"0\"}": 484.0,
+        "llamacpp:n_tokens_max": 2151.0,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"2\"}": 262.0,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"1\"}": 358.0,
+        "llamacpp:spec_decode_num_draft_tokens_total": 3089.0,
+        "llamacpp:spec_decode_num_drafts_total": 618.0,
+        "llamacpp:prompt_seconds_total": 0.464376,
+        "llamacpp:prompt_tokens_total": 104.0,
+        "llamacpp:tokens_predicted_total": 2048.0,
+        "llamacpp:prompt_tokens_seconds": 223.956,
+        "llamacpp:n_busy_slots_per_decode": 1.0,
+        "llamacpp:spec_decode_num_accepted_tokens_total": 1429.0
+      },
+      "repetition": 1,
+      "health": {
+        "status": "ok"
+      },
+      "models": {
+        "models": [
+          {
+            "name": "qwen3.8-27b-dflash2-5090",
+            "model": "qwen3.8-27b-dflash2-5090",
+            "modified_at": "",
+            "size": "",
+            "digest": "",
+            "type": "model",
+            "description": "",
+            "tags": [
+              ""
+            ],
+            "capabilities": [
+              "completion"
+            ],
+            "parameters": "",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "",
+              "families": [
+                ""
+              ],
+              "parameter_size": "",
+              "quantization_level": ""
+            }
+          }
+        ],
+        "object": "list",
+        "data": [
+          {
+            "id": "qwen3.8-27b-dflash2-5090",
+            "aliases": [
+              "qwen3.8-27b-dflash2-5090"
+            ],
+            "tags": [],
+            "object": "model",
+            "created": 1787236542,
+            "owned_by": "llamacpp",
+            "meta": {
+              "vocab_type": 2,
+              "n_vocab": 248320,
+              "n_ctx": 126976,
+              "n_ctx_train": 262144,
+              "n_embd": 5120,
+              "n_params": 27320697856,
+              "size": 23077412864,
+              "ftype": "Q6_K"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "sent_at": "2026-08-20T14:36:21.989557+00:00",
+      "port": 8081,
+      "model": "qwen3.8-27b-dflash2-4090",
+      "prompt": "Write a compact Python function that validates a UTF-8 JSON document, then explain the edge cases. Unique run nonce: a0eaf9d399a9418d9b16ccb36a97349f.",
+      "prompt_chars": 150,
+      "max_tokens": 2048,
+      "events": 2051,
+      "output_chars": 8406,
+      "usage": {
+        "completion_tokens": 2048,
+        "prompt_tokens": 106,
+        "total_tokens": 2154,
+        "prompt_tokens_details": {
+          "cached_tokens": 42
+        }
+      },
+      "ttft_seconds": 0.546554800006561,
+      "wall_seconds": 21.183639400056563,
+      "prompt_tokens": 64.0,
+      "prompt_tokens_cached": 42.0,
+      "pp_tokens_per_second": 363.59298038302273,
+      "predicted_tokens": 2048.0,
+      "tg_tokens_per_second": 99.24211587292356,
+      "draft_verification_steps": 632.0,
+      "drafted_tokens": 3159.0,
+      "accepted_draft_tokens": 1415.0,
+      "acceptance_ratio": 0.44792655903767015,
+      "mean_accepted_per_verification": 2.2389240506329116,
+      "metrics_delta": {
+        "llamacpp:n_decode_total": 634.0,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"3\"}": 185.0,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"4\"}": 135.0,
+        "llamacpp:requests_deferred": 0.0,
+        "llamacpp:prompt_tokens_cached_total": 42.0,
+        "llamacpp:requests_processing": 0.0,
+        "llamacpp:tokens_predicted_seconds_total": 20.636400000000002,
+        "llamacpp:predicted_tokens_seconds": 99.1937,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"0\"}": 476.0,
+        "llamacpp:n_tokens_max": 0.0,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"2\"}": 259.0,
+        "llamacpp:spec_decode_num_accepted_tokens_per_pos_total{position=\"1\"}": 360.0,
+        "llamacpp:spec_decode_num_draft_tokens_total": 3159.0,
+        "llamacpp:spec_decode_num_drafts_total": 632.0,
+        "llamacpp:prompt_seconds_total": 0.17602099999999987,
+        "llamacpp:prompt_tokens_total": 64.0,
+        "llamacpp:tokens_predicted_total": 2048.0,
+        "llamacpp:prompt_tokens_seconds": 363.601,
+        "llamacpp:n_busy_slots_per_decode": 0.0,
+        "llamacpp:spec_decode_num_accepted_tokens_total": 1415.0
+      },
+      "repetition": 1,
+      "health": {
+        "status": "ok"
+      },
+      "models": {
+        "models": [
+          {
+            "name": "qwen3.8-27b-dflash2-4090",
+            "model": "qwen3.8-27b-dflash2-4090",
+            "modified_at": "",
+            "size": "",
+            "digest": "",
+            "type": "model",
+            "description": "",
+            "tags": [
+              ""
+            ],
+            "capabilities": [
+              "completion"
+            ],
+            "parameters": "",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "",
+              "families": [
+                ""
+              ],
+              "parameter_size": "",
+              "quantization_level": ""
+            }
+          }
+        ],
+        "object": "list",
+        "data": [
+          {
+            "id": "qwen3.8-27b-dflash2-4090",
+            "aliases": [
+              "qwen3.8-27b-dflash2-4090"
+            ],
+            "tags": [],
+            "object": "model",
+            "created": 1787236560,
+            "owned_by": "llamacpp",
+            "meta": {
+              "vocab_type": 2,
+              "n_vocab": 248320,
+              "n_ctx": 110080,
+              "n_ctx_train": 262144,
+              "n_embd": 5120,
+              "n_params": 27320697856,
+              "size": 17548181504,
+              "ftype": "Q4_K - Medium"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
