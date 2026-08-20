@@ -1,0 +1,36 @@
+# Model weights and other large model artifacts
+/models/*
+!/models/.gitkeep
+*.gguf
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Locally cloned/build runtime; the pinned commit is documented under docs/
+/runtime/*
+!/runtime/.gitkeep
+
+# Raw/transient benchmark output; keep curated CSV/JSON/Markdown results trackable
+/benchmarks/raw/
+/benchmarks/*.log
+/benchmarks/*.tmp
+/benchmarks/*.jsonl
+
+# Generated host/runtime logs
+*.log
+*.csv.tmp
+*.pid
+*.lock
+
+# Python caches and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Windows/editor noise
+Thumbs.db
+Desktop.ini
+.vs/
+.vscode/
