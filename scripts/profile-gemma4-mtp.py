@@ -23,9 +23,9 @@ from typing import Any
 
 WORKSPACE = Path(__file__).resolve().parents[1]
 RUNTIME_DEFAULT = WORKSPACE / "runtime" / "llama.cpp-dflash2" / "build-dflash2" / "bin" / "Release" / "llama-server.exe"
-TARGET_DEFAULT = WORKSPACE / "models" / "gemma4" / "Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf"
-DRAFTER_DEFAULT = WORKSPACE / "models" / "gemma4" / "mtp-gemma-4-31B-it-Q8_0.gguf"
-OUTPUT_DEFAULT = WORKSPACE / "benchmarks" / "gemma4-mtp-profile.json"
+TARGET_DEFAULT = WORKSPACE / "models" / "Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf"
+DRAFTER_DEFAULT = WORKSPACE / "models" / "mtp-gemma-4-31B-it-Q8_0.gguf"
+OUTPUT_DEFAULT = WORKSPACE / "benchmarks" / "gemma4" / "mtp-profile.json"
 GPU_UUID_DEFAULT = "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0"
 DEFAULT_PROMPT = (
     "You are a coding assistant. Write a compact Python implementation for a "

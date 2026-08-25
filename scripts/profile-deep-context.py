@@ -160,7 +160,7 @@ def main() -> None:
     parser.add_argument("--model", required=True)
     parser.add_argument("--target-tokens", type=int, required=True)
     parser.add_argument("--max-tokens", type=int, default=128)
-    parser.add_argument("--output", required=True)
+    parser.add_argument("--output", default="benchmarks/qwen27b/deep-context.json")
     args = parser.parse_args()
 
     prompt, calibrated_tokens, calibration_error = calibrate(args.port, args.target_tokens)

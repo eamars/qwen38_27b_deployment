@@ -1,8 +1,12 @@
-# Host inventory
+# Host inventory — baseline capture
 
 Captured: 2026-08-20 19:19:47 +12:00
 
-This is the pre-installation host snapshot required by the deployment instruction. GPU assignments are explicit and must be rechecked before starting a backend.
+This is the baseline hardware/toolchain snapshot used by the deployment and
+initial measurements. It is not a live hardware reading; rerun
+`scripts/collect-host-inventory.ps1` when the host, drivers, or background GPU
+workload changes. GPU assignments are explicit and must be rechecked before
+starting a backend.
 
 ## Operating system and CPU
 

@@ -38,11 +38,10 @@ RUNTIME_DEFAULT = (
 TARGET_DEFAULT = (
     WORKSPACE
     / "models"
-    / "gemma4"
     / "Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf"
 )
-DRAFTER_DEFAULT = WORKSPACE / "models" / "gemma4" / "mtp-gemma-4-31B-it-Q8_0.gguf"
-OUTPUT_DEFAULT = WORKSPACE / "benchmarks" / "gemma4-4090-mtp-profile.json"
+DRAFTER_DEFAULT = WORKSPACE / "models" / "mtp-gemma-4-31B-it-Q8_0.gguf"
+OUTPUT_DEFAULT = WORKSPACE / "benchmarks" / "gemma4" / "mtp-4090-profile.json"
 GPU_UUID_DEFAULT = "GPU-eed52936-813f-8d68-1654-bfb56cb42bc3"
 GPU_NAME_DEFAULT = "RTX 4090"
 DEFAULT_KV_PROFILES = "q8_0:q8_0,q8_0:q4_0,q4_0:q4_0"

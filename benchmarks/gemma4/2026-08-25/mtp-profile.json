@@ -343,7 +343,7 @@
         "median_acceptance_ratio": null,
         "median_mean_accepted_per_verification": null
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-target-only-q8_0-q8_0.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-target-only-q8_0-q8_0.log"
     },
     "mtp-q8_0-q8_0-n2": {
       "case": {
@@ -614,7 +614,7 @@
         "median_acceptance_ratio": 0.851063829787234,
         "median_mean_accepted_per_verification": 1.702127659574468
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-mtp-q8_0-q8_0-n2.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-mtp-q8_0-q8_0-n2.log"
     },
     "mtp-q8_0-q8_0-n3": {
       "case": {
@@ -885,7 +885,7 @@
         "median_acceptance_ratio": 0.7291666666666666,
         "median_mean_accepted_per_verification": 2.1875
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-mtp-q8_0-q8_0-n3.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-mtp-q8_0-q8_0-n3.log"
     },
     "target-only-q8_0-q4_0": {
       "case": {
@@ -1153,7 +1153,7 @@
         "median_acceptance_ratio": null,
         "median_mean_accepted_per_verification": null
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-target-only-q8_0-q4_0.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-target-only-q8_0-q4_0.log"
     },
     "mtp-q8_0-q4_0-n2": {
       "case": {
@@ -1424,7 +1424,7 @@
         "median_acceptance_ratio": 0.8051282051282052,
         "median_mean_accepted_per_verification": 1.6020408163265305
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-mtp-q8_0-q4_0-n2.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-mtp-q8_0-q4_0-n2.log"
     },
     "mtp-q8_0-q4_0-n3": {
       "case": {
@@ -1695,7 +1695,7 @@
         "median_acceptance_ratio": 0.7032520325203252,
         "median_mean_accepted_per_verification": 2.1097560975609757
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-mtp-q8_0-q4_0-n3.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-mtp-q8_0-q4_0-n3.log"
     },
     "target-only-q4_0-q4_0": {
       "case": {
@@ -1963,7 +1963,7 @@
         "median_acceptance_ratio": null,
         "median_mean_accepted_per_verification": null
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-target-only-q4_0-q4_0.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-target-only-q4_0-q4_0.log"
     },
     "mtp-q4_0-q4_0-n2": {
       "case": {
@@ -2234,7 +2234,7 @@
         "median_acceptance_ratio": 0.8324607329842932,
         "median_mean_accepted_per_verification": 1.65625
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-mtp-q4_0-q4_0-n2.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-mtp-q4_0-q4_0-n2.log"
     },
     "mtp-q4_0-q4_0-n3": {
       "case": {
@@ -2505,7 +2505,7 @@
         "median_acceptance_ratio": 0.6867469879518072,
         "median_mean_accepted_per_verification": 2.0602409638554215
       },
-      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\gemma4-4090-mtp-profile-mtp-q4_0-q4_0-n3.log"
+      "log": "benchmarks/gemma4/2026-08-25/gemma4-4090-mtp-profile-mtp-q4_0-q4_0-n3.log"
     }
   },
   "errors": {},
@@ -2679,3 +2679,5 @@
     }
   }
 }
+
+

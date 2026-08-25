@@ -121,7 +121,7 @@ def stream_chat(port: int, model: str, prompt: str, max_tokens: int) -> dict:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output", default="benchmarks/api-smoke.json")
+    parser.add_argument("--output", default="benchmarks/qwen27b/api-smoke.json")
     parser.add_argument("--repetitions", type=int, default=3)
     parser.add_argument("--max-tokens", type=int, default=128)
     args = parser.parse_args()

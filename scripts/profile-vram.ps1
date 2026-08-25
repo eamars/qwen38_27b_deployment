@@ -3,7 +3,7 @@ param(
     [int]$DurationSeconds = 120,
     [int]$IntervalMilliseconds = 250,
     [string]$Phase = 'unspecified',
-    [string]$OutputPath = (Join-Path (Split-Path -Parent $PSScriptRoot) ('benchmarks\vram-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.csv'))
+    [string]$OutputPath = (Join-Path (Split-Path -Parent $PSScriptRoot) ('benchmarks\qwen27b\vram-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '.csv'))
 )
 
 $ErrorActionPreference = 'Stop'

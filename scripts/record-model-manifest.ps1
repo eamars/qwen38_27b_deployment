@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [string]$ModelsPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'models'),
-    [string]$OutputPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs\model-manifest.md')
+    [string]$OutputPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'docs\models.md')
 )
 
 $ErrorActionPreference = 'Stop'
@@ -16,6 +16,17 @@ $items = @(
     @{ Repo = 'unsloth/Qwen3.8-27B-GGUF'; File = 'Qwen3.8-27B-UD-Q4_K_M.gguf'; Quant = 'UD-Q4_K_M'; Role = 'RTX 4090 context fallback' },
     @{ Repo = 'incoai/Qwen3.8-27B-DFlash2-GGUF'; File = 'Qwen3.8-27B-DFlash2-Q4_K_M.gguf'; Quant = 'DFlash2 Q4_K_M'; Role = 'DFlash2 drafter for both backends' }
 )
+
+$optionalGemma = @(
+    @{ Repo = 'LM Studio local import'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf'; Quant = 'i1-Q4_K_M'; Role = 'Gemma 4 5090 experimental target' },
+    @{ Repo = 'mradermacher/Gemma-4-31B-Isometry-Fabled-Persona-i1-GGUF'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf'; Quant = 'i1-Q4_K_S'; Role = 'Gemma 4 4090 experimental target' },
+    @{ Repo = 'ggml-org/gemma-4-31B-it-GGUF'; File = 'mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 MTP drafter' }
+)
+foreach ($item in $optionalGemma) {
+    if (Test-Path -LiteralPath (Join-Path $models $item.File) -PathType Leaf) {
+        $items += $item
+    }
+}
 
 $lines = @(
     '# Model manifest'
