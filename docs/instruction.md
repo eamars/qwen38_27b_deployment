@@ -983,8 +983,8 @@ The final `scripts/` folder should contain only useful maintained scripts, for e
 ```text
 start-all.ps1
 stop-all.ps1
-start-5090.ps1
-start-4090.ps1
+start-qwen27b-5090.ps1
+start-qwen27b-4090.ps1
 profile-vram.ps1
 benchmark-ttft.ps1
 benchmark-tg.ps1

@@ -54,4 +54,4 @@ These require loading the model and are deliberately left for the next step:
 
 ## Next action
 
-Run scripts/verify-preload.ps1. If it passes, the workspace is at the requested point immediately before model loading. The first actual load should be made by explicitly invoking either scripts/start-5090.ps1 or scripts/start-4090.ps1 after confirming the other GPU's background usage and selecting the desired backend.
+Run scripts/verify-preload.ps1. If it passes, the workspace is at the requested point immediately before model loading. The first actual load should be made by explicitly invoking either scripts/start-qwen27b-5090.ps1 or scripts/start-qwen27b-4090.ps1 after confirming the other GPU's background usage and selecting the desired backend.

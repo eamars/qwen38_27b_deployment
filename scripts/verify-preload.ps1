@@ -14,7 +14,10 @@ if (-not (Test-Path -LiteralPath $runtime -PathType Leaf)) { throw "Runtime exec
 $models = @(
     (Join-Path $workspace 'models\Qwen3.8-27B-UD-Q6_K_M.gguf'),
     (Join-Path $workspace 'models\Qwen3.8-27B-UD-Q4_K_XL.gguf'),
-    (Join-Path $workspace 'models\Qwen3.8-27B-DFlash2-Q4_K_M.gguf')
+    (Join-Path $workspace 'models\Qwen3.8-27B-DFlash2-Q4_K_M.gguf'),
+    (Join-Path $workspace 'models\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf'),
+    (Join-Path $workspace 'models\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf'),
+    (Join-Path $workspace 'models\mtp-gemma-4-31B-it-Q8_0.gguf')
 )
 foreach ($model in $models) {
     if (-not (Test-Path -LiteralPath $model -PathType Leaf)) { throw "Required model artifact is missing: $model" }
@@ -23,7 +26,7 @@ foreach ($model in $models) {
 $version = (& $runtime --version 2>&1 | Out-String).Trim()
 $help = (& $runtime --help 2>&1 | Out-String)
 if ($help -notmatch 'draft-dflash') { throw 'Runtime help does not advertise draft-dflash support.' }
-foreach ($option in @('--spec-draft-model', '--spec-draft-ngl', '--cache-type-k', '--cache-type-v')) {
+foreach ($option in @('--spec-draft-model', '--spec-draft-ngl', '--cache-type-k', '--cache-type-v', '--models-preset', '--models-max', '--models-autoload')) {
     if ($help -notmatch [regex]::Escape($option)) { throw "Runtime help is missing required option: $option" }
 }
 

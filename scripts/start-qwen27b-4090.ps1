@@ -2,7 +2,9 @@
 param(
     [int]$Port = 8081,
     [int]$ContextSize = 110000,
-    [ValidateSet(4,5,7)][int]$DraftNMax = 5
+    [ValidateSet(4,5,7)][int]$DraftNMax = 5,
+    [string]$BindAddress = '0.0.0.0',
+    [switch]$Stop
 )
 
 $ErrorActionPreference = 'Stop'
@@ -12,6 +14,38 @@ $target = Join-Path $workspace 'models\Qwen3.8-27B-UD-Q4_K_XL.gguf'
 $draft = Join-Path $workspace 'models\Qwen3.8-27B-DFlash2-Q4_K_M.gguf'
 $expectedUuid = 'GPU-eed52936-813f-8d68-1654-bfb56cb42bc3'
 
+if ($Stop) {
+    $runtimeFullPath = [System.IO.Path]::GetFullPath($runtime)
+    $processes = @(
+        Get-CimInstance Win32_Process -Filter "Name = 'llama-server.exe'" |
+            Where-Object {
+                $executablePath = if ($_.ExecutablePath) {
+                    [System.IO.Path]::GetFullPath($_.ExecutablePath)
+                } else {
+                    $null
+                }
+                if (-not $executablePath -or $executablePath -ine $runtimeFullPath) {
+                    return $false
+                }
+
+                $commandLine = [string]$_.CommandLine
+                $portMatch = [regex]::Match($commandLine, '(?:^|\s)--port\s+(?<port>\d+)(?=\s|$)')
+                $portMatch.Success -and ([int]$portMatch.Groups['port'].Value -eq $Port)
+            }
+    )
+
+    if ($processes.Count -eq 0) {
+        Write-Host "No managed RTX 4090 llama-server process found on port $Port."
+        exit 0
+    }
+
+    foreach ($process in $processes) {
+        Stop-Process -Id $process.ProcessId
+        Write-Host "Stopped RTX 4090 llama-server PID $($process.ProcessId) on port $Port."
+    }
+    exit 0
+}
+
 if (-not (Test-Path -LiteralPath $runtime)) { throw "Runtime not built: $runtime" }
 if (-not (Test-Path -LiteralPath $target)) { throw "Target model is missing: $target" }
 if (-not (Test-Path -LiteralPath $draft)) { throw "DFlash2 drafter is missing: $draft" }
@@ -20,6 +54,7 @@ if ($gpu.Count -ne 1) { throw "Expected RTX 4090 UUID $expectedUuid exactly once
 $oldVisible = $env:CUDA_VISIBLE_DEVICES
 $env:CUDA_VISIBLE_DEVICES = $expectedUuid
 Write-Host "Validated RTX 4090 UUID $expectedUuid and restricted the child process to that UUID as runtime CUDA0."
+Write-Host "Binding RTX 4090 llama-server to $BindAddress`:$Port."
 Write-Host "Starting only after this script is explicitly run; model load begins with llama-server below."
 
 try {
@@ -27,7 +62,7 @@ try {
         --model $target `
         --spec-draft-model $draft `
         --alias 'qwen3.8-27b-dflash2-4090' `
-        --host 127.0.0.1 `
+        --host $BindAddress `
         --port $Port `
         --device CUDA0 `
         --spec-draft-device CUDA0 `
