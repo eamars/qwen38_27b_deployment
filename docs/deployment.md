@@ -159,6 +159,12 @@ target GPU is free. The recorded 4090 MTP sweep is in
 `benchmarks/gemma4/2026-08-25/`; it is a short experimental comparison, not a
 Qwen replacement or production sign-off.
 
+The active RTX 4090 Gemma default is the measured N1 profile: context `56320`,
+target KV `q8_0/f16`, draft KV `q8_0/q8_0`, MTP `n-max=3`, and batch/ubatch
+`256/128`. This is configured in both `start-gemma4-4090.ps1` and the
+`gemma4-4090` preset embedded in `start-kazusa-models.ps1`. The historical
+benchmark records remain unchanged.
+
 ## Performance profiling
 
 All maintained profilers write under the organized benchmark tree. Start the

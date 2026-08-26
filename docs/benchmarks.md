@@ -83,6 +83,28 @@ readiness. It has no long-context quality or reserve gate. The complete JSON
 and ignored per-case logs are in
 [benchmarks/gemma4/2026-08-25](../benchmarks/gemma4/2026-08-25/).
 
+## Gemma 4 / MTP default selection — 2026-08-26
+
+The current RTX 4090 default is N1: target KV `q8_0/f16`, draft KV
+`q8_0/q8_0`, `n-max=3`, and context `56320`. The combined workload used the
+same approximately 4K-token and 48K-token prompts for every case; the combined
+score is the sum of the two median wall times.
+
+| Case | Target KV | Context | Combined wall (s) | Minimum free VRAM |
+|---|---|---:|---:|---:|
+| Baseline comparator | `q8_0/q8_0` | 56320 | 5.499 | 2340 MiB |
+| N1 selected | `q8_0/f16` | 56320 | **5.145** | 1516 MiB |
+| N2 | `f16/q8_0` | 56320 | 5.182 | 1504 MiB |
+| N3 | `q8_0/q8_0` | 73728 | 5.506 | 1338 MiB |
+| N4 | `q8_0/q8_0` | 88064 | 5.666 | 940 MiB |
+
+N1 was 6.43% faster than the baseline comparator on the combined workload.
+The maximum successfully launched N1-context probe was `81920` with 547 MiB
+free, but it was 153.66% slower and is not the speed-priority default.
+The full record is in
+[benchmarks/gemma4/2026-08-26/combined-profile.json](../benchmarks/gemma4/2026-08-26/combined-profile.json);
+the earlier 2026-08-25 record remains unchanged for reference.
+
 ## Remaining acceptance work
 
 - Repeat the 4090 run with a clean, explicitly recorded background state.

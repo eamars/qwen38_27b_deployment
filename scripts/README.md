@@ -14,6 +14,7 @@ canonical launch and profiling entry points are:
 | Qwen tokenizer-calibrated deep context | `profile-deep-context.py` |
 | GPU memory sampling | `profile-vram.ps1` |
 | Gemma MTP comparison | `profile-gemma4-mtp.py`, `profile-gemma4-4090.py` |
+| Gemma short/long combined comparison | `profile-gemma4-combined.py` |
 | Runtime/model/GPU preflight | `check-runtime.ps1` |
 
 Setup and inventory helpers are also retained because they produce reproducible

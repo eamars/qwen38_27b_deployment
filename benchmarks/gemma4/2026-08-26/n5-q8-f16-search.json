@@ -1,0 +1,888 @@
+{
+  "created_utc": "2026-08-26T05:08:36.028192+00:00",
+  "server": "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-dflash2\\build-dflash2\\bin\\Release\\llama-server.exe",
+  "target": "C:\\workspace\\qwen38_27b\\models\\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf",
+  "drafter": "C:\\workspace\\qwen38_27b\\models\\mtp-gemma-4-31B-it-Q8_0.gguf",
+  "gpu_uuid": "GPU-eed52936-813f-8d68-1654-bfb56cb42bc3",
+  "short_target_tokens": 4000,
+  "long_target_tokens": 48000,
+  "repetitions": 2,
+  "max_tokens": 256,
+  "cases": [
+    {
+      "id": "n5-q8-f16-73728",
+      "candidate": true,
+      "context_size": 73728,
+      "target_cache_k": "q8_0",
+      "target_cache_v": "f16",
+      "started_utc": "2026-08-26T05:08:36.028192+00:00",
+      "command": [
+        "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-dflash2\\build-dflash2\\bin\\Release\\llama-server.exe",
+        "--model",
+        "C:\\workspace\\qwen38_27b\\models\\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf",
+        "--spec-draft-model",
+        "C:\\workspace\\qwen38_27b\\models\\mtp-gemma-4-31B-it-Q8_0.gguf",
+        "--spec-type",
+        "draft-mtp",
+        "--spec-draft-n-max",
+        "3",
+        "--spec-draft-device",
+        "CUDA0",
+        "--spec-draft-ngl",
+        "all",
+        "--cache-type-k",
+        "q8_0",
+        "--cache-type-v",
+        "f16",
+        "--spec-draft-type-k",
+        "q8_0",
+        "--spec-draft-type-v",
+        "q8_0",
+        "--alias",
+        "gemma4-n5-q8-f16-73728",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8100",
+        "--device",
+        "CUDA0",
+        "--split-mode",
+        "none",
+        "--gpu-layers",
+        "all",
+        "--ctx-size",
+        "73728",
+        "--parallel",
+        "1",
+        "--kv-unified",
+        "--flash-attn",
+        "on",
+        "--batch-size",
+        "256",
+        "--ubatch-size",
+        "128",
+        "--fit",
+        "off",
+        "--no-mmproj",
+        "--no-context-shift",
+        "--jinja",
+        "--reasoning",
+        "auto",
+        "--reasoning-preserve",
+        "--metrics"
+      ],
+      "log": "benchmarks\\gemma4\\2026-08-26\\combined-n5-q8-f16-73728.log",
+      "status": "ok",
+      "workloads": {
+        "short": {
+          "actual_prompt_tokens": 4005,
+          "runs": [
+            {
+              "wall_seconds": 2.1510971000534482,
+              "ttft_seconds": 0.3408185000298545,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 23875.2889573825,
+              "generation_tps": 110.01261080518934,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4017
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 2.143063900002744,
+              "ttft_seconds": 0.33115550002548844,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 25315.819244547783,
+              "generation_tps": 109.87464547836068,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4021
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 2.147080500028096,
+          "median_ttft_seconds": 0.33598700002767146,
+          "median_prompt_tps": 24595.554100965142,
+          "median_generation_tps": 109.94362814177501
+        },
+        "long": {
+          "actual_prompt_tokens": 48000,
+          "runs": [
+            {
+              "wall_seconds": 3.1017820999841206,
+              "ttft_seconds": 0.4602635999908671,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 252619.67385586395,
+              "generation_tps": 87.12098647763149,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48012
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 3.143364699964877,
+              "ttft_seconds": 0.479277300008107,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 269943.78864530474,
+              "generation_tps": 86.38001299391648,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48016
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 3.122573399974499,
+          "median_ttft_seconds": 0.469770449999487,
+          "median_prompt_tps": 261281.73125058436,
+          "median_generation_tps": 86.75049973577399
+        }
+      },
+      "prompt_targets": {
+        "short": {
+          "target_tokens": 4000,
+          "actual_tokens": 4005
+        },
+        "long": {
+          "target_tokens": 48000,
+          "actual_tokens": 48000
+        }
+      },
+      "combined_median_wall_seconds": 5.269653900002595,
+      "combined_median_generation_tps": 98.49781597799608,
+      "vram": {
+        "peak_used_mib": 23750,
+        "minimum_free_mib": 814,
+        "total_mib": 24564
+      },
+      "finished_utc": "2026-08-26T05:09:33.134130+00:00"
+    },
+    {
+      "id": "n5-q8-f16-76800",
+      "candidate": true,
+      "context_size": 76800,
+      "target_cache_k": "q8_0",
+      "target_cache_v": "f16",
+      "started_utc": "2026-08-26T05:09:33.136640+00:00",
+      "command": [
+        "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-dflash2\\build-dflash2\\bin\\Release\\llama-server.exe",
+        "--model",
+        "C:\\workspace\\qwen38_27b\\models\\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf",
+        "--spec-draft-model",
+        "C:\\workspace\\qwen38_27b\\models\\mtp-gemma-4-31B-it-Q8_0.gguf",
+        "--spec-type",
+        "draft-mtp",
+        "--spec-draft-n-max",
+        "3",
+        "--spec-draft-device",
+        "CUDA0",
+        "--spec-draft-ngl",
+        "all",
+        "--cache-type-k",
+        "q8_0",
+        "--cache-type-v",
+        "f16",
+        "--spec-draft-type-k",
+        "q8_0",
+        "--spec-draft-type-v",
+        "q8_0",
+        "--alias",
+        "gemma4-n5-q8-f16-76800",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8101",
+        "--device",
+        "CUDA0",
+        "--split-mode",
+        "none",
+        "--gpu-layers",
+        "all",
+        "--ctx-size",
+        "76800",
+        "--parallel",
+        "1",
+        "--kv-unified",
+        "--flash-attn",
+        "on",
+        "--batch-size",
+        "256",
+        "--ubatch-size",
+        "128",
+        "--fit",
+        "off",
+        "--no-mmproj",
+        "--no-context-shift",
+        "--jinja",
+        "--reasoning",
+        "auto",
+        "--reasoning-preserve",
+        "--metrics"
+      ],
+      "log": "benchmarks\\gemma4\\2026-08-26\\combined-n5-q8-f16-76800.log",
+      "status": "ok",
+      "workloads": {
+        "short": {
+          "actual_prompt_tokens": 4005,
+          "runs": [
+            {
+              "wall_seconds": 2.1711925999843515,
+              "ttft_seconds": 0.35468459996627644,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 23855.4930411608,
+              "generation_tps": 109.62821992392992,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4017
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 2.1524818999459967,
+              "ttft_seconds": 0.3345439999829978,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 24862.662798592613,
+              "generation_tps": 109.53434414288024,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4021
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 2.161837249965174,
+          "median_ttft_seconds": 0.3446142999746371,
+          "median_prompt_tps": 24359.077919876705,
+          "median_generation_tps": 109.58128203340507
+        },
+        "long": {
+          "actual_prompt_tokens": 48000,
+          "runs": [
+            {
+              "wall_seconds": 3.1021912999567576,
+              "ttft_seconds": 0.4678221999784,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 251166.31799162913,
+              "generation_tps": 87.34830697330652,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48012
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 3.155417400004808,
+              "ttft_seconds": 0.48248760000569746,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 267239.84418474644,
+              "generation_tps": 86.12091523714533,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48016
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 3.1288043499807827,
+          "median_ttft_seconds": 0.47515489999204874,
+          "median_prompt_tps": 259203.08108818778,
+          "median_generation_tps": 86.73461110522592
+        }
+      },
+      "prompt_targets": {
+        "short": {
+          "target_tokens": 4000,
+          "actual_tokens": 4005
+        },
+        "long": {
+          "target_tokens": 48000,
+          "actual_tokens": 48000
+        }
+      },
+      "combined_median_wall_seconds": 5.290641599945957,
+      "combined_median_generation_tps": 98.44132555809338,
+      "vram": {
+        "peak_used_mib": 23850,
+        "minimum_free_mib": 714,
+        "total_mib": 24564
+      },
+      "finished_utc": "2026-08-26T05:10:30.288881+00:00"
+    },
+    {
+      "id": "n5-q8-f16-78336",
+      "candidate": true,
+      "context_size": 78336,
+      "target_cache_k": "q8_0",
+      "target_cache_v": "f16",
+      "started_utc": "2026-08-26T05:10:30.289885+00:00",
+      "command": [
+        "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-dflash2\\build-dflash2\\bin\\Release\\llama-server.exe",
+        "--model",
+        "C:\\workspace\\qwen38_27b\\models\\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf",
+        "--spec-draft-model",
+        "C:\\workspace\\qwen38_27b\\models\\mtp-gemma-4-31B-it-Q8_0.gguf",
+        "--spec-type",
+        "draft-mtp",
+        "--spec-draft-n-max",
+        "3",
+        "--spec-draft-device",
+        "CUDA0",
+        "--spec-draft-ngl",
+        "all",
+        "--cache-type-k",
+        "q8_0",
+        "--cache-type-v",
+        "f16",
+        "--spec-draft-type-k",
+        "q8_0",
+        "--spec-draft-type-v",
+        "q8_0",
+        "--alias",
+        "gemma4-n5-q8-f16-78336",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8102",
+        "--device",
+        "CUDA0",
+        "--split-mode",
+        "none",
+        "--gpu-layers",
+        "all",
+        "--ctx-size",
+        "78336",
+        "--parallel",
+        "1",
+        "--kv-unified",
+        "--flash-attn",
+        "on",
+        "--batch-size",
+        "256",
+        "--ubatch-size",
+        "128",
+        "--fit",
+        "off",
+        "--no-mmproj",
+        "--no-context-shift",
+        "--jinja",
+        "--reasoning",
+        "auto",
+        "--reasoning-preserve",
+        "--metrics"
+      ],
+      "log": "benchmarks\\gemma4\\2026-08-26\\combined-n5-q8-f16-78336.log",
+      "status": "ok",
+      "workloads": {
+        "short": {
+          "actual_prompt_tokens": 4005,
+          "runs": [
+            {
+              "wall_seconds": 2.154101799998898,
+              "ttft_seconds": 0.3401778999832459,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 23913.559724531002,
+              "generation_tps": 109.7956664786258,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4017
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 2.15116459998535,
+              "ttft_seconds": 0.336225499981083,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 24446.197730169348,
+              "generation_tps": 109.72498486551935,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4021
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 2.152633199992124,
+          "median_ttft_seconds": 0.3382016999821644,
+          "median_prompt_tps": 24179.878727350173,
+          "median_generation_tps": 109.76032567207258
+        },
+        "long": {
+          "actual_prompt_tokens": 48000,
+          "runs": [
+            {
+              "wall_seconds": 3.1024491999996826,
+              "ttft_seconds": 0.4671879000379704,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 250641.96242171046,
+              "generation_tps": 87.3176683943624,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48012
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 3.182655500015244,
+              "ttft_seconds": 0.5089441000018269,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 267836.0290016765,
+              "generation_tps": 86.09398225139444,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48016
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 3.1425523500074632,
+          "median_ttft_seconds": 0.48806600001989864,
+          "median_prompt_tps": 259238.99571169348,
+          "median_generation_tps": 86.70582532287841
+        }
+      },
+      "prompt_targets": {
+        "short": {
+          "target_tokens": 4000,
+          "actual_tokens": 4005
+        },
+        "long": {
+          "target_tokens": 48000,
+          "actual_tokens": 48000
+        }
+      },
+      "combined_median_wall_seconds": 5.295185549999587,
+      "combined_median_generation_tps": 98.52132662994087,
+      "vram": {
+        "peak_used_mib": 23954,
+        "minimum_free_mib": 610,
+        "total_mib": 24564
+      },
+      "finished_utc": "2026-08-26T05:11:27.569478+00:00"
+    },
+    {
+      "id": "n5-q8-f16-79360",
+      "candidate": true,
+      "context_size": 79360,
+      "target_cache_k": "q8_0",
+      "target_cache_v": "f16",
+      "started_utc": "2026-08-26T05:11:27.570482+00:00",
+      "command": [
+        "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-dflash2\\build-dflash2\\bin\\Release\\llama-server.exe",
+        "--model",
+        "C:\\workspace\\qwen38_27b\\models\\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf",
+        "--spec-draft-model",
+        "C:\\workspace\\qwen38_27b\\models\\mtp-gemma-4-31B-it-Q8_0.gguf",
+        "--spec-type",
+        "draft-mtp",
+        "--spec-draft-n-max",
+        "3",
+        "--spec-draft-device",
+        "CUDA0",
+        "--spec-draft-ngl",
+        "all",
+        "--cache-type-k",
+        "q8_0",
+        "--cache-type-v",
+        "f16",
+        "--spec-draft-type-k",
+        "q8_0",
+        "--spec-draft-type-v",
+        "q8_0",
+        "--alias",
+        "gemma4-n5-q8-f16-79360",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8103",
+        "--device",
+        "CUDA0",
+        "--split-mode",
+        "none",
+        "--gpu-layers",
+        "all",
+        "--ctx-size",
+        "79360",
+        "--parallel",
+        "1",
+        "--kv-unified",
+        "--flash-attn",
+        "on",
+        "--batch-size",
+        "256",
+        "--ubatch-size",
+        "128",
+        "--fit",
+        "off",
+        "--no-mmproj",
+        "--no-context-shift",
+        "--jinja",
+        "--reasoning",
+        "auto",
+        "--reasoning-preserve",
+        "--metrics"
+      ],
+      "log": "benchmarks\\gemma4\\2026-08-26\\combined-n5-q8-f16-79360.log",
+      "status": "ok",
+      "workloads": {
+        "short": {
+          "actual_prompt_tokens": 4005,
+          "runs": [
+            {
+              "wall_seconds": 2.1046677000122145,
+              "ttft_seconds": 0.3524603999685496,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 24183.477425552348,
+              "generation_tps": 113.61950897342257,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4017
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 2.0980063000461087,
+              "ttft_seconds": 0.3483819999964908,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 24450.649508316117,
+              "generation_tps": 113.76755551072104,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4021
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 2.1013370000291616,
+          "median_ttft_seconds": 0.3504211999825202,
+          "median_prompt_tps": 24317.063466934233,
+          "median_generation_tps": 113.6935322420718
+        },
+        "long": {
+          "actual_prompt_tokens": 48000,
+          "runs": [
+            {
+              "wall_seconds": 6.714902099978644,
+              "ttft_seconds": 0.5025427999789827,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 260994.5652173898,
+              "generation_tps": 37.0672517167365,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48012
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 6.835324199986644,
+              "ttft_seconds": 0.5270055999862961,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 263428.41470104526,
+              "generation_tps": 36.510016850777006,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48016
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 6.775113149982644,
+          "median_ttft_seconds": 0.5147741999826394,
+          "median_prompt_tps": 262211.48995921755,
+          "median_generation_tps": 36.78863428375675
+        }
+      },
+      "prompt_targets": {
+        "short": {
+          "target_tokens": 4000,
+          "actual_tokens": 4005
+        },
+        "long": {
+          "target_tokens": 48000,
+          "actual_tokens": 48000
+        }
+      },
+      "combined_median_wall_seconds": 8.876450150011806,
+      "combined_median_generation_tps": 75.34338034507954,
+      "vram": {
+        "peak_used_mib": 23962,
+        "minimum_free_mib": 602,
+        "total_mib": 24564
+      },
+      "finished_utc": "2026-08-26T05:12:31.150959+00:00"
+    },
+    {
+      "id": "n5-q8-f16-79872",
+      "candidate": true,
+      "context_size": 79872,
+      "target_cache_k": "q8_0",
+      "target_cache_v": "f16",
+      "started_utc": "2026-08-26T05:12:31.151960+00:00",
+      "command": [
+        "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-dflash2\\build-dflash2\\bin\\Release\\llama-server.exe",
+        "--model",
+        "C:\\workspace\\qwen38_27b\\models\\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf",
+        "--spec-draft-model",
+        "C:\\workspace\\qwen38_27b\\models\\mtp-gemma-4-31B-it-Q8_0.gguf",
+        "--spec-type",
+        "draft-mtp",
+        "--spec-draft-n-max",
+        "3",
+        "--spec-draft-device",
+        "CUDA0",
+        "--spec-draft-ngl",
+        "all",
+        "--cache-type-k",
+        "q8_0",
+        "--cache-type-v",
+        "f16",
+        "--spec-draft-type-k",
+        "q8_0",
+        "--spec-draft-type-v",
+        "q8_0",
+        "--alias",
+        "gemma4-n5-q8-f16-79872",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8104",
+        "--device",
+        "CUDA0",
+        "--split-mode",
+        "none",
+        "--gpu-layers",
+        "all",
+        "--ctx-size",
+        "79872",
+        "--parallel",
+        "1",
+        "--kv-unified",
+        "--flash-attn",
+        "on",
+        "--batch-size",
+        "256",
+        "--ubatch-size",
+        "128",
+        "--fit",
+        "off",
+        "--no-mmproj",
+        "--no-context-shift",
+        "--jinja",
+        "--reasoning",
+        "auto",
+        "--reasoning-preserve",
+        "--metrics"
+      ],
+      "log": "benchmarks\\gemma4\\2026-08-26\\combined-n5-q8-f16-79872.log",
+      "status": "ok",
+      "workloads": {
+        "short": {
+          "actual_prompt_tokens": 4005,
+          "runs": [
+            {
+              "wall_seconds": 2.1216229999554344,
+              "ttft_seconds": 0.35207669995725155,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 24062.126642771775,
+              "generation_tps": 112.53495235835564,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4017
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 2.1122376000275835,
+              "ttft_seconds": 0.34250680002151057,
+              "prompt_tokens": 4028,
+              "predicted_tokens": 203,
+              "prompt_tps": 25483.99342022019,
+              "generation_tps": 112.50090056139612,
+              "chunks": 198,
+              "usage": {
+                "completion_tokens": 203,
+                "prompt_tokens": 4028,
+                "total_tokens": 4231,
+                "prompt_tokens_details": {
+                  "cached_tokens": 4021
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 2.116930299991509,
+          "median_ttft_seconds": 0.34729174998938106,
+          "median_prompt_tps": 24773.06003149598,
+          "median_generation_tps": 112.51792645987588
+        },
+        "long": {
+          "actual_prompt_tokens": 48000,
+          "runs": [
+            {
+              "wall_seconds": 4.233154499961529,
+              "ttft_seconds": 0.48774609999964014,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 256122.66666666183,
+              "generation_tps": 61.469434717621496,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48012
+                }
+              },
+              "repetition": 1
+            },
+            {
+              "wall_seconds": 4.286334800010081,
+              "ttft_seconds": 0.48940340004628524,
+              "prompt_tokens": 48023,
+              "predicted_tokens": 234,
+              "prompt_tps": 270247.60832864145,
+              "generation_tps": 60.64642872878346,
+              "chunks": 229,
+              "usage": {
+                "completion_tokens": 234,
+                "prompt_tokens": 48023,
+                "total_tokens": 48257,
+                "prompt_tokens_details": {
+                  "cached_tokens": 48016
+                }
+              },
+              "repetition": 2
+            }
+          ],
+          "median_wall_seconds": 4.259744649985805,
+          "median_ttft_seconds": 0.4885747500229627,
+          "median_prompt_tps": 263185.1374976516,
+          "median_generation_tps": 61.05793172320248
+        }
+      },
+      "prompt_targets": {
+        "short": {
+          "target_tokens": 4000,
+          "actual_tokens": 4005
+        },
+        "long": {
+          "target_tokens": 48000,
+          "actual_tokens": 48000
+        }
+      },
+      "combined_median_wall_seconds": 6.376674949977314,
+      "combined_median_generation_tps": 86.9851676395088,
+      "vram": {
+        "peak_used_mib": 23996,
+        "minimum_free_mib": 568,
+        "total_mib": 24564
+      },
+      "finished_utc": "2026-08-26T05:13:29.092721+00:00"
+    }
+  ]
+}
