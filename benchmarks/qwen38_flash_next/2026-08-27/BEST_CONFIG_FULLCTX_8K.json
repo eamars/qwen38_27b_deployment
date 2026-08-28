@@ -1,0 +1,9 @@
+{
+  "model": "Qwen3.8-Flash-Next",
+  "quant": "UD-Q4_K_XL",
+  "llama_cpp_sha": "6c5afc86a",
+  "selection_basis": "minimum median wall time among measured, correct, VRAM-safe rows",
+  "recommended_default": null,
+  "best_by_workload": {},
+  "note": "A single default remains null until workload priorities are chosen from the measured profiles."
+}

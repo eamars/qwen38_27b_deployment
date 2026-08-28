@@ -6,7 +6,9 @@ The raw measurements are grouped under [benchmarks](../benchmarks/):
 benchmarks/
 ├── qwen27b/2026-08-21/   initial dual-GPU baseline
 ├── qwen27b/2026-08-26/   Qwen 5090 n-max comparison
-└── gemma4/2026-08-25/    Gemma 4 / MTP experiment
+├── gemma4/2026-08-25/    Gemma 4 / MTP experiment
+├── qwen38_flash_next/2026-08-27/   Flash-Next exploratory probes
+└── qwen38_flash_next/2026-08-28/   Flash-Next fixed matrix
 ```
 
 See [benchmarks/README.md](../benchmarks/README.md) for the file-level index.
@@ -20,6 +22,9 @@ target KV `Q8_0` or better, and at least 1024 MiB minimum free VRAM during the
 accepted stress workload. Throughput is useful only after those conditions
 hold. Measurements from different dates are not directly comparable unless
 the prompt, context, runtime, background GPU load, and cache state match.
+The rules above describe the maintained Qwen3.8-27B DFlash2 paths; Flash-Next
+uses intentional host placement for PLE/MoE and is reported as a separate
+experimental track below.
 
 ## Current Qwen evidence
 
@@ -104,6 +109,30 @@ free, but it was 153.66% slower and is not the speed-priority default.
 The full record is in
 [benchmarks/gemma4/2026-08-26/combined-profile.json](../benchmarks/gemma4/2026-08-26/combined-profile.json);
 the earlier 2026-08-25 record remains unchanged for reference.
+
+## Qwen3.8-Flash-Next exploratory baseline — 2026-08-28
+
+The fixed Qwen3.8-Flash-Next matrix used the separate Qwen4Exp runtime at
+`6c5afc86a`, Q4 UD-Q4_K_XL weights, `38,10` layer splitting,
+`n-cpu-moe=33`, F16/F16 KV, batch/ubatch `2048/256`, and two
+262144-token slots. It ran one and two executors against short (about 4K) and
+mid (about 128K) prompts, with three repetitions per combination.
+
+| Executors | Prompt | Median TTFT (s) | Median prompt eval (tok/s) | Median generation (tok/s) | Median wall (s) | Min free VRAM 5090/4090 (MiB) | Retrieval |
+|---:|---|---:|---:|---:|---:|---:|---|
+| 1 | short | 20.832 | 194.19 | 26.53 | 50.707 | 2231 / 3029 | pass |
+| 2 | short | 41.449 | 95.73 | 13.45 | 75.518 | 2234 / 3001 | pass |
+| 1 | mid | 798.800 | 160.35 | 18.12 | 842.810 | 2112 / 2422 | pass |
+| 2 | mid | 1250.932 | 76.28 | 1.11 | 1746.701 | 1957 / 2321 | pass |
+
+The [complete JSON result](../benchmarks/qwen38_flash_next/2026-08-28/matrix-e1-e2-short-mid-r3.json)
+and [CSV result](../benchmarks/qwen38_flash_next/2026-08-28/matrix-e1-e2-short-mid-r3.csv)
+are retained with their dated prompt companions. The four matrix combinations
+completed successfully and observed headroom stayed above the repository's
+1024 MiB reserve floor. This is an exploratory baseline, not production
+sign-off: it does not cover MTP, parity, or the requested 250k-token workload.
+Earlier Flash-Next load, rejection, and plan records remain under
+[2026-08-27](../benchmarks/qwen38_flash_next/2026-08-27/).
 
 ## Remaining acceptance work
 

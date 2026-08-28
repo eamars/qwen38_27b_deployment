@@ -12,6 +12,8 @@ Read the documents in this order when operating the workspace:
    used for the measurements.
 5. [History](history.md) — the timeline of deployment stages and configuration
    decisions.
+6. [Qwen3.8-Flash-Next deployment](qwen38-flash-next-deployment.md) — the
+   separate Qwen4Exp deployment, load validation, and staged profiler.
 
 The [script inventory](../scripts/README.md) lists the canonical launch,
 profiling, setup, and inventory helpers.

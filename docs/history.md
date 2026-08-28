@@ -65,6 +65,23 @@ Dates are local host dates (Pacific/Auckland, UTC+12 in the captured runs).
   the lifetime of the process and is removed during shutdown; no Kazusa `.ini`
   file is tracked.
 
+### 2026-08-27/28 — Flash-Next load and fixed matrix
+
+- Added the isolated Qwen4Exp build, preparation, launcher, and profiler
+  helpers without changing the maintained Qwen3.8-27B DFlash2 launchers.
+- Recorded the pinned Qwen4Exp source/runtime and four-shard Q4 model set in
+  the build and environment manifests.
+- Executed the explicit no-MTP baseline on the RTX 5090 + RTX 4090 using
+  `38,10` layer splitting, `n-cpu-moe=33`, F16/F16 KV, two 262144-token slots,
+  and the fixed executor 1/2 × short/mid × three-repetition matrix.
+- All matrix combinations completed with retrieval correctness; the lowest
+  observed free VRAM was 1957 MiB on the RTX 5090 and 2321 MiB on the RTX
+  4090. The dated JSON/CSV evidence is retained under
+  `benchmarks/qwen38_flash_next/2026-08-28/`.
+- Kept the result experimental: MTP, parity, and 250k-token validation remain
+  open. Earlier exploratory probes and plan records are retained under the
+  2026-08-27 benchmark directory.
+
 ## Decisions retained
 
 1. Prefer correctness and full GPU residency over a headline throughput number.

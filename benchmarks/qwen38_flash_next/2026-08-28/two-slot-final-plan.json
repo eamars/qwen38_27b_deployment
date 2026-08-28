@@ -1,0 +1,75 @@
+{
+  "generated_utc": "2026-08-27T12:58:46.605135+00:00",
+  "run_requested": false,
+  "model_load_requested": false,
+  "model_load_performed": false,
+  "model": "Qwen3.8-Flash-Next",
+  "model_quant": "UD-Q4_K_XL",
+  "runtime": "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-qwen4exp\\build\\bin\\Release\\llama-server.exe",
+  "runtime_source": "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-qwen4exp",
+  "llama_sha": null,
+  "model_sha256": null,
+  "gpu0_uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+  "gpu1_uuid": "GPU-eed52936-813f-8d68-1654-bfb56cb42bc3",
+  "server_context": 524288,
+  "server_parallel": 2,
+  "slot_context": 262144,
+  "min_free_vram_mib": 0,
+  "reuse_server_pid": null,
+  "stage": "context",
+  "workloads": [
+    {
+      "id": "w1",
+      "target_tokens": 4000,
+      "output_tokens": 1000,
+      "description": "short interactive"
+    },
+    {
+      "id": "w5",
+      "target_tokens": 250000,
+      "output_tokens": 2000,
+      "description": "requested 250k context"
+    }
+  ],
+  "planned_cases": [
+    {
+      "id": "context-262144",
+      "stage": "context",
+      "context_size": 262144,
+      "gpu_split": "38,10",
+      "ncmoe": 35,
+      "threads": null,
+      "threads_batch": null,
+      "batch_size": 2048,
+      "ubatch_size": 256,
+      "kv_k": "f16",
+      "kv_v": "f16",
+      "mtp": false,
+      "mtp_precision": null,
+      "mtp_device": null,
+      "mtp_nmax": null
+    }
+  ],
+  "case_workload_compatibility": [
+    {
+      "case_id": "context-262144",
+      "compatible": [
+        "w1",
+        "w5"
+      ],
+      "nominally_skipped": []
+    }
+  ],
+  "cases": [],
+  "parity_checks": [],
+  "notes": [
+    "The profiler never runs a model-loading command in plan-only mode.",
+    "The server has two 262144-token slots; workloads are issued serially to one slot at a time.",
+    "The current repository DFlash2 runtime is not the default Flash-Next runtime path.",
+    "Architecture support still requires an explicit load validation after a Qwen4Exp SHA is pinned.",
+    "Q8 MTP is intentionally absent; evaluate it only after an F16/BF16 MTP baseline passes."
+  ],
+  "planned_commands": [
+    "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-qwen4exp\\build\\bin\\Release\\llama-server.exe --model C:\\workspace\\qwen38_27b\\models\\Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf --load-mode none --alias qwen38-flash-next-context-262144 --host 127.0.0.1 --port 8000 --device CUDA0,CUDA1 --split-mode layer --tensor-split 38,10 --gpu-layers all --ctx-size 524288 --parallel 2 --override-tensor per_layer_token_embd=CPU --n-cpu-moe 35 --flash-attn on --cache-type-k f16 --cache-type-v f16 --batch-size 2048 --ubatch-size 256 --fit off --cache-ram 0 --no-mmproj --no-context-shift --jinja --metrics"
+  ]
+}

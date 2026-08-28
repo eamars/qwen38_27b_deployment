@@ -81,6 +81,7 @@ are staged:
 - [docs/models.md](docs/models.md) — local model inventory, sizes, and current hashes.
 - [docs/host-inventory.md](docs/host-inventory.md) — captured hardware/build snapshot.
 - [docs/history.md](docs/history.md) — chronological project history and decision log.
+- [docs/qwen38-flash-next-deployment.md](docs/qwen38-flash-next-deployment.md) — isolated Flash-Next deployment and profiler.
 - [scripts/README.md](scripts/README.md) — maintained script inventory.
 - [benchmarks/README.md](benchmarks/README.md) — raw-result layout and naming convention.
 
@@ -101,3 +102,8 @@ benchmarks/ dated JSON/CSV measurements grouped by model and run date
 The hard operational constraints are full GPU residency, target KV cache at
 `Q8_0` or better, DFlash2 enabled, one slot, no normal CPU offload, and at
 least 1024 MiB free VRAM during the accepted stress workload.
+
+The separate Qwen3.8-Flash-Next path is experimental rather than a maintained
+production profile. Its pinned Qwen4Exp runtime and four-shard Q4 model have a
+recorded load and context matrix; MTP and broader correctness gates remain
+open. See [docs/qwen38-flash-next-deployment.md](docs/qwen38-flash-next-deployment.md).

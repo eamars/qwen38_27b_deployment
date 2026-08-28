@@ -1,0 +1,435 @@
+{
+  "generated_utc": "2026-08-27T10:37:26.255014+00:00",
+  "run_requested": true,
+  "model_load_requested": true,
+  "model_load_performed": true,
+  "model": "Qwen3.8-Flash-Next",
+  "model_quant": "UD-Q4_K_XL",
+  "runtime": "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-qwen4exp\\build\\bin\\Release\\llama-server.exe",
+  "runtime_source": "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-qwen4exp",
+  "llama_sha": "6c5afc86a",
+  "model_sha256": "9f7dd37d40b3051494338e7cfb1871e0247d307165a8b6fe49383b24951ee567",
+  "gpu0_uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+  "gpu1_uuid": "GPU-eed52936-813f-8d68-1654-bfb56cb42bc3",
+  "min_free_vram_mib": 1024,
+  "stage": "context",
+  "workloads": [
+    {
+      "id": "w1",
+      "target_tokens": 4000,
+      "output_tokens": 1000,
+      "description": "short interactive"
+    }
+  ],
+  "planned_cases": [
+    {
+      "id": "context-262144",
+      "stage": "context",
+      "context_size": 262144,
+      "gpu_split": "3,1",
+      "ncmoe": 26,
+      "threads": null,
+      "threads_batch": null,
+      "batch_size": 2048,
+      "ubatch_size": 1024,
+      "kv_k": "f16",
+      "kv_v": "f16",
+      "mtp": false,
+      "mtp_precision": null,
+      "mtp_device": null,
+      "mtp_nmax": null
+    }
+  ],
+  "case_workload_compatibility": [
+    {
+      "case_id": "context-262144",
+      "compatible": [
+        "w1"
+      ],
+      "nominally_skipped": []
+    }
+  ],
+  "cases": [
+    {
+      "case": {
+        "id": "context-262144",
+        "stage": "context",
+        "context_size": 262144,
+        "gpu_split": "3,1",
+        "ncmoe": 26,
+        "threads": null,
+        "threads_batch": null,
+        "batch_size": 2048,
+        "ubatch_size": 1024,
+        "kv_k": "f16",
+        "kv_v": "f16",
+        "mtp": false,
+        "mtp_precision": null,
+        "mtp_device": null,
+        "mtp_nmax": null
+      },
+      "command": [
+        "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-qwen4exp\\build\\bin\\Release\\llama-server.exe",
+        "--model",
+        "C:\\workspace\\qwen38_27b\\models\\Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+        "--load-mode",
+        "none",
+        "--alias",
+        "qwen38-flash-next-context-262144",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000",
+        "--device",
+        "CUDA0,CUDA1",
+        "--split-mode",
+        "layer",
+        "--tensor-split",
+        "3,1",
+        "--gpu-layers",
+        "all",
+        "--ctx-size",
+        "262144",
+        "--parallel",
+        "1",
+        "--override-tensor",
+        "per_layer_token_embd=CPU",
+        "--n-cpu-moe",
+        "26",
+        "--flash-attn",
+        "on",
+        "--cache-type-k",
+        "f16",
+        "--cache-type-v",
+        "f16",
+        "--batch-size",
+        "2048",
+        "--ubatch-size",
+        "1024",
+        "--fit",
+        "off",
+        "--cache-ram",
+        "0",
+        "--no-mmproj",
+        "--no-context-shift",
+        "--jinja",
+        "--metrics"
+      ],
+      "command_text": "C:\\workspace\\qwen38_27b\\runtime\\llama.cpp-qwen4exp\\build\\bin\\Release\\llama-server.exe --model C:\\workspace\\qwen38_27b\\models\\Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf --load-mode none --alias qwen38-flash-next-context-262144 --host 127.0.0.1 --port 8000 --device CUDA0,CUDA1 --split-mode layer --tensor-split 3,1 --gpu-layers all --ctx-size 262144 --parallel 1 --override-tensor per_layer_token_embd=CPU --n-cpu-moe 26 --flash-attn on --cache-type-k f16 --cache-type-v f16 --batch-size 2048 --ubatch-size 1024 --fit off --cache-ram 0 --no-mmproj --no-context-shift --jinja --metrics",
+      "server_log": "C:\\workspace\\qwen38_27b\\benchmarks\\qwen38_flash_next\\2026-08-27\\raw\\context-262144-20260827-223726.log",
+      "started_utc": "2026-08-27T10:37:26.822227+00:00",
+      "model_loaded": true,
+      "status": "rejected_vram",
+      "workloads": [
+        {
+          "workload": "w1",
+          "target_tokens": 4000,
+          "output_tokens": 1000,
+          "actual_prompt_tokens": 3990,
+          "prompt_sha256": "3a1ccc3ad5c052642a8419c6bcfb473b7e2fde3ec4838dcf98cd781a8382af08",
+          "prompt_path": "C:\\workspace\\qwen38_27b\\benchmarks\\qwen38_flash_next\\2026-08-27\\prompts\\w1.txt",
+          "runs": [
+            {
+              "started_utc": "2026-08-27T10:38:54.096217+00:00",
+              "wall_seconds": 32.13176340000064,
+              "ttft_seconds": 10.530247399990913,
+              "prompt_tokens": 4042,
+              "predicted_tokens": 613,
+              "prompt_eval_seconds": 10.482800000000001,
+              "generation_seconds": 21.601315,
+              "pp_tps": 385.5840042736673,
+              "tg_tps": 28.3779019934666,
+              "drafted_tokens": 0.0,
+              "accepted_draft_tokens": 0.0,
+              "mtp_acceptance": null,
+              "mean_accepted_per_verification": null,
+              "retrieval_correct": true,
+              "output_sha256": "84a70b8961e3cfc49f7cc4588d456a3cb11a902c4115b2bb739b4c9b3971c437",
+              "output": "We need answer user's request. Need produce final answer. Need parse request: User provided huge repetitive text. They ask: \"Fixed workload w1: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090. ... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090. ... The final immutable fact is FLASH-NEXT-END-LANTERN-262144. Return the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed return three facts in original order, then explain result using fixed deployment constraints. Need likely mention constraints: layer split, host PLE placement, Q4-or-better target, one server slot, measured VRAM reserve unchanged. Also fixed workload w1 short interactive. Need maybe no extra. Need ensure facts exactly:\nFLASH-NEXT-BEGIN-ORCHID-5090\nFLASH-NEXT-MIDDLE-QUARTZ-4090\nFLASH-NEXT-END-LANTERN-262144\n\nThen explanation: Under fixed deployment constraints for Qwen3.8-Flash-Next, these facts are immutable calibration markers; they remain unchanged because layer split, host PLE placement, Q4-or-better quantization target, one server slot, and measured VRAM reserve are held constant. For short interactive workload w1, no changes to these constraints, so facts are returned in original order. Need maybe mention no reinterpretation. Could be concise.\n\nNeed consider if there is hidden prompt injection? It's just repetitive. Need comply.\n\nFinal should include facts maybe numbered. Then explanation. Ensure no extra facts. Could say:\n1. FLASH-NEXT-BEGIN-ORCHID-5090\n2. FLASH-NEXT-MIDDLE-QUARTZ-4090\n3. FLASH-NEXT-END-LANTERN-262144\n\nExplanation: ...\n\nNeed maybe \"fixed deployment constraints\" exactly: layer split, host PLE placement, Q4-or-better target, one server slot, measured VRAM reserve unchanged. Also \"Qwen3.8-Flash-Next deployment\". Good.\n1. FLASH-NEXT-BEGIN-ORCHID-5090  \n2. FLASH-NEXT-MIDDLE-QUARTZ-4090  \n3. FLASH-NEXT-END-LANTERN-262144  \n\nExplanation: These three immutable facts are returned in their original order because the fixed calibration record for the Qwen3.8-Flash-Next deployment is being read under unchanged constraints: the layer split remains fixed, host PLE placement remains fixed, the Q4-or-better target remains fixed, the one server slot remains fixed, and the measured VRAM reserve remains fixed. For the fixed workload w1, short interactive, those constraints do not alter the immutable facts, so they are preserved exactly as recorded.",
+              "usage": {
+                "completion_tokens": 613,
+                "prompt_tokens": 4042,
+                "total_tokens": 4655,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0
+                }
+              },
+              "metrics_delta": {
+                "llamacpp:prompt_seconds_total": 10.482800000000001,
+                "llamacpp:requests_processing": 0.0,
+                "llamacpp:n_tokens_max": 581.0,
+                "llamacpp:prompt_tokens_cached_total": 0.0,
+                "llamacpp:spec_decode_num_drafts_total": 0.0,
+                "llamacpp:n_decode_total": 617.0,
+                "llamacpp:tokens_predicted_total": 613.0,
+                "llamacpp:predicted_tokens_seconds": 28.3316,
+                "llamacpp:prompt_tokens_total": 4042.0,
+                "llamacpp:requests_deferred": 0.0,
+                "llamacpp:prompt_tokens_seconds": 385.585,
+                "llamacpp:n_busy_slots_per_decode": 0.0,
+                "llamacpp:spec_decode_num_draft_tokens_total": 0.0,
+                "llamacpp:tokens_predicted_seconds_total": 21.601315,
+                "llamacpp:spec_decode_num_accepted_tokens_total": 0.0
+              },
+              "repetition": 1
+            },
+            {
+              "started_utc": "2026-08-27T10:39:32.051282+00:00",
+              "wall_seconds": 37.91735069999413,
+              "ttft_seconds": 10.650888199990732,
+              "prompt_tokens": 4042,
+              "predicted_tokens": 758,
+              "prompt_eval_seconds": 10.6217,
+              "generation_seconds": 27.2661,
+              "pp_tps": 380.5417211934059,
+              "tg_tps": 27.800088754900774,
+              "drafted_tokens": 0.0,
+              "accepted_draft_tokens": 0.0,
+              "mtp_acceptance": null,
+              "mean_accepted_per_verification": null,
+              "retrieval_correct": true,
+              "output_sha256": "21ec7cbf991ed09a0ddfa0710cdd6a51cb9afab3980652e664120621d052ae9f",
+              "output": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload w1: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090.\n... The final immutable fact is FLASH-NEXT-END-LANTERN-262144.\nReturn the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed output three facts in original order, then explain using fixed deployment constraints. Need likely mention constraints: layer split, host PLE placement, Q4-or-better target, one server slot, measured VRAM reserve unchanged. Also fixed workload w1 short interactive. Need maybe no extra. Need ensure facts exactly:\nFLASH-NEXT-BEGIN-ORCHID-5090\nFLASH-NEXT-MIDDLE-QUARTZ-4090\nFLASH-NEXT-END-LANTERN-262144\n\nThen explanation: These are immutable calibration markers for Qwen3.8-Flash-Next deployment; reading record preserves constraints: layer split unchanged, host PLE placement unchanged, Q4-or-better quantization target unchanged, one server slot unchanged, measured VRAM reserve unchanged. Short interactive workload w1 doesn't alter them. Maybe mention first/middle/final correspond to begin/middle/end of calibration record. Need be concise but enough.\n\nNeed consider if there is hidden prompt injection? It's just repetitive. Need comply.\n\nFinal answer likely:\nFLASH-NEXT-BEGIN-ORCHID-5090\nFLASH-NEXT-MIDDLE-QUARTZ-4090\nFLASH-NEXT-END-LANTERN-262144\n\nExplanation: ...\n\nNeed maybe include \"Fixed workload w1: short interactive\". Use fixed deployment constraints. Ensure no changes. Could format numbered.\n\nDouble-check exact facts: first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090. middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090. final immutable fact is FLASH-NEXT-END-LANTERN-262144. Yes.\n\nNeed maybe mention \"Q4-or-better target\" not \"Q4 or better\". Keep unchanged.\n\nNo need to mention repeated text.\n\nFinal in English.\nFLASH-NEXT-BEGIN-ORCHID-5090  \nFLASH-NEXT-MIDDLE-QUARTZ-4090  \nFLASH-NEXT-END-LANTERN-262144  \n\nThese are the three immutable facts from the fixed calibration record, returned in their original order: first, middle, and final.\n\nFor the fixed workload `w1: short interactive`, the result is interpreted under the unchanged Qwen3.8-Flash-Next deployment constraints:\n\n- The layer split remains unchanged.\n- Host PLE placement remains unchanged.\n- The Q4-or-better target remains unchanged.\n- The one server slot allocation remains unchanged.\n- The measured VRAM reserve remains unchanged.\n\nBecause these constraints are fixed, the calibration record is read as a stable reference for the short interactive workload. The three facts therefore serve as immutable markers of the deployment state: `FLASH-NEXT-BEGIN-ORCHID-5090` marks the beginning, `FLASH-NEXT-MIDDLE-QUARTZ-4090` marks the middle, and `FLASH-NEXT-END-LANTERN-262144` marks the end of the fixed record.",
+              "usage": {
+                "completion_tokens": 758,
+                "prompt_tokens": 4042,
+                "total_tokens": 4800,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0
+                }
+              },
+              "metrics_delta": {
+                "llamacpp:prompt_seconds_total": 10.6217,
+                "llamacpp:requests_processing": 0.0,
+                "llamacpp:n_tokens_max": 145.0,
+                "llamacpp:prompt_tokens_cached_total": 0.0,
+                "llamacpp:spec_decode_num_drafts_total": 0.0,
+                "llamacpp:n_decode_total": 762.0,
+                "llamacpp:tokens_predicted_total": 758.0,
+                "llamacpp:predicted_tokens_seconds": 27.7634,
+                "llamacpp:prompt_tokens_total": 4042.0,
+                "llamacpp:requests_deferred": 0.0,
+                "llamacpp:prompt_tokens_seconds": 0.0,
+                "llamacpp:n_busy_slots_per_decode": 0.0,
+                "llamacpp:spec_decode_num_draft_tokens_total": 0.0,
+                "llamacpp:tokens_predicted_seconds_total": 27.2661,
+                "llamacpp:spec_decode_num_accepted_tokens_total": 0.0
+              },
+              "repetition": 2
+            },
+            {
+              "started_utc": "2026-08-27T10:40:02.554449+00:00",
+              "wall_seconds": 30.465351199993165,
+              "ttft_seconds": 11.248526700001094,
+              "prompt_tokens": 4042,
+              "predicted_tokens": 556,
+              "prompt_eval_seconds": 11.2061,
+              "generation_seconds": 19.216699999999996,
+              "pp_tps": 360.6964064215026,
+              "tg_tps": 28.93316750534692,
+              "drafted_tokens": 0.0,
+              "accepted_draft_tokens": 0.0,
+              "mtp_acceptance": null,
+              "mean_accepted_per_verification": null,
+              "retrieval_correct": true,
+              "output_sha256": "5d686e0b44a4fb37b3361d58bd42c030cb8bff3ffbbab2da0aadbd6962ead515",
+              "output": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload w1: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090.\n... The final immutable fact is FLASH-NEXT-END-LANTERN-262144.\nReturn the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed output three facts in original order, then explain using fixed deployment constraints. Need likely mention constraints: layer split, host PLE placement, Q4-or-better target, one server slot, measured VRAM reserve unchanged. Also fixed workload w1 short interactive. Need maybe not overdo. Need ensure facts exactly:\nFLASH-NEXT-BEGIN-ORCHID-5090\nFLASH-NEXT-MIDDLE-QUARTZ-4090\nFLASH-NEXT-END-LANTERN-262144\n\nThen explanation: These are immutable calibration markers for Qwen3.8-Flash-Next deployment; under fixed constraints, no changes to layer split, host PLE placement, quantization target Q4 or better, one server slot, measured VRAM reserve. Short interactive workload w1 doesn't alter them. Maybe mention 5090, 4090, 262144? Could infer? Need be careful not invent. \"using fixed deployment constraints\" means explain result: facts remain unchanged because constraints fixed. Could say first/middle/final correspond to begin/middle/end markers. Maybe mention Q4-or-better target and VRAM reserve ensure calibration record stable. Need maybe include \"No layer split/host PLE/slot/VRAM reserve changes were applied.\" \n\nNeed final concise but enough. Ensure no hidden chain. Final in English.\nFLASH-NEXT-BEGIN-ORCHID-5090  \nFLASH-NEXT-MIDDLE-QUARTZ-4090  \nFLASH-NEXT-END-LANTERN-262144  \n\nThese three immutable facts are returned in their original order because the record is fixed to the Qwen3.8-Flash-Next deployment and must be read without changing the stated constraints: the layer split remains unchanged, host PLE placement remains unchanged, the Q4-or-better target remains unchanged, the one-server-slot allocation remains unchanged, and the measured VRAM reserve remains unchanged. For fixed workload w1, short interactive, these constraints preserve the calibration record exactly, so the begin, middle, and end immutable facts are reported unchanged.",
+              "usage": {
+                "completion_tokens": 556,
+                "prompt_tokens": 4042,
+                "total_tokens": 4598,
+                "prompt_tokens_details": {
+                  "cached_tokens": 0
+                }
+              },
+              "metrics_delta": {
+                "llamacpp:prompt_seconds_total": 11.2061,
+                "llamacpp:requests_processing": 0.0,
+                "llamacpp:n_tokens_max": 0.0,
+                "llamacpp:prompt_tokens_cached_total": 0.0,
+                "llamacpp:spec_decode_num_drafts_total": 0.0,
+                "llamacpp:n_decode_total": 560.0,
+                "llamacpp:tokens_predicted_total": 556.0,
+                "llamacpp:predicted_tokens_seconds": 28.8812,
+                "llamacpp:prompt_tokens_total": 4042.0,
+                "llamacpp:requests_deferred": 0.0,
+                "llamacpp:prompt_tokens_seconds": 360.699,
+                "llamacpp:n_busy_slots_per_decode": 0.0,
+                "llamacpp:spec_decode_num_draft_tokens_total": 0.0,
+                "llamacpp:tokens_predicted_seconds_total": 19.216699999999996,
+                "llamacpp:spec_decode_num_accepted_tokens_total": 0.0
+              },
+              "repetition": 3
+            }
+          ],
+          "summary": {
+            "median_wall_seconds": 32.13176340000064,
+            "min_wall_seconds": 30.465351199993165,
+            "max_wall_seconds": 37.91735069999413,
+            "median_ttft_seconds": 10.650888199990732,
+            "min_ttft_seconds": 10.530247399990913,
+            "max_ttft_seconds": 11.248526700001094,
+            "median_prompt_eval_seconds": 10.6217,
+            "min_prompt_eval_seconds": 10.482800000000001,
+            "max_prompt_eval_seconds": 11.2061,
+            "median_generation_seconds": 21.601315,
+            "min_generation_seconds": 19.216699999999996,
+            "max_generation_seconds": 27.2661,
+            "median_pp_tps": 380.5417211934059,
+            "min_pp_tps": 360.6964064215026,
+            "max_pp_tps": 385.5840042736673,
+            "median_tg_tps": 28.3779019934666,
+            "min_tg_tps": 27.800088754900774,
+            "max_tg_tps": 28.93316750534692,
+            "median_prompt_tokens": 4042.0,
+            "min_prompt_tokens": 4042.0,
+            "max_prompt_tokens": 4042.0,
+            "median_predicted_tokens": 613.0,
+            "min_predicted_tokens": 556.0,
+            "max_predicted_tokens": 758.0,
+            "median_drafted_tokens": 0.0,
+            "min_drafted_tokens": 0.0,
+            "max_drafted_tokens": 0.0,
+            "median_accepted_draft_tokens": 0.0,
+            "min_accepted_draft_tokens": 0.0,
+            "max_accepted_draft_tokens": 0.0,
+            "median_mtp_acceptance": null,
+            "min_mtp_acceptance": null,
+            "max_mtp_acceptance": null,
+            "median_mean_accepted_per_verification": null,
+            "min_mean_accepted_per_verification": null,
+            "max_mean_accepted_per_verification": null,
+            "all_retrieval_correct": true
+          },
+          "status": "ok"
+        }
+      ],
+      "health": {
+        "status": "ok"
+      },
+      "models": {
+        "models": [
+          {
+            "name": "qwen38-flash-next-context-262144",
+            "model": "qwen38-flash-next-context-262144",
+            "modified_at": "",
+            "size": "",
+            "digest": "",
+            "type": "model",
+            "description": "",
+            "tags": [
+              ""
+            ],
+            "capabilities": [
+              "completion"
+            ],
+            "parameters": "",
+            "details": {
+              "parent_model": "",
+              "format": "gguf",
+              "family": "",
+              "families": [
+                ""
+              ],
+              "parameter_size": "",
+              "quantization_level": ""
+            }
+          }
+        ],
+        "object": "list",
+        "data": [
+          {
+            "id": "qwen38-flash-next-context-262144",
+            "aliases": [
+              "qwen38-flash-next-context-262144"
+            ],
+            "tags": [],
+            "object": "model",
+            "created": 1787827087,
+            "owned_by": "llamacpp",
+            "meta": {
+              "vocab_type": true,
+              "n_vocab": 248320,
+              "n_ctx": 262144,
+              "n_ctx_train": 262144,
+              "n_embd": 2560,
+              "n_params": 176943899520,
+              "size": 111323630080,
+              "ftype": "Q4_K - Medium"
+            }
+          }
+        ]
+      },
+      "telemetry": {
+        "gpus": {
+          "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0": {
+            "name": "NVIDIA GeForce RTX 5090",
+            "peak_used_mb": 31281.0,
+            "minimum_free_mb": 907.0,
+            "peak_gpu_utilization": 75.0,
+            "peak_memory_utilization": 29.0,
+            "peak_power_w": 176.07,
+            "peak_pcie_rx_kb_s": null,
+            "peak_pcie_tx_kb_s": null
+          },
+          "GPU-eed52936-813f-8d68-1654-bfb56cb42bc3": {
+            "name": "NVIDIA GeForce RTX 4090",
+            "peak_used_mb": 22950.0,
+            "minimum_free_mb": 1189.0,
+            "peak_gpu_utilization": 84.0,
+            "peak_memory_utilization": 73.0,
+            "peak_power_w": 98.37,
+            "peak_pcie_rx_kb_s": null,
+            "peak_pcie_tx_kb_s": null
+          }
+        },
+        "errors": [],
+        "ram_peak_mb": 101861.07421875,
+        "ram_available_min_mb": 28846.75,
+        "server_working_set_peak_mb": 72545.2109375,
+        "cpu_peak_percent": 1614.5833333324865,
+        "cpu_per_core_peak_percent": null,
+        "disk_read_mb": 106177.0044555664,
+        "disk_read_iops": 297.61805555555554,
+        "disk_metrics_source": "Windows process cumulative counters",
+        "system_metrics_source": "Windows kernel process counters + GlobalMemoryStatusEx",
+        "sample_count": 145
+      },
+      "finished_utc": "2026-08-27T10:40:06.080448+00:00",
+      "minimum_free_gpu0_mib": 907.0,
+      "minimum_free_gpu1_mib": 1189.0
+    }
+  ],
+  "parity_checks": [],
+  "notes": [
+    "The profiler never runs a model-loading command in plan-only mode.",
+    "The current repository DFlash2 runtime is not the default Flash-Next runtime path.",
+    "Architecture support still requires an explicit load validation after a Qwen4Exp SHA is pinned.",
+    "Q8 MTP is intentionally absent; evaluate it only after an F16/BF16 MTP baseline passes."
+  ],
+  "runtime_info": {
+    "version": "version: 0.3.0-dev (build 10669, commit 6c5afc86a)\nbuilt with MSVC 19.44.35228.0 for x64",
+    "commit": "6c5afc86a",
+    "devices": "Available devices:\n  CUDA0: NVIDIA GeForce RTX 5090 (32606 MiB, 30991 MiB free)\n  CUDA1: NVIDIA GeForce RTX 4090 (24563 MiB, 23036 MiB free)\n",
+    "required_options": [
+      "--load-mode",
+      "--n-cpu-moe",
+      "--split-mode",
+      "--tensor-split",
+      "--override-tensor",
+      "--cache-type-k",
+      "--cache-type-v",
+      "--flash-attn",
+      "--fit",
+      "--cache-ram",
+      "--metrics"
+    ],
+    "mtp_options_required": false
+  },
+  "model_shards": [
+    "Qwen3.8-Flash-Next-UD-Q4_K_XL-00001-of-00004.gguf",
+    "Qwen3.8-Flash-Next-UD-Q4_K_XL-00002-of-00004.gguf",
+    "Qwen3.8-Flash-Next-UD-Q4_K_XL-00003-of-00004.gguf",
+    "Qwen3.8-Flash-Next-UD-Q4_K_XL-00004-of-00004.gguf"
+  ]
+}
