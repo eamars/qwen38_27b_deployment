@@ -8,6 +8,13 @@ Qwen rows are the deployment set; Gemma rows are experimental and are included
 when those files are present. Regenerate this file with
 `scripts/record-model-manifest.ps1` after replacing an artifact.
 
+The Qwen3.8 Flash-Next deployment uses the complete
+`RadixArk/Qwen3.8-Flash-Next-NVFP4` checkpoint under WSL at
+`/home/rba90/models/Qwen3.8-Flash-Next-NVFP4`. Its indexed weight files total
+135195303851206 bytes. It is intentionally outside the generated Windows
+`models/` table below; the pinned runtime and benchmark record its repository
+revision and validate that all indexed shards are present.
+
 | Role | Repository | Filename | Quantization | Size bytes | Size GB | SHA-256 | Download date |
 |---|---|---|---|---:|---:|---|---|
 | RTX 5090 primary target | unsloth/Qwen3.8-27B-GGUF | Qwen3.8-27B-UD-Q6_K_M.gguf | UD-Q6_K_M | 23088409504 | 21.503 | 6629d378ec65deaa772917e9b2b031c97f07aa710f9cf218ca2a0a32e8531fcc | 2026-08-20 |

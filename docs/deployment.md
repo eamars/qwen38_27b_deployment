@@ -224,24 +224,16 @@ Do not solve a VRAM problem by lowering target KV below `Q8_0`, enabling normal
 CPU target offload, adding slots, or silently switching to a different runtime
 build.
 
-## Qwen3.8-Flash-Next experimental deployment
+## Qwen3.8-Flash-Next FreeToken deployment
 
-Flash-Next is not an alternate setting for the current DFlash2 Qwen3.8-27B
-launchers. Its deployment uses a separate pinned Qwen4Exp-compatible runtime,
-layer splitting across both GPUs, CPU placement for `per_layer_token_embd`,
-and staged CPU-MoE profiling. The preparation, load validation, and profiler
-are documented in
-[qwen38-flash-next-deployment.md](qwen38-flash-next-deployment.md).
-
-These entry points are safe to preview while the GPUs are busy:
+Flash-Next is isolated from the maintained Qwen3.8-27B DFlash2 launchers. Its
+only retained path is FreeToken on the RTX 5090 with the NVFP4 checkpoint in
+WSL. Preview it without loading weights:
 
 ```powershell
-.\scripts\prepare-qwen38-flash-next.ps1
-.\scripts\start-qwen38-flash-next.ps1 -Profile Baseline -DryRun
-python .\scripts\profile-qwen38-flash-next.py --stage context --dry-run
+.\scripts\start-qwen38-flash-next-freetoken.ps1 -Profile Short4K -DryRun
 ```
 
-The preparation script never loads a model. The profiler requires an explicit
-`--run` before it starts a server. Keep the existing Qwen3.8-27B launchers and
-their DFlash2 defaults unchanged. The completed matrix is indexed under
-`benchmarks/qwen38_flash_next/2026-08-28/` and is not a production sign-off.
+The measured profile and memory placement are documented in
+[the FreeToken deployment record](qwen38-flash-next-freetoken.md).
+Keep the existing Qwen3.8-27B launchers and their DFlash2 defaults unchanged.

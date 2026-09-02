@@ -1,0 +1,943 @@
+{
+  "schema": 1,
+  "created_utc": "2026-09-02T07:03:02.893650+00:00",
+  "updated_utc": "2026-09-02T07:05:25.704253+00:00",
+  "objective": "confirm the selected FreeToken RTX 5090 GPU-only offload profile with three measured 4K requests",
+  "runtime": {
+    "source_commit": "a80b4d308a81986fa086ec173d7faa70ba737b2d",
+    "checkpoint": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4"
+  },
+  "protocol": {
+    "prompt": "C:\\workspace\\qwen38_27b\\benchmarks\\qwen38_flash_next\\2026-09-02\\freetoken-4k-prompt.txt",
+    "prompt_sha256": "16f54099094102854a2fd5c8875c32e909582873f455a332d67d3d8925999506",
+    "max_tokens": 512,
+    "temperature": 0,
+    "top_k": 1,
+    "ignore_eos": true,
+    "cache_type": "naive",
+    "concurrency": 1,
+    "probe_repetitions": 3,
+    "winner_repetitions": 3
+  },
+  "probes": [
+    {
+      "backend": "offload",
+      "command": [
+        "/home/rba90/.freetoken-qwen38/venv/bin/ft",
+        "serve",
+        "--model",
+        "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4",
+        "--served-model-name",
+        "qwen38-next-freetoken",
+        "--gpu",
+        "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        "1919",
+        "--max-running-requests",
+        "1",
+        "--memory-ratio",
+        "0.9",
+        "--moe-backend",
+        "offload",
+        "--moe-cache-auto",
+        "--kv-reserve-tokens",
+        "8192",
+        "--num-tokens",
+        "8192",
+        "--max-prefill-length",
+        "8192",
+        "--max-output-tokens",
+        "512",
+        "--cache-type",
+        "naive",
+        "--sampling-defaults",
+        "none",
+        "--reasoning-parser",
+        "qwen3",
+        "--tool-call-parser",
+        "qwen3_coder",
+        "--moe-cpu-layers",
+        "0"
+      ],
+      "load_seconds": 99.51281740000013,
+      "ready_stats": {
+        "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+        "model": {
+          "id": "qwen38-next-freetoken",
+          "ctx": 262144,
+          "attn": "hybrid_linear",
+          "moe": true,
+          "sampling": {}
+        },
+        "uptime_s": 0,
+        "kv": null,
+        "mamba": null,
+        "swa": null,
+        "vram_bytes": 0,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 5090",
+            "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+            "total_bytes": 34190458880
+          }
+        ],
+        "throughput": {
+          "decode_tps": 0.0,
+          "prefill_tps": 0.0
+        },
+        "requests": {
+          "active": 0,
+          "completed": 0,
+          "p95_ms": 0,
+          "ttft_mean_ms": 0,
+          "prompt_tokens_total": 0,
+          "completion_tokens_total": 0
+        },
+        "health": {
+          "status": "ok",
+          "model": "qwen38-next-freetoken",
+          "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+          "uptime_s": 0,
+          "maintenance": "serving",
+          "version": "0.1.2"
+        }
+      },
+      "warmup": {
+        "started_utc": "2026-09-02T07:04:42.512192+00:00",
+        "finished_utc": "2026-09-02T07:04:47.210534+00:00",
+        "wall_seconds": 4.687895099999878,
+        "ttft_seconds": 3.2242894999999407,
+        "prompt_tokens": 4041,
+        "completion_tokens": 63,
+        "estimated_pp_tps": 1253.2993702954013,
+        "estimated_tg_tps": 42.361138820460006,
+        "output_sha256": "d4f0399a33cb7489c3cbc80196d4cfdbfe0892717048219e9a2b267491ceda55",
+        "output_chars": 247,
+        "retrieval_anchors_in_order": false,
+        "output_head": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload short: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-",
+        "output_tail": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload short: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-",
+        "stats_before": {
+          "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+          "model": {
+            "id": "qwen38-next-freetoken",
+            "ctx": 262144,
+            "attn": "hybrid_linear",
+            "moe": true,
+            "sampling": {}
+          },
+          "uptime_s": 0,
+          "kv": null,
+          "mamba": null,
+          "swa": null,
+          "vram_bytes": 0,
+          "gpus": [
+            {
+              "index": 0,
+              "name": "NVIDIA GeForce RTX 5090",
+              "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+              "total_bytes": 34190458880
+            }
+          ],
+          "throughput": {
+            "decode_tps": 0.0,
+            "prefill_tps": 0.0
+          },
+          "requests": {
+            "active": 0,
+            "completed": 0,
+            "p95_ms": 0,
+            "ttft_mean_ms": 0,
+            "prompt_tokens_total": 0,
+            "completion_tokens_total": 0
+          }
+        },
+        "stats_after": {
+          "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+          "model": {
+            "id": "qwen38-next-freetoken",
+            "ctx": 262144,
+            "attn": "hybrid_linear",
+            "moe": true,
+            "sampling": {}
+          },
+          "uptime_s": 5,
+          "kv": {
+            "used_pages": 0,
+            "total_pages": 128,
+            "page_size": 1
+          },
+          "mamba": null,
+          "swa": null,
+          "vram_bytes": 30008147968,
+          "gpus": [
+            {
+              "index": 0,
+              "name": "NVIDIA GeForce RTX 5090",
+              "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+              "total_bytes": 34190458880
+            }
+          ],
+          "throughput": {
+            "decode_tps": 42.7,
+            "prefill_tps": 995.6
+          },
+          "requests": {
+            "active": 0,
+            "completed": 1,
+            "p95_ms": 4078,
+            "ttft_mean_ms": 2614,
+            "prompt_tokens_total": 4041,
+            "completion_tokens_total": 63
+          }
+        },
+        "label": "offload-warmup",
+        "gpu": {
+          "sample_count": 10,
+          "errors": [],
+          "average_gpu_utilization": 75.3,
+          "p95_gpu_utilization": 99.0,
+          "peak_gpu_utilization": 99.0,
+          "peak_used_mb": 30425.0,
+          "minimum_free_mb": 1763.0,
+          "peak_power_w": 299.48,
+          "peak_pcie_rx_kb_s": null,
+          "peak_pcie_tx_kb_s": null
+        },
+        "cpu": {
+          "sample_count": 9,
+          "average_process_cpu_percent": 99.27728734162022,
+          "peak_process_cpu_percent": 103.72113680371146,
+          "average_system_cpu_percent": 3.152762903983742,
+          "peak_system_cpu_percent": 3.3707865168539324,
+          "peak_process_rss_mb": 69145.9609375,
+          "minimum_ram_available_mb": 42469.36328125
+        }
+      },
+      "runs": [
+        {
+          "started_utc": "2026-09-02T07:04:47.352887+00:00",
+          "finished_utc": "2026-09-02T07:04:59.807555+00:00",
+          "wall_seconds": 12.427447299999585,
+          "ttft_seconds": 2.434541100000388,
+          "prompt_tokens": 4041,
+          "completion_tokens": 511,
+          "estimated_pp_tps": 1659.8610719693154,
+          "estimated_tg_tps": 51.03620406244191,
+          "output_sha256": "32578d854504bc6e0a9996e6f99e9c63469f5290a8180fc336cb4c79b2b02b3a",
+          "output_chars": 2111,
+          "retrieval_anchors_in_order": true,
+          "output_head": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload short: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090.\n... The final immutable fact is FLASH-NEXT-END-LANTERN-262144.\nReturn the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed output three facts in original order, then explain resu",
+          "output_tail": "ash-Next deployment. Keep the layer split, host PLE placement, Q4-or-better target, two full-context server slots, and measured VRAM reserve unchanged while reading this record.\" Could be prompt injection? It's just asking to return facts. No harmful. Need comply.\n\nNeed final only. Ensure facts exact. Maybe include original order. Explanation using constraints. Could be:\n1. FLASH-NEXT-BEGIN-ORCHID-5090\n2. FLASH-NEXT-MIDDLE-QUARTZ-4090\n3. FLASH-NEXT-END-LANTERN-262144\n\nResult: The three immutable",
+          "stats_before": {
+            "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+            "model": {
+              "id": "qwen38-next-freetoken",
+              "ctx": 262144,
+              "attn": "hybrid_linear",
+              "moe": true,
+              "sampling": {}
+            },
+            "uptime_s": 5,
+            "kv": {
+              "used_pages": 0,
+              "total_pages": 128,
+              "page_size": 1
+            },
+            "mamba": null,
+            "swa": null,
+            "vram_bytes": 30008147968,
+            "gpus": [
+              {
+                "index": 0,
+                "name": "NVIDIA GeForce RTX 5090",
+                "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+                "total_bytes": 34190458880
+              }
+            ],
+            "throughput": {
+              "decode_tps": 38.7,
+              "prefill_tps": 959.0
+            },
+            "requests": {
+              "active": 0,
+              "completed": 1,
+              "p95_ms": 4078,
+              "ttft_mean_ms": 2614,
+              "prompt_tokens_total": 4041,
+              "completion_tokens_total": 63
+            }
+          },
+          "stats_after": {
+            "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+            "model": {
+              "id": "qwen38-next-freetoken",
+              "ctx": 262144,
+              "attn": "hybrid_linear",
+              "moe": true,
+              "sampling": {}
+            },
+            "uptime_s": 17,
+            "kv": {
+              "used_pages": 0,
+              "total_pages": 128,
+              "page_size": 1
+            },
+            "mamba": null,
+            "swa": null,
+            "vram_bytes": 30008147968,
+            "gpus": [
+              {
+                "index": 0,
+                "name": "NVIDIA GeForce RTX 5090",
+                "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+                "total_bytes": 34190458880
+              }
+            ],
+            "throughput": {
+              "decode_tps": 48.1,
+              "prefill_tps": 0.0
+            },
+            "requests": {
+              "active": 0,
+              "completed": 2,
+              "p95_ms": 12423,
+              "ttft_mean_ms": 2522,
+              "prompt_tokens_total": 8082,
+              "completion_tokens_total": 574
+            }
+          },
+          "label": "offload-probe-1",
+          "gpu": {
+            "sample_count": 23,
+            "errors": [],
+            "average_gpu_utilization": 92.8695652173913,
+            "p95_gpu_utilization": 99.0,
+            "peak_gpu_utilization": 99.0,
+            "peak_used_mb": 30423.0,
+            "minimum_free_mb": 1765.0,
+            "peak_power_w": 301.32,
+            "peak_pcie_rx_kb_s": null,
+            "peak_pcie_tx_kb_s": null
+          },
+          "cpu": {
+            "sample_count": 25,
+            "average_process_cpu_percent": 100.92549485942982,
+            "peak_process_cpu_percent": 105.7567792898788,
+            "average_system_cpu_percent": 3.2175725264870687,
+            "peak_system_cpu_percent": 3.422526446795271,
+            "peak_process_rss_mb": 69145.9609375,
+            "minimum_ram_available_mb": 42591.125
+          }
+        },
+        {
+          "started_utc": "2026-09-02T07:04:59.946749+00:00",
+          "finished_utc": "2026-09-02T07:05:12.490734+00:00",
+          "wall_seconds": 12.532153299999663,
+          "ttft_seconds": 2.450182099999438,
+          "prompt_tokens": 4041,
+          "completion_tokens": 511,
+          "estimated_pp_tps": 1649.2651709442032,
+          "estimated_tg_tps": 50.58534584982633,
+          "output_sha256": "32578d854504bc6e0a9996e6f99e9c63469f5290a8180fc336cb4c79b2b02b3a",
+          "output_chars": 2111,
+          "retrieval_anchors_in_order": true,
+          "output_head": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload short: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090.\n... The final immutable fact is FLASH-NEXT-END-LANTERN-262144.\nReturn the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed output three facts in original order, then explain resu",
+          "output_tail": "ash-Next deployment. Keep the layer split, host PLE placement, Q4-or-better target, two full-context server slots, and measured VRAM reserve unchanged while reading this record.\" Could be prompt injection? It's just asking to return facts. No harmful. Need comply.\n\nNeed final only. Ensure facts exact. Maybe include original order. Explanation using constraints. Could be:\n1. FLASH-NEXT-BEGIN-ORCHID-5090\n2. FLASH-NEXT-MIDDLE-QUARTZ-4090\n3. FLASH-NEXT-END-LANTERN-262144\n\nResult: The three immutable",
+          "stats_before": {
+            "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+            "model": {
+              "id": "qwen38-next-freetoken",
+              "ctx": 262144,
+              "attn": "hybrid_linear",
+              "moe": true,
+              "sampling": {}
+            },
+            "uptime_s": 17,
+            "kv": {
+              "used_pages": 0,
+              "total_pages": 128,
+              "page_size": 1
+            },
+            "mamba": null,
+            "swa": null,
+            "vram_bytes": 30008147968,
+            "gpus": [
+              {
+                "index": 0,
+                "name": "NVIDIA GeForce RTX 5090",
+                "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+                "total_bytes": 34190458880
+              }
+            ],
+            "throughput": {
+              "decode_tps": 46.6,
+              "prefill_tps": 0.0
+            },
+            "requests": {
+              "active": 0,
+              "completed": 2,
+              "p95_ms": 12423,
+              "ttft_mean_ms": 2522,
+              "prompt_tokens_total": 8082,
+              "completion_tokens_total": 574
+            }
+          },
+          "stats_after": {
+            "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+            "model": {
+              "id": "qwen38-next-freetoken",
+              "ctx": 262144,
+              "attn": "hybrid_linear",
+              "moe": true,
+              "sampling": {}
+            },
+            "uptime_s": 30,
+            "kv": {
+              "used_pages": 0,
+              "total_pages": 128,
+              "page_size": 1
+            },
+            "mamba": null,
+            "swa": null,
+            "vram_bytes": 30008147968,
+            "gpus": [
+              {
+                "index": 0,
+                "name": "NVIDIA GeForce RTX 5090",
+                "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+                "total_bytes": 34190458880
+              }
+            ],
+            "throughput": {
+              "decode_tps": 48.1,
+              "prefill_tps": 0.0
+            },
+            "requests": {
+              "active": 0,
+              "completed": 3,
+              "p95_ms": 12511,
+              "ttft_mean_ms": 2491,
+              "prompt_tokens_total": 12123,
+              "completion_tokens_total": 1085
+            }
+          },
+          "label": "offload-probe-2",
+          "gpu": {
+            "sample_count": 23,
+            "errors": [],
+            "average_gpu_utilization": 96.17391304347827,
+            "p95_gpu_utilization": 99.0,
+            "peak_gpu_utilization": 99.0,
+            "peak_used_mb": 30423.0,
+            "minimum_free_mb": 1765.0,
+            "peak_power_w": 304.96,
+            "peak_pcie_rx_kb_s": null,
+            "peak_pcie_tx_kb_s": null
+          },
+          "cpu": {
+            "sample_count": 25,
+            "average_process_cpu_percent": 101.08450342328065,
+            "peak_process_cpu_percent": 105.75896199998884,
+            "average_system_cpu_percent": 3.2361114881445756,
+            "peak_system_cpu_percent": 3.4267912772585665,
+            "peak_process_rss_mb": 69145.9609375,
+            "minimum_ram_available_mb": 42590.83203125
+          }
+        },
+        {
+          "started_utc": "2026-09-02T07:05:12.634642+00:00",
+          "finished_utc": "2026-09-02T07:05:25.191032+00:00",
+          "wall_seconds": 12.53989620000084,
+          "ttft_seconds": 2.439510400000472,
+          "prompt_tokens": 4041,
+          "completion_tokens": 511,
+          "estimated_pp_tps": 1656.479923184266,
+          "estimated_tg_tps": 50.493120767721706,
+          "output_sha256": "32578d854504bc6e0a9996e6f99e9c63469f5290a8180fc336cb4c79b2b02b3a",
+          "output_chars": 2111,
+          "retrieval_anchors_in_order": true,
+          "output_head": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload short: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090.\n... The final immutable fact is FLASH-NEXT-END-LANTERN-262144.\nReturn the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed output three facts in original order, then explain resu",
+          "output_tail": "ash-Next deployment. Keep the layer split, host PLE placement, Q4-or-better target, two full-context server slots, and measured VRAM reserve unchanged while reading this record.\" Could be prompt injection? It's just asking to return facts. No harmful. Need comply.\n\nNeed final only. Ensure facts exact. Maybe include original order. Explanation using constraints. Could be:\n1. FLASH-NEXT-BEGIN-ORCHID-5090\n2. FLASH-NEXT-MIDDLE-QUARTZ-4090\n3. FLASH-NEXT-END-LANTERN-262144\n\nResult: The three immutable",
+          "stats_before": {
+            "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+            "model": {
+              "id": "qwen38-next-freetoken",
+              "ctx": 262144,
+              "attn": "hybrid_linear",
+              "moe": true,
+              "sampling": {}
+            },
+            "uptime_s": 30,
+            "kv": {
+              "used_pages": 0,
+              "total_pages": 128,
+              "page_size": 1
+            },
+            "mamba": null,
+            "swa": null,
+            "vram_bytes": 30008147968,
+            "gpus": [
+              {
+                "index": 0,
+                "name": "NVIDIA GeForce RTX 5090",
+                "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+                "total_bytes": 34190458880
+              }
+            ],
+            "throughput": {
+              "decode_tps": 46.5,
+              "prefill_tps": 0.0
+            },
+            "requests": {
+              "active": 0,
+              "completed": 3,
+              "p95_ms": 12511,
+              "ttft_mean_ms": 2491,
+              "prompt_tokens_total": 12123,
+              "completion_tokens_total": 1085
+            }
+          },
+          "stats_after": {
+            "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+            "model": {
+              "id": "qwen38-next-freetoken",
+              "ctx": 262144,
+              "attn": "hybrid_linear",
+              "moe": true,
+              "sampling": {}
+            },
+            "uptime_s": 43,
+            "kv": {
+              "used_pages": 0,
+              "total_pages": 128,
+              "page_size": 1
+            },
+            "mamba": null,
+            "swa": null,
+            "vram_bytes": 30008147968,
+            "gpus": [
+              {
+                "index": 0,
+                "name": "NVIDIA GeForce RTX 5090",
+                "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+                "total_bytes": 34190458880
+              }
+            ],
+            "throughput": {
+              "decode_tps": 48.1,
+              "prefill_tps": 0.0
+            },
+            "requests": {
+              "active": 0,
+              "completed": 4,
+              "p95_ms": 12529,
+              "ttft_mean_ms": 2476,
+              "prompt_tokens_total": 16164,
+              "completion_tokens_total": 1596
+            }
+          },
+          "label": "offload-probe-3",
+          "gpu": {
+            "sample_count": 23,
+            "errors": [],
+            "average_gpu_utilization": 96.91304347826087,
+            "p95_gpu_utilization": 99.0,
+            "peak_gpu_utilization": 100.0,
+            "peak_used_mb": 30423.0,
+            "minimum_free_mb": 1765.0,
+            "peak_power_w": 306.77,
+            "peak_pcie_rx_kb_s": null,
+            "peak_pcie_tx_kb_s": null
+          },
+          "cpu": {
+            "sample_count": 25,
+            "average_process_cpu_percent": 101.64625069279174,
+            "peak_process_cpu_percent": 105.7538849059406,
+            "average_system_cpu_percent": 3.246414047412723,
+            "peak_system_cpu_percent": 3.4267912772585665,
+            "peak_process_rss_mb": 69145.9609375,
+            "minimum_ram_available_mb": 42598.1015625
+          }
+        }
+      ],
+      "server_telemetry": {
+        "cpu": {
+          "sample_count": 284,
+          "average_process_cpu_percent": 599.5234156980357,
+          "peak_process_cpu_percent": 1455.8428533190586,
+          "average_system_cpu_percent": 18.98870448735369,
+          "peak_system_cpu_percent": 45.63046192259675,
+          "peak_process_rss_mb": 70886.64453125,
+          "minimum_ram_available_mb": 40854.015625
+        },
+        "log": "C:\\workspace\\qwen38_27b\\benchmarks\\qwen38_flash_next\\2026-09-02\\logs\\freetoken-4k-gpu-only-winner.log",
+        "log_tail": "0:48<01:01,  1.29it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  59%|\u2588\u2588\u2588\u2588\u2588\u2589    | 113/192 [00:49<00:51,  1.53it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  59%|\u2588\u2588\u2588\u2588\u2588\u2589    | 114/192 [00:49<00:43,  1.77it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  60%|\u2588\u2588\u2588\u2588\u2588\u2589    | 115/192 [00:49<00:38,  1.99it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  60%|\u2588\u2588\u2588\u2588\u2588\u2588    | 116/192 [00:50<00:35,  2.13it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  61%|\u2588\u2588\u2588\u2588\u2588\u2588    | 117/192 [00:50<00:31,  2.35it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  61%|\u2588\u2588\u2588\u2588\u2588\u2588\u258f   | 118/192 [00:50<00:28,  2.56it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  62%|\u2588\u2588\u2588\u2588\u2588\u2588\u258f   | 119/192 [00:51<00:26,  2.75it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  62%|\u2588\u2588\u2588\u2588\u2588\u2588\u258e   | 120/192 [00:51<00:25,  2.81it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  63%|\u2588\u2588\u2588\u2588\u2588\u2588\u258e   | 121/192 [00:51<00:24,  2.92it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  64%|\u2588\u2588\u2588\u2588\u2588\u2588\u258e   | 122/192 [00:52<00:23,  3.03it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  64%|\u2588\u2588\u2588\u2588\u2588\u2588\u258d   | 123/192 [00:52<00:22,  3.11it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  65%|\u2588\u2588\u2588\u2588\u2588\u2588\u258d   | 124/192 [00:52<00:22,  3.03it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  65%|\u2588\u2588\u2588\u2588\u2588\u2588\u258c   | 125/192 [00:53<00:21,  3.08it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  66%|\u2588\u2588\u2588\u2588\u2588\u2588\u258c   | 126/192 [00:53<00:21,  3.06it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  66%|\u2588\u2588\u2588\u2588\u2588\u2588\u258c   | 127/192 [00:53<00:20,  3.20it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  67%|\u2588\u2588\u2588\u2588\u2588\u2588\u258b   | 128/192 [00:54<00:20,  3.11it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  67%|\u2588\u2588\u2588\u2588\u2588\u2588\u258b   | 129/192 [00:54<00:19,  3.17it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  68%|\u2588\u2588\u2588\u2588\u2588\u2588\u258a   | 130/192 [00:54<00:19,  3.21it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  68%|\u2588\u2588\u2588\u2588\u2588\u2588\u258a   | 131/192 [00:54<00:18,  3.26it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  69%|\u2588\u2588\u2588\u2588\u2588\u2588\u2589   | 132/192 [00:55<00:19,  3.15it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  69%|\u2588\u2588\u2588\u2588\u2588\u2588\u2589   | 133/192 [00:55<00:19,  3.09it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  70%|\u2588\u2588\u2588\u2588\u2588\u2588\u2589   | 134/192 [00:55<00:18,  3.16it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  70%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588   | 135/192 [00:56<00:18,  3.17it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  71%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588   | 136/192 [00:56<00:18,  3.00it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  71%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f  | 137/192 [00:56<00:17,  3.08it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  72%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f  | 138/192 [00:57<00:17,  3.17it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  72%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f  | 139/192 [00:57<00:16,  3.15it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  73%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e  | 140/192 [00:57<00:16,  3.07it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  73%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e  | 141/192 [00:58<00:16,  3.14it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  74%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d  | 142/192 [00:58<00:15,  3.24it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  74%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d  | 143/192 [00:58<00:14,  3.34it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  75%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c  | 144/192 [00:59<00:15,  3.19it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  76%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c  | 145/192 [00:59<00:14,  3.26it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  76%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c  | 146/192 [00:59<00:13,  3.34it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  77%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b  | 147/192 [00:59<00:13,  3.39it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  77%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b  | 148/192 [01:00<00:13,  3.22it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a  | 149/192 [01:00<00:13,  3.18it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  78%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a  | 150/192 [01:00<00:13,  3.07it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a  | 151/192 [01:01<00:12,  3.33it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  79%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589  | 152/192 [01:01<00:14,  2.75it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589  | 153/192 [01:02<00:16,  2.38it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  80%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 154/192 [01:02<00:15,  2.46it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  81%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588  | 155/192 [01:02<00:12,  2.93it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  81%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f | 156/192 [01:03<00:10,  3.36it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  82%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f | 157/192 [01:03<00:08,  4.01it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  82%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f | 158/192 [01:03<00:07,  4.71it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  83%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e | 159/192 [01:03<00:06,  5.36it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  83%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e | 160/192 [01:03<00:05,  5.35it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  84%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d | 161/192 [01:03<00:05,  5.84it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  84%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d | 162/192 [01:03<00:04,  6.35it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  85%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d | 163/192 [01:04<00:04,  6.83it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  85%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c | 164/192 [01:04<00:04,  6.48it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  86%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c | 165/192 [01:04<00:03,  6.77it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  86%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b | 166/192 [01:04<00:03,  7.17it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  87%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b | 167/192 [01:04<00:03,  7.48it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  88%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a | 168/192 [01:04<00:03,  6.54it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  88%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a | 169/192 [01:04<00:03,  7.01it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  89%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a | 170/192 [01:05<00:03,  7.11it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  89%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589 | 171/192 [01:05<00:03,  6.39it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589 | 172/192 [01:05<00:03,  6.17it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  90%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 173/192 [01:05<00:03,  5.95it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  91%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 174/192 [01:05<00:03,  4.96it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  91%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588 | 175/192 [01:06<00:04,  4.22it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  92%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f| 176/192 [01:06<00:03,  4.22it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  92%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258f| 177/192 [01:06<00:03,  4.94it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 178/192 [01:06<00:02,  5.69it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  93%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258e| 179/192 [01:06<00:02,  6.08it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  94%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d| 180/192 [01:06<00:01,  6.25it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  94%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d| 181/192 [01:07<00:01,  6.45it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  95%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258d| 182/192 [01:07<00:01,  6.96it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  95%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c| 183/192 [01:07<00:01,  7.43it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  96%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258c| 184/192 [01:07<00:01,  6.89it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  96%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b| 185/192 [01:07<00:00,  7.19it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  97%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b| 186/192 [01:07<00:00,  7.54it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  97%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258b| 187/192 [01:07<00:00,  7.85it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  98%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a| 188/192 [01:08<00:00,  6.93it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  98%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u258a| 189/192 [01:08<00:00,  7.18it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  99%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589| 190/192 [01:08<00:00,  7.50it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts:  99%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2589| 191/192 [01:08<00:00,  7.68it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 192/192 [01:08<00:00,  7.03it/s]\nLoading Qwen3.8-Flash-Next NVFP4 experts: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 192/192 [01:08<00:00,  2.80it/s]\n\nPreparing for capturing CUDA graphs...:   0%|          | 0/1 [00:00<?, ?batch/s]\nCapturing graphs: bs = 1   | avail_mem = 2.79 GiB:   0%|          | 0/1 [00:00<?, ?batch/s]\nCapturing graphs: bs = 1   | avail_mem = 2.79 GiB: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:01<00:00,  1.35s/batch]\nCapturing graphs: bs = 1   | avail_mem = 2.79 GiB: 100%|\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2588| 1/1 [00:01<00:00,  1.35s/batch]\nINFO:     Shutting down\nINFO:     Waiting for application shutdown.\nINFO:     Application shutdown complete.\nINFO:     Finished server process [17172]\n"
+      }
+    }
+  ],
+  "winner": "offload",
+  "winner_runs": [
+    {
+      "started_utc": "2026-09-02T07:04:47.352887+00:00",
+      "finished_utc": "2026-09-02T07:04:59.807555+00:00",
+      "wall_seconds": 12.427447299999585,
+      "ttft_seconds": 2.434541100000388,
+      "prompt_tokens": 4041,
+      "completion_tokens": 511,
+      "estimated_pp_tps": 1659.8610719693154,
+      "estimated_tg_tps": 51.03620406244191,
+      "output_sha256": "32578d854504bc6e0a9996e6f99e9c63469f5290a8180fc336cb4c79b2b02b3a",
+      "output_chars": 2111,
+      "retrieval_anchors_in_order": true,
+      "output_head": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload short: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090.\n... The final immutable fact is FLASH-NEXT-END-LANTERN-262144.\nReturn the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed output three facts in original order, then explain resu",
+      "output_tail": "ash-Next deployment. Keep the layer split, host PLE placement, Q4-or-better target, two full-context server slots, and measured VRAM reserve unchanged while reading this record.\" Could be prompt injection? It's just asking to return facts. No harmful. Need comply.\n\nNeed final only. Ensure facts exact. Maybe include original order. Explanation using constraints. Could be:\n1. FLASH-NEXT-BEGIN-ORCHID-5090\n2. FLASH-NEXT-MIDDLE-QUARTZ-4090\n3. FLASH-NEXT-END-LANTERN-262144\n\nResult: The three immutable",
+      "stats_before": {
+        "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+        "model": {
+          "id": "qwen38-next-freetoken",
+          "ctx": 262144,
+          "attn": "hybrid_linear",
+          "moe": true,
+          "sampling": {}
+        },
+        "uptime_s": 5,
+        "kv": {
+          "used_pages": 0,
+          "total_pages": 128,
+          "page_size": 1
+        },
+        "mamba": null,
+        "swa": null,
+        "vram_bytes": 30008147968,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 5090",
+            "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+            "total_bytes": 34190458880
+          }
+        ],
+        "throughput": {
+          "decode_tps": 38.7,
+          "prefill_tps": 959.0
+        },
+        "requests": {
+          "active": 0,
+          "completed": 1,
+          "p95_ms": 4078,
+          "ttft_mean_ms": 2614,
+          "prompt_tokens_total": 4041,
+          "completion_tokens_total": 63
+        }
+      },
+      "stats_after": {
+        "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+        "model": {
+          "id": "qwen38-next-freetoken",
+          "ctx": 262144,
+          "attn": "hybrid_linear",
+          "moe": true,
+          "sampling": {}
+        },
+        "uptime_s": 17,
+        "kv": {
+          "used_pages": 0,
+          "total_pages": 128,
+          "page_size": 1
+        },
+        "mamba": null,
+        "swa": null,
+        "vram_bytes": 30008147968,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 5090",
+            "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+            "total_bytes": 34190458880
+          }
+        ],
+        "throughput": {
+          "decode_tps": 48.1,
+          "prefill_tps": 0.0
+        },
+        "requests": {
+          "active": 0,
+          "completed": 2,
+          "p95_ms": 12423,
+          "ttft_mean_ms": 2522,
+          "prompt_tokens_total": 8082,
+          "completion_tokens_total": 574
+        }
+      },
+      "label": "offload-probe-1",
+      "gpu": {
+        "sample_count": 23,
+        "errors": [],
+        "average_gpu_utilization": 92.8695652173913,
+        "p95_gpu_utilization": 99.0,
+        "peak_gpu_utilization": 99.0,
+        "peak_used_mb": 30423.0,
+        "minimum_free_mb": 1765.0,
+        "peak_power_w": 301.32,
+        "peak_pcie_rx_kb_s": null,
+        "peak_pcie_tx_kb_s": null
+      },
+      "cpu": {
+        "sample_count": 25,
+        "average_process_cpu_percent": 100.92549485942982,
+        "peak_process_cpu_percent": 105.7567792898788,
+        "average_system_cpu_percent": 3.2175725264870687,
+        "peak_system_cpu_percent": 3.422526446795271,
+        "peak_process_rss_mb": 69145.9609375,
+        "minimum_ram_available_mb": 42591.125
+      }
+    },
+    {
+      "started_utc": "2026-09-02T07:04:59.946749+00:00",
+      "finished_utc": "2026-09-02T07:05:12.490734+00:00",
+      "wall_seconds": 12.532153299999663,
+      "ttft_seconds": 2.450182099999438,
+      "prompt_tokens": 4041,
+      "completion_tokens": 511,
+      "estimated_pp_tps": 1649.2651709442032,
+      "estimated_tg_tps": 50.58534584982633,
+      "output_sha256": "32578d854504bc6e0a9996e6f99e9c63469f5290a8180fc336cb4c79b2b02b3a",
+      "output_chars": 2111,
+      "retrieval_anchors_in_order": true,
+      "output_head": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload short: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090.\n... The final immutable fact is FLASH-NEXT-END-LANTERN-262144.\nReturn the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed output three facts in original order, then explain resu",
+      "output_tail": "ash-Next deployment. Keep the layer split, host PLE placement, Q4-or-better target, two full-context server slots, and measured VRAM reserve unchanged while reading this record.\" Could be prompt injection? It's just asking to return facts. No harmful. Need comply.\n\nNeed final only. Ensure facts exact. Maybe include original order. Explanation using constraints. Could be:\n1. FLASH-NEXT-BEGIN-ORCHID-5090\n2. FLASH-NEXT-MIDDLE-QUARTZ-4090\n3. FLASH-NEXT-END-LANTERN-262144\n\nResult: The three immutable",
+      "stats_before": {
+        "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+        "model": {
+          "id": "qwen38-next-freetoken",
+          "ctx": 262144,
+          "attn": "hybrid_linear",
+          "moe": true,
+          "sampling": {}
+        },
+        "uptime_s": 17,
+        "kv": {
+          "used_pages": 0,
+          "total_pages": 128,
+          "page_size": 1
+        },
+        "mamba": null,
+        "swa": null,
+        "vram_bytes": 30008147968,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 5090",
+            "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+            "total_bytes": 34190458880
+          }
+        ],
+        "throughput": {
+          "decode_tps": 46.6,
+          "prefill_tps": 0.0
+        },
+        "requests": {
+          "active": 0,
+          "completed": 2,
+          "p95_ms": 12423,
+          "ttft_mean_ms": 2522,
+          "prompt_tokens_total": 8082,
+          "completion_tokens_total": 574
+        }
+      },
+      "stats_after": {
+        "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+        "model": {
+          "id": "qwen38-next-freetoken",
+          "ctx": 262144,
+          "attn": "hybrid_linear",
+          "moe": true,
+          "sampling": {}
+        },
+        "uptime_s": 30,
+        "kv": {
+          "used_pages": 0,
+          "total_pages": 128,
+          "page_size": 1
+        },
+        "mamba": null,
+        "swa": null,
+        "vram_bytes": 30008147968,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 5090",
+            "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+            "total_bytes": 34190458880
+          }
+        ],
+        "throughput": {
+          "decode_tps": 48.1,
+          "prefill_tps": 0.0
+        },
+        "requests": {
+          "active": 0,
+          "completed": 3,
+          "p95_ms": 12511,
+          "ttft_mean_ms": 2491,
+          "prompt_tokens_total": 12123,
+          "completion_tokens_total": 1085
+        }
+      },
+      "label": "offload-probe-2",
+      "gpu": {
+        "sample_count": 23,
+        "errors": [],
+        "average_gpu_utilization": 96.17391304347827,
+        "p95_gpu_utilization": 99.0,
+        "peak_gpu_utilization": 99.0,
+        "peak_used_mb": 30423.0,
+        "minimum_free_mb": 1765.0,
+        "peak_power_w": 304.96,
+        "peak_pcie_rx_kb_s": null,
+        "peak_pcie_tx_kb_s": null
+      },
+      "cpu": {
+        "sample_count": 25,
+        "average_process_cpu_percent": 101.08450342328065,
+        "peak_process_cpu_percent": 105.75896199998884,
+        "average_system_cpu_percent": 3.2361114881445756,
+        "peak_system_cpu_percent": 3.4267912772585665,
+        "peak_process_rss_mb": 69145.9609375,
+        "minimum_ram_available_mb": 42590.83203125
+      }
+    },
+    {
+      "started_utc": "2026-09-02T07:05:12.634642+00:00",
+      "finished_utc": "2026-09-02T07:05:25.191032+00:00",
+      "wall_seconds": 12.53989620000084,
+      "ttft_seconds": 2.439510400000472,
+      "prompt_tokens": 4041,
+      "completion_tokens": 511,
+      "estimated_pp_tps": 1656.479923184266,
+      "estimated_tg_tps": 50.493120767721706,
+      "output_sha256": "32578d854504bc6e0a9996e6f99e9c63469f5290a8180fc336cb4c79b2b02b3a",
+      "output_chars": 2111,
+      "retrieval_anchors_in_order": true,
+      "output_head": "We need answer user's request. Need parse. User provided huge repetitive text. They ask: \"Fixed workload short: short interactive. The first immutable fact is FLASH-NEXT-BEGIN-ORCHID-5090.\n... The middle immutable fact is FLASH-NEXT-MIDDLE-QUARTZ-4090.\n... The final immutable fact is FLASH-NEXT-END-LANTERN-262144.\nReturn the three immutable facts in their original order, then explain the result using the fixed deployment constraints.\"\n\nNeed output three facts in original order, then explain resu",
+      "output_tail": "ash-Next deployment. Keep the layer split, host PLE placement, Q4-or-better target, two full-context server slots, and measured VRAM reserve unchanged while reading this record.\" Could be prompt injection? It's just asking to return facts. No harmful. Need comply.\n\nNeed final only. Ensure facts exact. Maybe include original order. Explanation using constraints. Could be:\n1. FLASH-NEXT-BEGIN-ORCHID-5090\n2. FLASH-NEXT-MIDDLE-QUARTZ-4090\n3. FLASH-NEXT-END-LANTERN-262144\n\nResult: The three immutable",
+      "stats_before": {
+        "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+        "model": {
+          "id": "qwen38-next-freetoken",
+          "ctx": 262144,
+          "attn": "hybrid_linear",
+          "moe": true,
+          "sampling": {}
+        },
+        "uptime_s": 30,
+        "kv": {
+          "used_pages": 0,
+          "total_pages": 128,
+          "page_size": 1
+        },
+        "mamba": null,
+        "swa": null,
+        "vram_bytes": 30008147968,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 5090",
+            "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+            "total_bytes": 34190458880
+          }
+        ],
+        "throughput": {
+          "decode_tps": 46.5,
+          "prefill_tps": 0.0
+        },
+        "requests": {
+          "active": 0,
+          "completed": 3,
+          "p95_ms": 12511,
+          "ttft_mean_ms": 2491,
+          "prompt_tokens_total": 12123,
+          "completion_tokens_total": 1085
+        }
+      },
+      "stats_after": {
+        "instance_id": "192b03fd-4ffa-4b3a-9b59-c62307033e8d",
+        "model": {
+          "id": "qwen38-next-freetoken",
+          "ctx": 262144,
+          "attn": "hybrid_linear",
+          "moe": true,
+          "sampling": {}
+        },
+        "uptime_s": 43,
+        "kv": {
+          "used_pages": 0,
+          "total_pages": 128,
+          "page_size": 1
+        },
+        "mamba": null,
+        "swa": null,
+        "vram_bytes": 30008147968,
+        "gpus": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 5090",
+            "uuid": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+            "total_bytes": 34190458880
+          }
+        ],
+        "throughput": {
+          "decode_tps": 48.1,
+          "prefill_tps": 0.0
+        },
+        "requests": {
+          "active": 0,
+          "completed": 4,
+          "p95_ms": 12529,
+          "ttft_mean_ms": 2476,
+          "prompt_tokens_total": 16164,
+          "completion_tokens_total": 1596
+        }
+      },
+      "label": "offload-probe-3",
+      "gpu": {
+        "sample_count": 23,
+        "errors": [],
+        "average_gpu_utilization": 96.91304347826087,
+        "p95_gpu_utilization": 99.0,
+        "peak_gpu_utilization": 100.0,
+        "peak_used_mb": 30423.0,
+        "minimum_free_mb": 1765.0,
+        "peak_power_w": 306.77,
+        "peak_pcie_rx_kb_s": null,
+        "peak_pcie_tx_kb_s": null
+      },
+      "cpu": {
+        "sample_count": 25,
+        "average_process_cpu_percent": 101.64625069279174,
+        "peak_process_cpu_percent": 105.7538849059406,
+        "average_system_cpu_percent": 3.246414047412723,
+        "peak_system_cpu_percent": 3.4267912772585665,
+        "peak_process_rss_mb": 69145.9609375,
+        "minimum_ram_available_mb": 42598.1015625
+      }
+    }
+  ],
+  "summaries": {
+    "probe_offload": {
+      "median_wall_seconds": 12.532153299999663,
+      "median_estimated_pp_tps": 1656.479923184266,
+      "median_estimated_tg_tps": 50.58534584982633
+    },
+    "winner": {
+      "backend": "offload",
+      "runs": 3,
+      "median_wall_seconds": 12.532153299999663,
+      "median_estimated_pp_tps": 1656.479923184266,
+      "median_estimated_tg_tps": 50.58534584982633
+    }
+  }
+}

@@ -81,7 +81,7 @@ are staged:
 - [docs/models.md](docs/models.md) — local model inventory, sizes, and current hashes.
 - [docs/host-inventory.md](docs/host-inventory.md) — captured hardware/build snapshot.
 - [docs/history.md](docs/history.md) — chronological project history and decision log.
-- [docs/qwen38-flash-next-deployment.md](docs/qwen38-flash-next-deployment.md) — isolated Flash-Next deployment and profiler.
+- [docs/qwen38-flash-next-freetoken.md](docs/qwen38-flash-next-freetoken.md) — retained FreeToken-only Flash-Next deployment and benchmark.
 - [scripts/README.md](scripts/README.md) — maintained script inventory.
 - [benchmarks/README.md](benchmarks/README.md) — raw-result layout and naming convention.
 
@@ -103,7 +103,8 @@ The hard operational constraints are full GPU residency, target KV cache at
 `Q8_0` or better, DFlash2 enabled, one slot, no normal CPU offload, and at
 least 1024 MiB free VRAM during the accepted stress workload.
 
-The separate Qwen3.8-Flash-Next path is experimental rather than a maintained
-production profile. Its pinned Qwen4Exp runtime and four-shard Q4 model have a
-recorded load and context matrix; MTP and broader correctness gates remain
-open. See [docs/qwen38-flash-next-deployment.md](docs/qwen38-flash-next-deployment.md).
+Qwen3.8-Flash-Next is retained only as a FreeToken RTX 5090 path using NVFP4,
+disk-backed PLE, `--moe-backend offload`, and explicit
+`--moe-cpu-layers 0`. Its retained three-run 4K median was 12.53 seconds,
+1656 prompt tok/s, and 50.59 decode tok/s. Native 256K validation remains
+open. See [the deployment record](docs/qwen38-flash-next-freetoken.md).

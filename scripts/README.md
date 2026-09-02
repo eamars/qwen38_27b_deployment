@@ -12,10 +12,8 @@ canonical launch and profiling entry points are:
 | Gemma RTX 4090 experiment | `start-gemma4-4090.ps1` |
 | Qwen API smoke/sustained checks | `profile-api.py` |
 | Qwen tokenizer-calibrated deep context | `profile-deep-context.py` |
-| Flash-Next no-load environment manifest | `prepare-qwen38-flash-next.ps1` |
-| Flash-Next pinned CUDA configure/build | `build-qwen38-flash-next.ps1` |
-| Flash-Next launch/stop and dry-run | `start-qwen38-flash-next.ps1` |
-| Flash-Next staged profiler | `profile-qwen38-flash-next.py` |
+| Flash-Next FreeToken RTX 5090 launch/stop | `start-qwen38-flash-next-freetoken.ps1` |
+| Flash-Next FreeToken 4K benchmark | `benchmark-freetoken-qwen38-next.py` |
 | GPU memory sampling | `profile-vram.ps1` |
 | Gemma MTP comparison | `profile-gemma4-mtp.py`, `profile-gemma4-4090.py` |
 | Gemma short/long combined comparison | `profile-gemma4-combined.py` |
@@ -39,8 +37,10 @@ preset is deleted when the server exits.
 The unvalidated two-slot Qwen launcher remains removed. Cleanup and restoration
 history is recorded in [docs/history.md](../docs/history.md).
 
-The Flash-Next scripts are isolated from the maintained Qwen3.8-27B DFlash2
-launchers. The Flash-Next profiler is dry-run by default and starts a model
-server only with an explicit `--run`. The completed matrix is retained under
-`benchmarks/qwen38_flash_next/2026-08-28/`; pass an explicit dated `--output`
-when recording a new run.
+Qwen3.8 Flash-Next is FreeToken-only. The measured profile uses the RTX 5090,
+NVFP4, disk-backed PLE, and explicit `--moe-cpu-layers 0`. Preview without
+loading weights:
+
+```powershell
+.\scripts\start-qwen38-flash-next-freetoken.ps1 -Profile Short4K -DryRun
+```
