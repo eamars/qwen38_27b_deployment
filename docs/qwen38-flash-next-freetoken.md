@@ -13,8 +13,11 @@ CPU MoE layers = 0
 MoE cache = auto
 PLE backend = disk
 memory ratio = 0.90
-concurrency = 1
+default max-running-requests = 4
 ```
+
+The retained performance record below was measured with one request at a time;
+use `-MaxRunningRequests 1` when reproducing that benchmark.
 
 Start the measured 4K profile:
 

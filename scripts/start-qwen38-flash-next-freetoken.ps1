@@ -2,6 +2,8 @@
 param(
     [ValidateSet('Short4K', 'Native256K')]
     [string]$Profile = 'Native256K',
+    [ValidateRange(1, 8)]
+    [int]$MaxRunningRequests = 2,
     [string]$Model = '/home/rba90/models/Qwen3.8-Flash-Next-NVFP4',
     [string]$GpuUuid = 'GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0',
     [int]$Port = 1919,
@@ -49,7 +51,7 @@ $command = @(
     '--gpu', $GpuUuid,
     '--host', '0.0.0.0',
     '--port', $Port.ToString(),
-    '--max-running-requests', '1',
+    '--max-running-requests', $MaxRunningRequests.ToString(),
     '--dtype', 'bfloat16',
     '--memory-ratio', '0.90',
     '--moe-backend', 'offload',
