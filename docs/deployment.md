@@ -236,4 +236,7 @@ WSL. Preview it without loading weights:
 
 The measured profile and memory placement are documented in
 [the FreeToken deployment record](qwen38-flash-next-freetoken.md).
+FreeToken's Qwen tool-call compatibility and the boundary between the
+`qwen3` reasoning parser and `qwen3_coder` tool parser are recorded in the
+[compatibility note](../runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
 Keep the existing Qwen3.8-27B launchers and their DFlash2 defaults unchanged.

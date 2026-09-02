@@ -70,6 +70,11 @@ Dates are local host dates (Pacific/Auckland, UTC+12 in the captured runs).
 - Selected the RTX 5090 FreeToken NVFP4 path with disk-backed PLE and explicit
   `--moe-cpu-layers 0`.
 - Retained the three-run 4K winner, prompt, and final server log.
+- Set the retained Flash-Next wrapper default to two concurrent requests; the
+  retained benchmark remains a one-request-at-a-time record.
+- Fixed FreeToken responses that emit a Qwen tool call before `</think>` in
+  parser commit `593aac7`; the parser boundary and client expectations are
+  recorded in the [FreeToken compatibility note](../runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
 - Removed the Flash-Next GGUF/MTP assets, Qwen4Exp llama.cpp runtimes,
   alternative launchers, and intermediate benchmark probes.
 

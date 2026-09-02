@@ -1,12 +1,16 @@
 # Qwen3.8 / DFlash2 Windows workspace
 
-This repository is a reproducible local-inference workspace for two Qwen
-llama.cpp deployment modes on one Windows host:
+This repository is a reproducible local-inference workspace for two maintained
+Qwen3.8-27B llama.cpp deployment modes plus one isolated
+Qwen3.8-Flash-Next FreeToken path on one Windows host:
 
 - RTX 5090: Qwen3.8-27B `UD-Q6_K_M` with DFlash2, currently profiled at
   `126976` context tokens.
 - RTX 4090: Qwen3.8-27B `UD-Q4_K_XL` with DFlash2, currently profiled at
   `110000` context tokens.
+- RTX 5090 under WSL: Qwen3.8-Flash-Next NVFP4 through FreeToken, with routed
+  expert offload and disk-backed PLE; this path is separate from the maintained
+  llama.cpp launchers.
 
 The independent launchers expose one model per port. The maintained Kazusa
 launcher can instead place the Qwen RTX 5090 profile and the experimental Gemma
@@ -99,12 +103,15 @@ scripts/    maintained launch, profiling, setup, and inventory helpers
 benchmarks/ dated JSON/CSV measurements grouped by model and run date
 ```
 
-The hard operational constraints are full GPU residency, target KV cache at
-`Q8_0` or better, DFlash2 enabled, one slot, no normal CPU offload, and at
-least 1024 MiB free VRAM during the accepted stress workload.
+For the maintained Qwen3.8-27B DFlash2 profiles, the hard operational
+constraints are full target and draft GPU residency, target KV cache at `Q8_0`
+or better, DFlash2 enabled, one slot, no normal CPU offload, and at least
+1024 MiB free VRAM during the accepted stress workload.
 
 Qwen3.8-Flash-Next is retained only as a FreeToken RTX 5090 path using NVFP4,
 disk-backed PLE, `--moe-backend offload`, and explicit
 `--moe-cpu-layers 0`. Its retained three-run 4K median was 12.53 seconds,
 1656 prompt tok/s, and 50.59 decode tok/s. Native 256K validation remains
-open. See [the deployment record](docs/qwen38-flash-next-freetoken.md).
+open. Its routed-expert host-memory placement is separate from the DFlash2
+constraints above. See [the deployment record](docs/qwen38-flash-next-freetoken.md)
+and its [tool-call compatibility note](runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).

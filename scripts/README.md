@@ -44,3 +44,6 @@ loading weights:
 ```powershell
 .\scripts\start-qwen38-flash-next-freetoken.ps1 -Profile Short4K -DryRun
 ```
+
+The wrapper defaults to two concurrent requests. Pass
+`-MaxRunningRequests 1` to reproduce the retained single-request benchmark.

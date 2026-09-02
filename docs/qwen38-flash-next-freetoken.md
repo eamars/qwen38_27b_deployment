@@ -13,11 +13,12 @@ CPU MoE layers = 0
 MoE cache = auto
 PLE backend = disk
 memory ratio = 0.90
-default max-running-requests = 4
+default max-running-requests = 2
 ```
 
-The retained performance record below was measured with one request at a time;
-use `-MaxRunningRequests 1` when reproducing that benchmark.
+The launcher default is two concurrent requests. The retained performance
+record below was measured with one request at a time; use
+`-MaxRunningRequests 1` when reproducing that benchmark.
 
 Start the measured 4K profile:
 
@@ -63,9 +64,12 @@ minimum free VRAM sample was 1765 MiB.
 runtime to move 15 MoE layers to CPU compute. Explicit GPU computation reduced
 median request time from 16.66 to 12.53 seconds and raised GPU utilisation.
 
-FreeToken commit `a80b4d308a81986fa086ec173d7faa70ba737b2d` deliberately
-drops the checkpoint's `mtp.*` tensors. No MTP configuration or sidecar is
-retained in this workspace.
+The retained benchmark used FreeToken base commit
+`a80b4d308a81986fa086ec173d7faa70ba737b2d`, which deliberately drops the
+checkpoint's `mtp.*` tensors. No MTP configuration or sidecar is retained in
+this workspace. The current local FreeToken source revision is
+`593aac73dd1102a2af9f42c602039dc49bc25b90`; it includes the Qwen tool-call
+boundary fix described in the [FreeToken compatibility note](../runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
 
 ## Retained 4K benchmark
 
@@ -95,7 +99,8 @@ Evidence:
   selects the physical RTX 5090 by UUID.
 - `scripts/benchmark-freetoken-qwen38-next.py` — optional repeatable 4K
   measurement harness for the retained profile.
-- `runtime/freetoken-a80b4d3` — pinned source tree.
+- `runtime/freetoken-a80b4d3` — FreeToken source tree; benchmark and current
+  source revisions are recorded above.
 - `/home/rba90/.freetoken-qwen38/venv` — WSL Python environment.
 - `/home/rba90/models/Qwen3.8-Flash-Next-NVFP4` — complete WSL checkpoint.
 
