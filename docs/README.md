@@ -19,6 +19,10 @@ Read the documents in this order when operating the workspace:
 The [script inventory](../scripts/README.md) lists the canonical launch,
 profiling, setup, and inventory helpers.
 
+The FreeToken MTP-on-RTX-4090 experiment is closed. Its
+[conclusion and evidence](archive/qwen38-mtp-4090-conclusion.md) are retained
+for cleanup of the runtime test ground; deletion is pending an execution-policy block.
+
 The material in [archive](archive/) records earlier handover and instruction
 stages. It is useful for provenance, but commands there may describe
 superseded scripts or pre-measurement assumptions.

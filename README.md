@@ -21,6 +21,14 @@ profile. It is documented separately and is not the production Qwen path.
 
 ## Current state
 
+The FreeToken MTP-on-RTX-4090 experiment was closed on 2026-09-06. The
+target verifier failed the performance requirement (`G2: FAIL_ECONOMICS`),
+and the final existing-kernel batching check failed the exact numerical
+contract (`G2R: HARD_STOP_SCOPE`). No MTP acceleration was deployed. The
+experiment test ground is ready for removal, but automated deletion was
+blocked by execution policy. The working runtimes remain in place. See the
+[conclusion and retained evidence](docs/archive/qwen38-mtp-4090-conclusion.md).
+
 The runtime and model files are present locally but intentionally ignored by
 Git. Qwen long-context retrieval passed in the recorded runs. The Qwen
 profiles are provisional rather than a complete production sign-off: cold
@@ -98,7 +106,7 @@ reference. They are not the current operating instructions.
 ```text
 docs/       current documentation and archived stage notes
 models/     local GGUF files; ignored by Git
-runtime/    local llama.cpp build; ignored by Git
+runtime/    retained llama.cpp and FreeToken runtimes; ignored by Git
 scripts/    maintained launch, profiling, setup, and inventory helpers
 benchmarks/ dated JSON/CSV measurements grouped by model and run date
 ```
