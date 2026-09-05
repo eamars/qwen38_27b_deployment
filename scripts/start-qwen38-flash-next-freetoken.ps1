@@ -12,12 +12,28 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repoRoot = Split-Path -Parent $PSScriptRoot
-$launchScript = '/mnt/c/' + (($PSScriptRoot.Substring(3) -replace '\\', '/') + '/launch-freetoken-wsl.sh')
+
+function ConvertTo-WslMountPath {
+    param([Parameter(Mandatory)][string]$Path)
+
+    $fullPath = [System.IO.Path]::GetFullPath($Path)
+    $match = [regex]::Match($fullPath, '^(?<drive>[A-Za-z]):\\(?<tail>.*)$')
+    if (-not $match.Success) {
+        throw "Expected a local Windows drive path, got: $fullPath"
+    }
+
+    $drive = $match.Groups['drive'].Value.ToLowerInvariant()
+    $tail = $match.Groups['tail'].Value.Replace('\', '/')
+    return "/mnt/$drive/$tail"
+}
+
+$launchScript = ConvertTo-WslMountPath (Join-Path $PSScriptRoot 'launch-freetoken-wsl.sh')
+$freeToken = '/home/rba90/.freetoken-qwen38/venv/bin/ft'
 $pidFile = "/tmp/qwen38-flash-next-freetoken-$Port.pid"
 
 if ($Stop) {
-    $recordedPid = (& wsl.exe cat $pidFile 2>$null).Trim()
+    $recordedPidOutput = & wsl.exe cat $pidFile 2>$null
+    $recordedPid = if ($null -eq $recordedPidOutput) { '' } else { ([string]$recordedPidOutput).Trim() }
     if ($recordedPid -match '^[1-9][0-9]*$') {
         # The launcher records the setsid child, which is normally its own
         # process-group leader. Try the group first, then the exact child.
@@ -41,11 +57,19 @@ if (-not $gpu) {
 if ($LASTEXITCODE -ne 0) {
     throw "FreeToken checkpoint was not found in WSL: $Model"
 }
+& wsl.exe test -f "$Model/model.safetensors.index.json"
+if ($LASTEXITCODE -ne 0) {
+    throw "FreeToken checkpoint index was not found in WSL: $Model/model.safetensors.index.json"
+}
+& wsl.exe test -x $freeToken
+if ($LASTEXITCODE -ne 0) {
+    throw "FreeToken executable was not found in WSL: $freeToken"
+}
 
 $tokens = if ($Profile -eq 'Native256K') { 262144 } else { 8192 }
 $maxOutput = if ($Profile -eq 'Native256K') { 65536 } else { 512 }
 $command = @(
-    '/home/rba90/.freetoken-qwen38/venv/bin/ft', 'serve',
+    $freeToken, 'serve',
     '--model', $Model,
     '--served-model-name', 'qwen38-next-freetoken',
     '--gpu', $GpuUuid,
