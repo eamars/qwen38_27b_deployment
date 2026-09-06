@@ -13,6 +13,7 @@ canonical launch and profiling entry points are:
 | Qwen API smoke/sustained checks | `profile-api.py` |
 | Qwen tokenizer-calibrated deep context | `profile-deep-context.py` |
 | Flash-Next FreeToken RTX 5090 launch/stop | `start-qwen38-flash-next-freetoken.ps1` |
+| Uncensored Flash-Next FreeToken preparation/launch | `start-qwen38-flash-next-uncensored-freetoken.ps1` |
 | Flash-Next FreeToken 4K benchmark | `benchmark-freetoken-qwen38-next.py` |
 | GPU memory sampling | `profile-vram.ps1` |
 | Gemma MTP comparison | `profile-gemma4-mtp.py`, `profile-gemma4-4090.py` |
@@ -27,6 +28,18 @@ state rather than launch an alternative runtime:
   the isolated Gemma experiment.
 - `collect-host-inventory.ps1` — refreshes `docs/host-inventory.md`.
 - `record-model-manifest.ps1` — refreshes `docs/models.md`.
+- `prepare-qwen38-uncensored-runtime.py` — reproduces the isolated FreeToken
+  loader adapter using the retained patch and compiled kernels.
+- `stage-qwen38-uncensored.py` — stages and verifies the pinned checkpoint in WSL.
+- `verify-qwen38-uncensored.py` — checks all local tensor headers against the
+  adapter without reading tensor payloads.
+- `probe-qwen38-uncensored-runtime.py` — checks the loaders with tiny synthetic
+  tensors and the compiled CPU disk reader; never initializes CUDA.
+
+The [uncensored deployment note](../docs/qwen38-flash-next-uncensored.md)
+records the pinned assets, loader changes, preparation results and deferred
+GPU test. Generated verification reports belong under
+`benchmarks/raw/qwen38-uncensored/`, which is ignored by Git.
 
 `start-kazusa-models.ps1` launches one shared `llama-server` router with the
 `qwen27b-5090` and `gemma4-4090` profiles. Their model-specific settings are

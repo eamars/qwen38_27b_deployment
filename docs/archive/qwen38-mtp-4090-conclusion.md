@@ -57,3 +57,10 @@ large profiles are omitted, so this is not a complete replay bundle.
 Paths inside archived reports describe the original test ground.
 The original agent plans remain historical instructions, not authorization
 to resume this closed experiment.
+
+The 2026-09-06 workspace cleanup rechecked archive integrity and all 125
+source-file SHA256 matches; no running process referenced the experiment.
+Automatic approval review again rejected recursive cleanup with "blocked by
+policy" before execution. The retired directory remains present and ignored by
+Git; the archive and working runtimes are preserved. Archive SHA256:
+`8c11463bd1f774d2ec748275cd0231fa6d98496873a606c30949d1bc3b44f80b`.

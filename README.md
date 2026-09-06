@@ -94,6 +94,7 @@ are staged:
 - [docs/host-inventory.md](docs/host-inventory.md) — captured hardware/build snapshot.
 - [docs/history.md](docs/history.md) — chronological project history and decision log.
 - [docs/qwen38-flash-next-freetoken.md](docs/qwen38-flash-next-freetoken.md) — retained FreeToken-only Flash-Next deployment and benchmark.
+- [docs/qwen38-flash-next-uncensored.md](docs/qwen38-flash-next-uncensored.md) — separate uncensored NVFP4 checkpoint and isolated FreeToken loader, with GPU validation deferred.
 - [scripts/README.md](scripts/README.md) — maintained script inventory.
 - [benchmarks/README.md](benchmarks/README.md) — raw-result layout and naming convention.
 

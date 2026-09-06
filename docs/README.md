@@ -15,6 +15,9 @@ Read the documents in this order when operating the workspace:
 6. [Qwen3.8-Flash-Next FreeToken deployment](qwen38-flash-next-freetoken.md) —
    the retained RTX 5090 configuration, measured 4K result, and operational
    commands.
+7. [Uncensored Flash-Next deployment](qwen38-flash-next-uncensored.md) —
+   separate checkpoint, isolated loader, preparation checks and the pause before
+   model loading.
 
 The [script inventory](../scripts/README.md) lists the canonical launch,
 profiling, setup, and inventory helpers.
