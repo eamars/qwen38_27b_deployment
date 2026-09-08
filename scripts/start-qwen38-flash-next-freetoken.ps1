@@ -3,7 +3,7 @@ param(
     [ValidateSet('Short4K', 'Native256K')]
     [string]$Profile = 'Native256K',
     [ValidateRange(1, 8)]
-    [int]$MaxRunningRequests = 2,
+    [int]$MaxRunningRequests = 1,
     [string]$Model = '/home/rba90/models/Qwen3.8-Flash-Next-NVFP4',
     [string]$GpuUuid = 'GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0',
     [int]$Port = 1919,
@@ -87,6 +87,7 @@ $command = @(
     '--max-prefill-length', '8192',
     '--max-output-tokens', $maxOutput.ToString(),
     '--cache-type', 'radix',
+    '--enable-cache-report',
     '--reasoning-parser', 'qwen3',
     '--tool-call-parser', 'qwen3_coder'
 )
