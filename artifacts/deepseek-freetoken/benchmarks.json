@@ -1,0 +1,303 @@
+[
+  {
+    "name": "corrected-180k-cached-recall",
+    "wall_s": 4.751838337999288,
+    "ttft_s": 4.2428203429999485,
+    "usage": {
+      "prompt_tokens": 179031,
+      "completion_tokens": 7,
+      "total_tokens": 179038
+    },
+    "client_decode_tps": 16.295318802506987,
+    "text": "BIRCH-5274",
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 3,
+      "min_available_ram_gib": 4.642066955566406,
+      "max_gpu_used_mib": 31694,
+      "swap_in_pages": 0,
+      "swap_out_pages": 0
+    }
+  },
+  {
+    "name": "corrected-180k-copy-baseline",
+    "wall_s": 17.739902340999834,
+    "ttft_s": 5.1763183019998,
+    "usage": {
+      "prompt_tokens": 261,
+      "completion_tokens": 241,
+      "total_tokens": 502
+    },
+    "client_decode_tps": 19.36919928395128,
+    "text": "Record 1: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 2: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 3: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 4: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 5: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 6: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 7: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 8: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 9: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 10: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 11: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 12: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 13: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 14: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 15: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 16: alpha cedar maple river orchid stone silver forest amber cloud.",
+    "copy_exact_match": true,
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 9,
+      "min_available_ram_gib": 5.170814514160156,
+      "max_gpu_used_mib": 28024,
+      "swap_in_pages": 3393,
+      "swap_out_pages": 42337
+    }
+  },
+  {
+    "name": "corrected-180k-filled",
+    "wall_s": 501.8667800919998,
+    "ttft_s": 488.7644765780001,
+    "usage": {
+      "prompt_tokens": 179047,
+      "completion_tokens": 255,
+      "total_tokens": 179302
+    },
+    "client_decode_tps": 19.386895965421505,
+    "text": "Understood. I will first state the reference code, then provide a detailed explanation and a numbered checklist for validating an archive of records.\n\n---\n\n**Reference Code:** BIRCH-5274\n\n---\n\n### How to Validate an Archive of Records: A Detailed Guide\n\nValidating an archive is a systematic process to ensure that the records within it are authentic, reliable, complete, and usable for their intended purpose (e.g., legal, historical, or operational). It is not a single step but a multi-faceted review that combines administrative checks, technical verification, and content analysis. The goal is to confirm that the archive is a trustworthy representation of the activities it documents.\n\nThe process can be broken down into three main phases:\n1.  **Preparation and Contextualization:** Understanding what the archive should contain and why.\n2.  **Physical and Technical Inspection:** Verifying the integrity of the storage medium and file formats.\n3.  **Content and Metadata Verification:** Checking the records themselves against expected standards and the archive's own documentation.\n\nBelow is a numbered checklist with at least twelve items, designed to be a comprehensive guide for this validation process.\n\n---\n\n### Numbered Checklist for Archive Validation\n\n1.  **Confirm the Archive's Scope and Purpose:** Review the archive's",
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 247,
+      "min_available_ram_gib": 4.637458801269531,
+      "max_gpu_used_mib": 31687,
+      "swap_in_pages": 757,
+      "swap_out_pages": 1
+    }
+  },
+  {
+    "name": "corrected-180k-final-1408",
+    "wall_s": 17.273667751000175,
+    "ttft_s": 4.422018233000017,
+    "usage": {
+      "prompt_tokens": 179047,
+      "completion_tokens": 255,
+      "total_tokens": 179302
+    },
+    "client_decode_tps": 19.764384163658708,
+    "text": "The reference code is **BIRCH-5274**.\n\n---\n\n### How to Validate an Archive of Records\n\nValidating an archive ensures that the records are authentic, complete, and usable for their intended purpose (e.g., legal, historical, or operational). The process involves verifying physical and digital integrity, metadata, and compliance with archival standards. Below is a detailed, numbered checklist for validating an archive.\n\n---\n\n#### **Validation Checklist (12+ Items)**\n\n1. **Confirm the Reference Code and Scope**  \n   - Verify that the archive\u2019s reference code (e.g., BIRCH-5274) matches the collection\u2019s official identifier.  \n   - Ensure the archive\u2019s stated scope (dates, subjects, record types) matches the actual contents.\n\n2. **Check Physical Condition (for paper/analog records)**  \n   - Inspect for damage: tears, water stains, mold, fading, or missing pages.  \n   - Verify that folders, boxes, or binders are labeled correctly and not overcrowded.\n\n3. **Verify Digital File Integrity (for electronic records)**  \n   - Run checksums (e.g., MD5, SHA-256) on files and compare them to the original or manifest values.  \n   - Test that",
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 9,
+      "min_available_ram_gib": 4.625213623046875,
+      "max_gpu_used_mib": 27399,
+      "swap_in_pages": 0,
+      "swap_out_pages": 0
+    }
+  },
+  {
+    "name": "corrected-coding-baseline",
+    "wall_s": 14.363720875000126,
+    "ttft_s": 1.4987896170000568,
+    "usage": {
+      "prompt_tokens": 24,
+      "completion_tokens": 255,
+      "total_tokens": 279
+    },
+    "client_decode_tps": 19.743953522106594,
+    "text": "Here's a Python function that merges overlapping intervals:\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"\n    Merge overlapping intervals.\n    \n    Args:\n        intervals: List of tuples/lists containing [start, end] pairs\n    \n    Returns:\n        List of merged intervals as [start, end] pairs\n    \"\"\"\n    if not intervals:\n        return []\n    \n    # Sort intervals by start time\n    intervals.sort(key=lambda x: x[0])\n    \n    merged = [intervals[0]]\n    \n    for current in intervals[1:]:\n        # Get the last merged interval\n        last = merged[-1]\n        \n        # If current interval overlaps with last merged interval\n        if current[0] <= last[1]:\n            # Merge by updating the end time to the maximum\n            last[1] = max(last[1], current[1])\n        else:\n            # No overlap, add current interval as new merged interval\n            merged.append(current)\n    \n    return merged\n```\n\n## Time Complexity Analysis\n\n- **Sorting**: O(n log n) - Python's Timsort\n- **Merging loop**: O(n) - single pass through the sorted intervals\n- **Total time complexity**: **O(n",
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 8,
+      "min_available_ram_gib": 4.6181793212890625,
+      "max_gpu_used_mib": 29589,
+      "swap_in_pages": 48,
+      "swap_out_pages": 0
+    }
+  },
+  {
+    "name": "corrected-mtp5-paired-baseline",
+    "wall_s": 14.117332554999848,
+    "ttft_s": 1.3641402720004407,
+    "usage": {
+      "prompt_tokens": 24,
+      "completion_tokens": 255,
+      "total_tokens": 279
+    },
+    "client_decode_tps": 19.917258787279035,
+    "text": "Here's a Python function that merges overlapping intervals:\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"\n    Merge overlapping intervals.\n    \n    Args:\n        intervals: List of tuples/lists containing [start, end] pairs\n    \n    Returns:\n        List of merged intervals as [start, end] pairs\n    \"\"\"\n    if not intervals:\n        return []\n    \n    # Sort intervals by start time\n    intervals.sort(key=lambda x: x[0])\n    \n    merged = [intervals[0]]\n    \n    for current in intervals[1:]:\n        # Get the last merged interval\n        last = merged[-1]\n        \n        # If current interval overlaps with last merged interval\n        if current[0] <= last[1]:\n            # Merge by updating the end time to the maximum\n            last[1] = max(last[1], current[1])\n        else:\n            # No overlap, add current interval as new merged interval\n            merged.append(current)\n    \n    return merged\n```\n\n## Time Complexity Analysis\n\n- **Sorting**: O(n log n) - Python's Timsort\n- **Merging loop**: O(n) - single pass through the sorted intervals\n- **Total time complexity**: **O(n",
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 7,
+      "min_available_ram_gib": 3.4217071533203125,
+      "max_gpu_used_mib": 28633,
+      "swap_in_pages": 1,
+      "swap_out_pages": 0
+    }
+  },
+  {
+    "name": "corrected-prefill-8k",
+    "wall_s": 21.631564265999714,
+    "ttft_s": 21.230323150000004,
+    "usage": {
+      "prompt_tokens": 8031,
+      "completion_tokens": 7,
+      "total_tokens": 8038
+    },
+    "client_decode_tps": 22.405136428336426,
+    "text": "ORCHID-7319",
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 11,
+      "min_available_ram_gib": 4.647132873535156,
+      "max_gpu_used_mib": 30707,
+      "swap_in_pages": 21,
+      "swap_out_pages": 0
+    }
+  },
+  {
+    "name": "corrected-simple-recall",
+    "wall_s": 2.24819847200024,
+    "ttft_s": 1.8750577380001232,
+    "usage": {
+      "prompt_tokens": 19,
+      "completion_tokens": 7,
+      "total_tokens": 26
+    },
+    "client_decode_tps": 27.35846160309251,
+    "text": "ORCHID-7319",
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 2,
+      "min_available_ram_gib": 4.6133880615234375,
+      "max_gpu_used_mib": 28991,
+      "swap_in_pages": 0,
+      "swap_out_pages": 0
+    }
+  },
+  {
+    "name": "long-capacity-short-prompt",
+    "wall_s": 15.409118005999972,
+    "ttft_s": 2.873279736000086,
+    "usage": {
+      "prompt_tokens": 32,
+      "completion_tokens": 255,
+      "total_tokens": 287
+    },
+    "client_decode_tps": 20.26257196281251,
+    "text": "  \nHere's a Python function that merges overlapping intervals:\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"\n    Merge overlapping intervals.\n\n    Args:\n        intervals: List of tuples/lists, each representing [start, end]\n\n    Returns:\n        List of merged intervals as lists [start, end]\n    \"\"\"\n    if not intervals:\n        return []\n\n    # Sort intervals by start time\n    intervals.sort(key=lambda x: x[0])\n\n    merged = [intervals[0].copy()]  # Start with the first interval\n\n    for current in intervals[1:]:\n        last = merged[-1]\n\n        # If current interval overlaps with the last merged interval\n        if current[0] <= last[1]:\n            # Merge: update the end to the max of both ends\n            last[1] = max(last[1], current[1])\n        else:\n            # No overlap, add current as a new interval\n            merged.append(current.copy())\n\n    return merged\n```\n\n## Time Complexity\n\n- **Sorting**: O(n log n), where n is the number of intervals.\n- **Merging loop**: O(n) \u2014 we iterate through the sorted intervals once.\n- **Total**: **O(n",
+    "pre_tokenizer_correction": true
+  },
+  {
+    "name": "prefill-441",
+    "wall_s": 4.759890026999983,
+    "ttft_s": 4.316653845000019,
+    "usage": {
+      "prompt_tokens": 441,
+      "completion_tokens": 7,
+      "total_tokens": 448
+    },
+    "client_decode_tps": 21.350980136674465,
+    "text": "</think>ORCHID-7",
+    "pre_tokenizer_correction": true
+  },
+  {
+    "name": "prefill-841",
+    "wall_s": 8.327910411000175,
+    "ttft_s": null,
+    "usage": {
+      "prompt_tokens": 841,
+      "completion_tokens": 1,
+      "total_tokens": 842
+    },
+    "client_decode_tps": null,
+    "text": "",
+    "pre_tokenizer_correction": true
+  },
+  {
+    "name": "prefill-8k",
+    "wall_s": 65.21848045499996,
+    "ttft_s": null,
+    "usage": {
+      "prompt_tokens": 8041,
+      "completion_tokens": 1,
+      "total_tokens": 8042
+    },
+    "client_decode_tps": null,
+    "text": "",
+    "pre_tokenizer_correction": true
+  },
+  {
+    "name": "short-baseline",
+    "wall_s": 22.743058389999987,
+    "ttft_s": 7.696946857000057,
+    "usage": {
+      "prompt_tokens": 32,
+      "completion_tokens": 255,
+      "total_tokens": 287
+    },
+    "client_decode_tps": 16.88209352786201,
+    "text": "  \nHere's a Python function that merges overlapping intervals:\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"\n    Merge overlapping intervals.\n\n    Args:\n        intervals: List of tuples/lists, each representing an interval [start, end]\n\n    Returns:\n        List of merged intervals as lists [start, end]\n    \"\"\"\n    if not intervals:\n        return []\n\n    # Sort intervals by start time\n    intervals.sort(key=lambda x: x[0])\n\n    merged = [list(intervals[0])]  # Start with the first interval\n\n    for start, end in intervals[1:]:\n        # Get the last merged interval's end\n        last_start, last_end = merged[-1]\n\n        # If current interval overlaps with the last merged one\n        if start <= last_end:\n            # Merge: update the end to the max of both ends\n            merged[-1][1] = max(last_end, end)\n        else:\n            # No overlap, add as new interval\n            merged.append([start, end])\n\n    return merged\n```\n\n## Time Complexity\n\n- **Sorting**: O(n log n) \u2014 dominates the complexity\n- **Single pass through intervals**: O(n)\n- **Total**: **O",
+    "pre_tokenizer_correction": true
+  },
+  {
+    "name": "simple-recall",
+    "wall_s": 1.869096634000016,
+    "ttft_s": 1.4810003170000527,
+    "usage": {
+      "prompt_tokens": 29,
+      "completion_tokens": 6,
+      "total_tokens": 35
+    },
+    "client_decode_tps": 20.04826507546233,
+    "text": "ORCHID-7",
+    "pre_tokenizer_correction": true
+  },
+  {
+    "name": "spec-180k-copy",
+    "wall_s": 23.05066203000024,
+    "ttft_s": 4.6580145699999775,
+    "usage": {
+      "prompt_tokens": 261,
+      "completion_tokens": 241,
+      "total_tokens": 502
+    },
+    "client_decode_tps": 13.776179858649495,
+    "text": "Record 1: alpha alpha cedar alpha cedar maple river river orchid river orchid stone silver silver forest silver forest amber cloud cloud.\nRecordRecord Record 2:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 3:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 4:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 5:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 6:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 7:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 8:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 9:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 10:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 11:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 12:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 13:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 14:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 15:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.\nRecordRecord Record 16:: alpha: alpha cedar maple maple river maple river orchid stone stone silver stone silver forest amber amber cloud amber cloud.",
+    "copy_exact_match": false,
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 12,
+      "min_available_ram_gib": 4.646450042724609,
+      "max_gpu_used_mib": 28039,
+      "swap_in_pages": 53,
+      "swap_out_pages": 2
+    }
+  },
+  {
+    "name": "spec-180k-copy7-fixed",
+    "wall_s": 24.352300100999855,
+    "ttft_s": 4.831032573999892,
+    "usage": {
+      "prompt_tokens": 261,
+      "completion_tokens": 241,
+      "total_tokens": 502
+    },
+    "client_decode_tps": 12.64064244101671,
+    "text": "Record 1: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 2: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 3: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 4: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 5: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 6: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 7: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 8: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 9: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 10: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 11: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 12: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 13: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 14: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 15: alpha cedar maple river orchid stone silver forest amber cloud.\nRecord 16: alpha cedar maple river orchid stone silver forest amber cloud.",
+    "copy_exact_match": true,
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 12,
+      "min_available_ram_gib": 4.7093658447265625,
+      "max_gpu_used_mib": 28040,
+      "swap_in_pages": 171,
+      "swap_out_pages": 0
+    }
+  },
+  {
+    "name": "spec-mtp5-paired",
+    "wall_s": 34.36495855300001,
+    "ttft_s": 1.5578522120000002,
+    "usage": {
+      "prompt_tokens": 24,
+      "completion_tokens": 256,
+      "total_tokens": 280
+    },
+    "client_decode_tps": 7.772922646197926,
+    "text": "Here's a Python function that merges overlapping intervals:\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"\n    Merge overlapping intervals.\n    \n    Args:\n        intervals: List of tuples/lists containing [start, end] pairs\n    \n    Returns:\n        List of merged intervals as [start, end] pairs\n    \"\"\"\n    if not intervals:\n        return []\n    \n    # Sort intervals by start time\n    intervals.sort(key=lambda x: x[0])\n    \n    merged = [intervals[0]]\n    \n    for current in intervals[1:]:\n        # Get the last merged interval\n        last = merged[-1]\n        \n        # If current interval overlaps with last merged interval\n        if current[0] <= last[1]:\n            # Merge by updating the end time if needed\n            last[1] = max(last[1], current[1])\n        else:\n            # No overlap, add current interval as new merged interval\n            merged.append(current)\n    \n    return merged\n```\n\n## Time Complexity Analysis\n\n- **Sorting**: O(n log n) - Python's Timsort\n- **Merging loop**: O(n) - single pass through sorted intervals\n- **Total time complexity**: **O(n log n)**",
+    "pre_tokenizer_correction": false,
+    "resources": {
+      "samples": 17,
+      "min_available_ram_gib": 5.365592956542969,
+      "max_gpu_used_mib": 29565,
+      "swap_in_pages": 22,
+      "swap_out_pages": 6
+    }
+  }
+]

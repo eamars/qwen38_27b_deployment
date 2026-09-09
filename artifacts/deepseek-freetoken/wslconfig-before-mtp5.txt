@@ -1,0 +1,10 @@
+[wsl2]
+memory=112GB
+swap=32GB
+processors=32
+networkingMode=mirrored
+dnsTunneling=true
+firewall=true
+
+[experimental]
+hostAddressLoopback=true

@@ -1,0 +1,6 @@
+{
+  "relative_weight_rmse": 0.21869415044784546,
+  "finite": true,
+  "source": "official MTP layer 0 expert 0 w1",
+  "quant": "IQ3_XXS"
+}

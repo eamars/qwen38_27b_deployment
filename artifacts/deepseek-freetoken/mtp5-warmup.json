@@ -1,0 +1,21 @@
+{
+  "id": "chatcmpl-0",
+  "object": "chat.completion",
+  "created": 1788960300,
+  "model": "deepseek-v4-flash-gpu-probe",
+  "choices": [
+    {
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here's a Python function that merges overlapping intervals:\n\n```python\ndef merge_intervals(intervals):\n    \"\"\"\n    Merge overlapping intervals.\n    \n    Args:\n        intervals: List of tuples/lists containing [start, end] pairs\n    \n    Returns:\n        List of merged intervals as [start, end] pairs"
+      },
+      "finish_reason": "length"
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 24,
+    "completion_tokens": 64,
+    "total_tokens": 88
+  }
+}

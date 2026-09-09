@@ -1,0 +1,7 @@
+{
+  "byte_check_passed": true,
+  "cuda_graph_passed": true,
+  "cpu_executor": false,
+  "gather_gb_per_s": 23.485670125594446,
+  "two_layer_step_ms": 4.922384729998157
+}

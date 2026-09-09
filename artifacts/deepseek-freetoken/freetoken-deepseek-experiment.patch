@@ -1,0 +1,131 @@
+diff --git a/python/freetoken/engine/engine.py b/python/freetoken/engine/engine.py
+index 4943b5a..e694e59 100644
+--- a/python/freetoken/engine/engine.py
++++ b/python/freetoken/engine/engine.py
+@@ -1049,11 +1049,9 @@ def _adjust_dsv4_config(config: EngineConfig, override) -> None:
+     # 'naive' stays naive with the pool's swa currency riding swa_paged.
+     if getattr(config, "cache_type", "radix") != "naive":
+         override("cache_type", "swa_radix")
+-    # 'radix' (SWARadixCache on the full-loc currency, carry-aware re-prefill) is the default and is
+-    # honored, as is an explicit 'naive'. Don't let max_extend_tokens force a second chunk within
+-    # one prompt (the pool's prefill_chunk_budget still chunks prompts larger than the window
+-    # pool); prefill batches ragged (bs>=1), each segment resuming from its own cached_len.
+-    if getattr(config, "max_extend_tokens", 0) < config.max_seq_len:
++    # Honor an explicit prefill cap so long-context activation scratch stays bounded.
++    # The window pool's prefill_chunk_budget can further reduce the actual chunk.
++    if getattr(config, "max_extend_tokens", 0) <= 0:
+         override("max_extend_tokens", config.max_seq_len)
+ 
+     # DSV4 decode batches at most max_running_req rows; its full-loc snapshot is sized to that,
+diff --git a/python/freetoken/layers/moe.py b/python/freetoken/layers/moe.py
+index e62a2be..ad0fdc8 100644
+--- a/python/freetoken/layers/moe.py
++++ b/python/freetoken/layers/moe.py
+@@ -550,6 +550,7 @@ class OffloadMoELayer(MoELayer):
+             return fused_experts_gguf(
+                 hidden_states, gate_up, down, topk_weights, topk_ids, self.activation,
+                 quant_type=t_gate_up, down_quant_type=t_down,
++                swiglu_limit=getattr(self, "swiglu_limit", None),
+             )
+         if fmt == "mxfp4_triton":
+             # gpt-oss MXFP4 experts (biased, clamped swiglu): transposed split-K GEMV
+diff --git a/python/freetoken/models/deepseek_v4/gguf.py b/python/freetoken/models/deepseek_v4/gguf.py
+index 962f3c2..badfd8c 100644
+--- a/python/freetoken/models/deepseek_v4/gguf.py
++++ b/python/freetoken/models/deepseek_v4/gguf.py
+@@ -96,7 +96,8 @@ def _args_from_gguf(shim: "GgufConfigShim") -> DeepseekV4Args:
+         dtype="bf16",
+         scale_fmt=None,
+         expert_dtype=None,
+-        vocab_size=int(_kv(shim, "vocab_size")),
++        vocab_size=int(_kv(shim, "vocab_size", len(
++            (shim if isinstance(shim, dict) else shim.metadata)["tokenizer.ggml.tokens"]))),
+         dim=int(_kv(shim, "embedding_length")),
+         moe_inter_dim=int(_kv(shim, "expert_feed_forward_length")),
+         n_layers=int(_kv(shim, "block_count")),
+@@ -178,12 +179,10 @@ def parse_gguf_config(shim: "GgufConfigShim") -> ModelConfig:
+     #
+     # compress_ratios is the authority: it carries one entry per served layer plus the MTP
+     # layers, so the served count falls out of it and is then cross-checked below.
+-    served_layers = len(args.compress_ratios) - args.n_mtp_layers
+-    if served_layers != args.n_layers:
++    served_layers = args.n_layers
++    if len(args.compress_ratios) < served_layers:
+         raise ValueError(
+-            f"deepseek4 GGUF: compress_ratios implies {served_layers} served layers "
+-            f"({len(args.compress_ratios)} entries minus {args.n_mtp_layers} MTP) but "
+-            f"block_count is {args.n_layers}; refusing to guess which is right"
++            "deepseek4 GGUF: compression schedule is shorter than block_count"
+         )
+     args.n_layers = served_layers
+ 
+@@ -198,7 +197,7 @@ def parse_gguf_config(shim: "GgufConfigShim") -> ModelConfig:
+     from .gguf_experts import gguf_expert_types
+ 
+     types = gguf_expert_types(model_path, served_layers) if model_path else None
+-    expert_types = (types["gate_up"][0], types["down"][0]) if types else None
++    expert_types = (tuple(types["gate_up"]), tuple(types["down"])) if types else None
+ 
+     # The schedule derived from compress_ratios must match what the file actually contains.
+     # A compressor exists where ratio != 0 and a lightning indexer where ratio == 4, so
+diff --git a/python/freetoken/models/gguf/tokenizer.py b/python/freetoken/models/gguf/tokenizer.py
+index 609d49e..eafea08 100644
+--- a/python/freetoken/models/gguf/tokenizer.py
++++ b/python/freetoken/models/gguf/tokenizer.py
+@@ -54,6 +54,17 @@ def load_gguf_tokenizer(model_path: str):
+ 
+     meta = load_gguf_metadata(model_path)
+     arch = gguf_architecture(model_path)
++    if arch == "deepseek4":
++        import os
++        path = os.environ.get("FREETOKEN_DSV4_TOKENIZER_PATH")
++        if not path:
++            raise ValueError("Set FREETOKEN_DSV4_TOKENIZER_PATH to the matching official tokenizer")
++        tokenizer = PreTrainedTokenizerFast.from_pretrained(path, local_files_only=True)
++        tokens = meta["tokenizer.ggml.tokens"]
++        if any(tokenizer.convert_ids_to_tokens(i) != token for i, token in enumerate(tokens)):
++            raise ValueError("Official tokenizer vocabulary does not match this GGUF")
++        tokenizer.chat_template = meta.get("tokenizer.chat_template")
++        return tokenizer
+     conv_arch = _TOKENIZER_ARCH.get(arch, arch)
+     tok_dict: dict[str, Any] = {
+         k[len("tokenizer.ggml.") :]: v
+diff --git a/python/freetoken/moe/fused_q4_0.py b/python/freetoken/moe/fused_q4_0.py
+index f35bc9f..8913e47 100644
+--- a/python/freetoken/moe/fused_q4_0.py
++++ b/python/freetoken/moe/fused_q4_0.py
+@@ -34,6 +34,7 @@ def fused_experts_gguf(
+     activation: str,
+     quant_type: int,
+     down_quant_type: int | None = None,
++    swiglu_limit: float | None = None,
+ ) -> torch.Tensor:
+     """Fused GGUF MoE expert compute over any MMVQ-supported quantization type.
+ 
+@@ -76,7 +77,12 @@ def fused_experts_gguf(
+ 
+     # gate_up: [num_tokens*top_k, 2I] -> activation -> [num_tokens*top_k, I]
+     gate_up = ggml_moe_a8_vec(hidden_states, gate_up_q, topk_ids, top_k, qt, n2, num_tokens)
+-    inter = act_fn(gate_up)
++    if swiglu_limit is not None and swiglu_limit > 0:
++        from freetoken.kernel.triton.dsv4.swiglu import fused_swiglu
++        gate, up = gate_up.chunk(2, dim=-1)
++        inter = fused_swiglu(gate.contiguous(), up.contiguous(), swiglu_limit, gate_up.dtype)
++    else:
++        inter = act_fn(gate_up)
+     # down: each of the num_tokens*top_k intermediate rows uses its own expert id.
+     out = ggml_moe_a8_vec(inter, down_q, topk_ids, 1, int(down_quant_type), h, num_tokens * top_k)
+     out = out.reshape(num_tokens, top_k, h) * topk_weights.reshape(num_tokens, top_k, 1).to(
+diff --git a/python/freetoken/server/args.py b/python/freetoken/server/args.py
+index 4954c5f..53aa447 100644
+--- a/python/freetoken/server/args.py
++++ b/python/freetoken/server/args.py
+@@ -196,6 +196,8 @@ def parse_args(
+         return None
+ 
+     parser = argparse.ArgumentParser(prog=prog, description="FreeToken Server Arguments")
++    parser.add_argument("--swa-num-pages-override", type=int, default=None,
++                        help="Experimental: pin the sliding-window pool page count.")
+ 
+     parser.add_argument(
+         "--model-path",

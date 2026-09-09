@@ -1,0 +1,7 @@
+{
+  "device": "NVIDIA GeForce RTX 5090",
+  "iq3_cuda_relative_rmse": 0.004809301346540451,
+  "clamped_moe_relative_rmse": 0.08669533580541611,
+  "h2d_gb_per_second": 27.777266162705278,
+  "h2d_elapsed_s": 0.30924334099995576
+}

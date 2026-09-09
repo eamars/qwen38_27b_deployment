@@ -1,0 +1,23 @@
+{
+  "event": "download_complete",
+  "repo": "tarruda/DeepSeek-V4-Flash-0731-GGUF",
+  "revision": "ad2ca0244d0e62868d0b79d67d14a42d6c41278d",
+  "files": [
+    {
+      "path": "/home/rba90/models/DeepSeek-V4-Flash-0731-IQ3_XXS/IQ3_XXS/DeepSeek-V4-Flash-0731-IQ3_XXS-00003-of-00004.gguf",
+      "bytes": 49822244864
+    },
+    {
+      "path": "/home/rba90/models/DeepSeek-V4-Flash-0731-IQ3_XXS/IQ3_XXS/DeepSeek-V4-Flash-0731-IQ3_XXS-00001-of-00004.gguf",
+      "bytes": 5251072
+    },
+    {
+      "path": "/home/rba90/models/DeepSeek-V4-Flash-0731-IQ3_XXS/IQ3_XXS/DeepSeek-V4-Flash-0731-IQ3_XXS-00004-of-00004.gguf",
+      "bytes": 14783041600
+    },
+    {
+      "path": "/home/rba90/models/DeepSeek-V4-Flash-0731-IQ3_XXS/IQ3_XXS/DeepSeek-V4-Flash-0731-IQ3_XXS-00002-of-00004.gguf",
+      "bytes": 49260045920
+    }
+  ]
+}
