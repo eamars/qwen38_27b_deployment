@@ -8,8 +8,11 @@ canonical launch and profiling entry points are:
 | Qwen RTX 5090 launch/stop | `start-qwen27b-5090.ps1` |
 | Qwen RTX 4090 launch/stop | `start-qwen27b-4090.ps1` |
 | Shared Qwen + Gemma server | `start-kazusa-models.ps1` |
-| Gemma RTX 5090 experiment | `start-gemma4-5090.ps1` |
-| Gemma RTX 4090 experiment | `start-gemma4-4090.ps1` |
+| Gemma 4 31B Isometry Fabled Persona i1-Q4_K_M, RTX 5090 | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1` |
+| Gemma 4 31B Isometry Fabled Persona i1-Q4_K_S, RTX 4090 | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1` |
+| Gemma 4 31B Isometry Fabled Persona i1-Q4_K_S, RTX 4090 no checkpoint | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-90k-mtp-no-checkpoint.ps1` |
+| Gemma 4 31B TeichAI Fable-5 Distill Q4_K_M, RTX 4090 | `start-gemma4-31b-fable-5-distill-q4_k_m-4090-70k-mtp.ps1` |
+| Gemma 4 31B Instruct QAT UD-Q4_K_XL, RTX 4090, 90K context | `start-gemma4-31b-it-qat-ud-q4_k_xl-4090-90k-mtp.ps1` |
 | Qwen API smoke/sustained checks | `profile-api.py` |
 | Qwen tokenizer-calibrated deep context | `profile-deep-context.py` |
 | Flash-Next FreeToken RTX 5090 launch/stop | `start-qwen38-flash-next-freetoken.ps1` |

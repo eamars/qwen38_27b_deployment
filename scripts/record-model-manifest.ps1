@@ -20,10 +20,13 @@ $items = @(
 $optionalGemma = @(
     @{ Repo = 'LM Studio local import'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf'; Quant = 'i1-Q4_K_M'; Role = 'Gemma 4 5090 experimental target' },
     @{ Repo = 'mradermacher/Gemma-4-31B-Isometry-Fabled-Persona-i1-GGUF'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf'; Quant = 'i1-Q4_K_S'; Role = 'Gemma 4 4090 experimental target' },
-    @{ Repo = 'ggml-org/gemma-4-31B-it-GGUF'; File = 'mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 MTP drafter' }
+    @{ Repo = 'ggml-org/gemma-4-31B-it-GGUF'; File = 'mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 MTP drafter' },
+    @{ Repo = 'unsloth/gemma-4-31B-it-qat-GGUF'; Path = 'unsloth-gemma4-qat\gemma-4-31B-it-qat-UD-Q4_K_XL.gguf'; File = 'gemma-4-31B-it-qat-UD-Q4_K_XL.gguf'; Quant = 'QAT UD-Q4_K_XL'; Role = 'Gemma 4 4090 QAT Instruct target' },
+    @{ Repo = 'unsloth/gemma-4-31B-it-qat-GGUF'; Path = 'unsloth-gemma4-qat\MTP\mtp-gemma-4-31B-it-Q8_0.gguf'; File = 'MTP/mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 QAT MTP drafter' }
 )
 foreach ($item in $optionalGemma) {
-    if (Test-Path -LiteralPath (Join-Path $models $item.File) -PathType Leaf) {
+    $relativePath = if ($item.Path) { $item.Path } else { $item.File }
+    if (Test-Path -LiteralPath (Join-Path $models $relativePath) -PathType Leaf) {
         $items += $item
     }
 }
@@ -40,7 +43,8 @@ $lines = @(
 )
 
 foreach ($item in $items) {
-    $path = Join-Path $models $item.File
+    $relativePath = if ($item.Path) { $item.Path } else { $item.File }
+    $path = Join-Path $models $relativePath
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Missing model file: $path" }
     Write-Host "Hashing $($item.File)"
     $file = Get-Item -LiteralPath $path

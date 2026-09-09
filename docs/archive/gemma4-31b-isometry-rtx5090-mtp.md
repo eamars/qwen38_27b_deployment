@@ -36,25 +36,25 @@ The staging script copies the exact LM Studio target and downloads only the name
 Print the command without touching the GPU:
 
 ```powershell
-.\scripts\start-gemma4-5090.ps1 -DryRun
+.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1 -DryRun
 ```
 
 Start target + Google MTP when the RTX 5090 is available:
 
 ```powershell
-.\scripts\start-gemma4-5090.ps1
+.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1
 ```
 
 Start the target-only control server:
 
 ```powershell
-.\scripts\start-gemma4-5090.ps1 -NoMtp -Port 8082
+.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1 -NoMtp -Port 8082
 ```
 
 Stop the managed server:
 
 ```powershell
-.\scripts\start-gemma4-5090.ps1 -Stop
+.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1 -Stop
 ```
 
 The initial RTX 5090 defaults are one slot, 65,536 context tokens, target K/V `q8_0`, assistant K/V `f16`, and MTP `n-max=3`. Increase context only after measuring VRAM headroom.
@@ -69,13 +69,13 @@ and MTP `n-max=3` by default. It binds the child process to the detected RTX
 Print the command without touching the GPU:
 
 ```powershell
-.\scripts\start-gemma4-4090.ps1 -DryRun
+.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1 -DryRun
 ```
 
 Start target + Google MTP when the RTX 4090 is free:
 
 ```powershell
-.\scripts\start-gemma4-4090.ps1
+.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1
 ```
 
 Use `-NoMtp` for the target-only control, or override `-CacheTypeK` and

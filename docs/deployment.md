@@ -148,8 +148,8 @@ repository.
 The Gemma launchers and profilers are maintained as an isolated experiment:
 
 ```powershell
-.\scripts\start-gemma4-5090.ps1 -DryRun
-.\scripts\start-gemma4-4090.ps1 -DryRun
+.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1 -DryRun
+.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1 -DryRun
 python .\scripts\profile-gemma4-mtp.py
 python .\scripts\profile-gemma4-4090.py --dry-run --check-gpu
 ```
@@ -161,7 +161,8 @@ Qwen replacement or production sign-off.
 
 The active RTX 4090 Gemma default is the measured N1 profile: context `56320`,
 target KV `q8_0/f16`, draft KV `q8_0/q8_0`, MTP `n-max=3`, and batch/ubatch
-`256/128`. This is configured in both `start-gemma4-4090.ps1` and the
+`256/128`. This is configured in both
+`start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1` and the
 `gemma4-4090` preset embedded in `start-kazusa-models.ps1`. The historical
 benchmark records remain unchanged.
 
