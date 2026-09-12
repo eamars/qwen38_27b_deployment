@@ -16,6 +16,10 @@ p.add_argument('--filler-lines', type=int, default=0)
 p.add_argument('--reference', default='ORCHID-7319')
 p.add_argument('--copy-test', action='store_true')
 p.add_argument('--long-output', action='store_true')
+p.add_argument('--reasoning-effort', '--thinking-effort', dest='reasoning_effort',
+                choices=('none', 'off', 'minimal', 'low', 'medium', 'high', 'xhigh', 'max'),
+                default=None,
+                help='Per-request DeepSeek thinking effort; omit to preserve the model default.')
 a=p.parse_args()
 samples=[]
 stop_sampling=threading.Event()
@@ -45,7 +49,9 @@ if a.copy_test:
     a.prompt='Copy the following records exactly. Output only the records, without code fences or commentary.\n\n'+copy_expected
 payload={'model':'deepseek-v4-flash-gpu-probe','messages':[{'role':'user','content':a.prompt}],
          'temperature':0,'max_tokens':a.tokens,'stream':True,'stream_options':{'include_usage':True}}
-req=urllib.request.Request('http://127.0.0.1:1920/v1/chat/completions',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
+if a.reasoning_effort is not None:
+    payload['reasoning_effort'] = a.reasoning_effort
+req=urllib.request.Request('http://127.0.0.1:1919/v1/chat/completions',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
 start=time.perf_counter()
 def interrupted(signum, frame):
     stop_sampling.set()

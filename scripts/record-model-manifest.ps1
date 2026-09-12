@@ -22,7 +22,10 @@ $optionalGemma = @(
     @{ Repo = 'mradermacher/Gemma-4-31B-Isometry-Fabled-Persona-i1-GGUF'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf'; Quant = 'i1-Q4_K_S'; Role = 'Gemma 4 4090 experimental target' },
     @{ Repo = 'ggml-org/gemma-4-31B-it-GGUF'; File = 'mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 MTP drafter' },
     @{ Repo = 'unsloth/gemma-4-31B-it-qat-GGUF'; Path = 'unsloth-gemma4-qat\gemma-4-31B-it-qat-UD-Q4_K_XL.gguf'; File = 'gemma-4-31B-it-qat-UD-Q4_K_XL.gguf'; Quant = 'QAT UD-Q4_K_XL'; Role = 'Gemma 4 4090 QAT Instruct target' },
-    @{ Repo = 'unsloth/gemma-4-31B-it-qat-GGUF'; Path = 'unsloth-gemma4-qat\MTP\mtp-gemma-4-31B-it-Q8_0.gguf'; File = 'MTP/mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 QAT MTP drafter' }
+    @{ Repo = 'unsloth/gemma-4-31B-it-qat-GGUF'; Path = 'unsloth-gemma4-qat\MTP\mtp-gemma-4-31B-it-Q8_0.gguf'; File = 'MTP/mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 QAT MTP drafter' },
+    @{ Repo = 'HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP'; Path = 'hauhaucs-gemma4-qat-uncensored-balanced-mtp\Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-Q4_K_M.gguf'; File = 'Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-Q4_K_M.gguf'; Quant = 'QAT Q4_K_M'; Role = 'Gemma 4 4090 HauhauCS uncensored target' },
+    @{ Repo = 'HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP'; Path = 'hauhaucs-gemma4-qat-uncensored-balanced-mtp\mtp-gemma-4-31B-it.gguf'; File = 'mtp-gemma-4-31B-it.gguf'; Quant = 'MTP'; Role = 'Gemma 4 HauhauCS MTP drafter' },
+    @{ Repo = 'HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP'; Path = 'hauhaucs-gemma4-qat-uncensored-balanced-mtp\mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf'; File = 'mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf'; Quant = 'BF16 mmproj'; Role = 'Gemma 4 HauhauCS vision projector' }
 )
 foreach ($item in $optionalGemma) {
     $relativePath = if ($item.Path) { $item.Path } else { $item.File }

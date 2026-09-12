@@ -60,6 +60,13 @@ The Gemma experiment can be staged separately with:
 .\scripts\stage-gemma4-assets.ps1 -LmStudioTargetPath 'D:\path\to\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf'
 ```
 
+The HauhauCS uncensored QAT target, MTP drafter, and vision projector are
+staged at an immutable revision with:
+
+```powershell
+.\scripts\stage-gemma4-hauhaucs.ps1
+```
+
 ## Preflight
 
 Run the no-load check before starting a backend:
@@ -68,10 +75,10 @@ Run the no-load check before starting a backend:
 .\scripts\check-runtime.ps1
 ```
 
-Add `-IncludeGemma` only when the Gemma/MTP experiment is needed. The check
-verifies the pinned executable, model files, DFlash2 command-line support,
-and UUID-to-`CUDA0` isolation for both cards. It does not start a server or
-load a model.
+Add `-IncludeGemma` or `-IncludeHauhauCS` only when the corresponding Gemma
+assets are needed. The check verifies the pinned executable, model files,
+DFlash2 command-line support, and UUID-to-`CUDA0` isolation for both cards. It
+does not start a server or load a model.
 
 ## Launch and stop
 
@@ -107,6 +114,18 @@ http://127.0.0.1:8081  RTX 4090
 ```
 
 Check `/health`, `/v1/models`, `/metrics`, and `/slots` before profiling.
+
+The HauhauCS Gemma 4 launcher uses the same RTX 4090 and default port `8083`
+as the official QAT launcher. It defaults to 65,536 context tokens because the
+full vision+MTP configuration does not fit reliably at 90K with q8 KV caches.
+Vision and MTP are enabled by default; use `-NoVision` only when the projector
+is not needed, and stop the current model before swapping the process on `8083`:
+
+```powershell
+.\scripts\start-gemma4-31b-hauhaucs-balanced-q4_k_m-4090-65k-mtp.ps1 -DryRun
+.\scripts\start-gemma4-31b-it-qat-ud-q4_k_xl-4090-90k-mtp.ps1 -Stop -Port 8083
+.\scripts\start-gemma4-31b-hauhaucs-balanced-q4_k_m-4090-65k-mtp.ps1
+```
 
 ## Shared Kazusa server
 

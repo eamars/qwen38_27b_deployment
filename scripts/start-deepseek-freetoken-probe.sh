@@ -26,13 +26,13 @@ test -f "$output/download-verified.json"
 exec bash /mnt/c/workspace/qwen38_27b/scripts/deepseek-freetoken-env.sh \
   python -u -m freetoken.cli serve --model "$model" \
   --served-model-name deepseek-v4-flash-gpu-probe \
-  --host 127.0.0.1 --port 1920 --tensor-parallel-size 1 \
+  --host 0.0.0.0 --port 1919 --tensor-parallel-size 1 \
   --dtype bfloat16 --memory-ratio 0.90 --max-running-requests 1 \
   --moe-backend offload --moe-cpu-layers 0 --expert-load serial \
   --moe-cache-size "$slots" --kv-reserve-tokens "$kv_tokens" --num-tokens "$kv_tokens" \
   --max-seq-len-override "$context" --max-prefill-length "$prefill" \
   --swa-num-pages-override "$window_pages" \
   --max-output-tokens 512 --cuda-graph-max-bs "$graphs" --disable-pynccl \
-  --cache-type radix --decode-log-interval 20 --reasoning-parser off \
+  --cache-type radix --decode-log-interval 20 --reasoning-parser auto \
   "${extra_args[@]}" \
   2>&1 | tee "$log"

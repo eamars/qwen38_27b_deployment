@@ -1,6 +1,6 @@
 # Model manifest
 
-Generated: 2026-08-26 11:19:43 +12:00
+Generated: 2026-09-10 19:17:56 +12:00
 
 All model artifacts are local under `models/` and are ignored by Git. SHA-256
 values below were calculated from the completed files in this workspace. The
@@ -27,3 +27,6 @@ revision and validate that all indexed shards are present.
 | Gemma 4 MTP drafter | ggml-org/gemma-4-31B-it-GGUF | mtp-gemma-4-31B-it-Q8_0.gguf | MTP Q8_0 | 514687104 | 0.479 | 6b52ab20af503aee320dc09e93f886133b18d89ffc9075c7d9dcaf681e20b375 | 2026-08-24 |
 | Gemma 4 4090 QAT Instruct target | unsloth/gemma-4-31B-it-qat-GGUF | gemma-4-31B-it-qat-UD-Q4_K_XL.gguf | QAT UD-Q4_K_XL | 17287670048 | 16.1 | 00b5a7c497f0c8934033088c10a7fa9a4c015e46ee6d89e9c6890650ba5d0e71 | 2026-09-09 |
 | Gemma 4 QAT MTP drafter | unsloth/gemma-4-31B-it-qat-GGUF | MTP/mtp-gemma-4-31B-it-Q8_0.gguf | MTP Q8_0 | 514705920 | 0.479 | e6e88dea4fcf79a0a71cd7732e61632355126dbbda9b72a08d6301fa06fbaf22 | 2026-09-09 |
+| Gemma 4 4090 HauhauCS uncensored target | HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP | Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-Q4_K_M.gguf | QAT Q4_K_M | 18687062176 | 17.404 | 71667f9e601a4b914a98425c59150b731f6e15d260d661dbd1f1ee07469fc7db | 2026-09-10 |
+| Gemma 4 HauhauCS MTP drafter | HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP | mtp-gemma-4-31B-it.gguf | MTP | 279954368 | 0.261 | b5c4e583fc5982439080114bbc1b7edaec361f9d4c9193d6bed606a3de401b62 | 2026-09-10 |
+| Gemma 4 HauhauCS vision projector | HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP | mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf | BF16 mmproj | 1200726016 | 1.118 | 7bef0d0fb3e85fc2941ec5f1c375febf3742645f158132a43ced557093aea841 | 2026-09-10 |

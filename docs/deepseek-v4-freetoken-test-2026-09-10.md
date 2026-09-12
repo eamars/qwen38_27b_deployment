@@ -44,8 +44,10 @@ The existing Qwen runtime was left intact. Experimental checkouts are `runtime/f
 Start the tested default from PowerShell:
 
 ```powershell
-wsl.exe bash /mnt/c/workspace/qwen38_27b/scripts/start-deepseek-freetoken-probe.sh
+.\scripts\start-deepseek-freetoken.ps1
 ```
+
+The Windows launcher performs the GPU, checkpoint, tokenizer, port, and verified-download checks before starting the tested baseline. It fixes the API port at **1919**, the same port used by the Qwen launcher; only one of those servers can run at a time. It defaults to the RTX 5090, 180,000-token cap (179,968 usable page-aligned tokens), 1,536 expert-cache slots, 64 window pages, 4,096-token prefill chunks, and zero CPU expert layers. Use `-Check` to query readiness and `-Stop` to terminate the recorded process group. `-DryRun` prints the exact WSL command without starting it.
 
 Experimental speculation, after stopping the existing server:
 
@@ -53,9 +55,11 @@ Experimental speculation, after stopping the existing server:
 wsl.exe env FREETOKEN_NGRAM=1 FREETOKEN_NGRAM_TOKENS=7 FREETOKEN_LOG_SUFFIX=-ngram7 bash /mnt/c/workspace/qwen38_27b/scripts/start-deepseek-freetoken-probe.sh
 ```
 
-The OpenAI-compatible API is `http://127.0.0.1:1920/v1`, with model name `deepseek-v4-flash-gpu-probe`. Requests that omit an output limit default to 512 tokens in this test launcher; clients may request more, within the shared prompt/output context budget. The isolated build uses the existing WSL Python environment, CUDA 13.3, and Clang for the experimental CUDA extension. Clang was installed locally to resolve the GCC/PyTorch extension compilation failure.
+The OpenAI-compatible API is `http://127.0.0.1:1919/v1` for local clients and `http://<Windows-host-address>:1919/v1` for LAN clients, with model name `deepseek-v4-flash-gpu-probe`. The server binds `0.0.0.0` on the same port as the Qwen3.8-Flash launcher. Windows Firewall and network routing still need to allow inbound TCP 1919 for remote clients. Requests that omit an output limit default to 512 tokens in this test launcher; clients may request more, within the shared prompt/output context budget. The isolated build uses the existing WSL Python environment, CUDA 13.3, and Clang for the experimental CUDA extension. Clang was installed locally to resolve the GCC/PyTorch extension compilation failure.
 
-Portable evidence is exported under `artifacts/deepseek-freetoken`: compact benchmark results, component results, live cache geometry, server logs, and patches against each checkout's HEAD. These are local experimental artifacts, not an upstream release. The test server is left running at the address above, idle after successful generation. The near-limit test uses repetitive synthetic records and one retrieval target; it does not establish general long-document accuracy or production stability across all workloads.
+The OpenAI-compatible request field `reasoning_effort` is exposed by the DeepSeek harness. The live model advertises `low`, `medium`, `high`, and `xhigh`; `none` or `off` disables thinking. Chat Completions clients send `{"reasoning_effort":"high"}`; the Codex/Responses harness sends `{"reasoning":{"effort":"high"}}`. For the benchmark harness, use `--reasoning-effort high` (or the alias `--thinking-effort high`) on `scripts/benchmark-deepseek-freetoken.py`. The server uses FreeToken's automatic DeepSeek reasoning parser so explicit thinking output is returned as `reasoning_content` rather than mixed into normal `content`.
+
+Portable evidence is exported under `artifacts/deepseek-freetoken`: compact benchmark results, component results, live cache geometry, server logs, and patches against each checkout's HEAD. These are local experimental artifacts, not an upstream release. The service is stopped unless the launcher is running. The near-limit test uses repetitive synthetic records and one retrieval target; it does not establish general long-document accuracy or production stability across all workloads.
 
 MTP5 follow-up (completed): a fresh paired coding baseline measured **19.9173 tokens/s**, versus **7.7729 tokens/s with MTP5**, a **60.97% slowdown**. Both used the same 24-token coding prompt, temperature zero, a 256-token output budget, the 180K context cap, and 1,536 expert-cache slots. The baseline returned 255 tokens and MTP5 returned 256; throughput counts returned tokens. MTP5 received one untimed 64-token kernel warmup before the timed run. Output was coherent but not byte-identical. The benchmark automatically stopped MTP5 as soon as the slower result was measured. No further performance tuning or benchmarks followed.
 

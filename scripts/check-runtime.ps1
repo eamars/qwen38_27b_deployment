@@ -1,6 +1,7 @@
 [CmdletBinding()]
 param(
-    [switch]$IncludeGemma
+    [switch]$IncludeGemma,
+    [switch]$IncludeHauhauCS
 )
 
 $ErrorActionPreference = 'Stop'
@@ -28,6 +29,20 @@ foreach ($model in $requiredModels) {
     $path = Join-Path $workspace "models\$model"
     if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
         throw "Required model artifact is missing: $path"
+    }
+}
+
+if ($IncludeHauhauCS) {
+    $hauhaucsRoot = Join-Path $workspace 'models\hauhaucs-gemma4-qat-uncensored-balanced-mtp'
+    foreach ($model in @(
+            'Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-Q4_K_M.gguf',
+            'mtp-gemma-4-31B-it.gguf',
+            'mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf'
+        )) {
+        $path = Join-Path $hauhaucsRoot $model
+        if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
+            throw "Required HauhauCS model artifact is missing: $path"
+        }
     }
 }
 
@@ -76,5 +91,6 @@ Write-Host "Runtime: $runtime"
 Write-Host $version
 Write-Host "Model artifacts checked: $($requiredModels.Count)"
 if ($IncludeGemma) { Write-Host 'Gemma/MTP model artifacts checked.' }
+if ($IncludeHauhauCS) { Write-Host 'HauhauCS target/MTP/vision artifacts checked.' }
 Write-Host 'DFlash2 options and per-GPU UUID isolation are available.'
 Write-Host 'No server was started and no model was loaded by this check.'

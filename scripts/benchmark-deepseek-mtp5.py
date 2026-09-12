@@ -8,7 +8,7 @@ import urllib.request
 root=Path('/home/rba90/deepseek-freetoken-probe')
 prompt='Write a Python function that merges overlapping intervals. Explain its time complexity and give three test cases.'
 payload=dict(model='deepseek-v4-flash-gpu-probe',messages=[dict(role='user',content=prompt)],temperature=0,max_tokens=64,stream=False)
-request=urllib.request.Request('http://127.0.0.1:1920/v1/chat/completions',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
+request=urllib.request.Request('http://127.0.0.1:1919/v1/chat/completions',data=json.dumps(payload).encode(),headers={'Content-Type':'application/json'})
 print('Warming new draft kernels (not timed).',flush=True)
 with urllib.request.urlopen(request,timeout=600) as response:
     warmup=json.load(response)

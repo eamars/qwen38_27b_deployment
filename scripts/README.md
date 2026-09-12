@@ -13,11 +13,14 @@ canonical launch and profiling entry points are:
 | Gemma 4 31B Isometry Fabled Persona i1-Q4_K_S, RTX 4090 no checkpoint | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-90k-mtp-no-checkpoint.ps1` |
 | Gemma 4 31B TeichAI Fable-5 Distill Q4_K_M, RTX 4090 | `start-gemma4-31b-fable-5-distill-q4_k_m-4090-70k-mtp.ps1` |
 | Gemma 4 31B Instruct QAT UD-Q4_K_XL, RTX 4090, 90K context | `start-gemma4-31b-it-qat-ud-q4_k_xl-4090-90k-mtp.ps1` |
+| Gemma 4 31B HauhauCS QAT Uncensored Balanced Q4_K_M + vision/MTP, RTX 4090, 65K context | `start-gemma4-31b-hauhaucs-balanced-q4_k_m-4090-65k-mtp.ps1` |
 | Qwen API smoke/sustained checks | `profile-api.py` |
 | Qwen tokenizer-calibrated deep context | `profile-deep-context.py` |
 | Flash-Next FreeToken RTX 5090 launch/stop | `start-qwen38-flash-next-freetoken.ps1` |
 | Uncensored Flash-Next FreeToken preparation/launch | `start-qwen38-flash-next-uncensored-freetoken.ps1` |
 | Flash-Next FreeToken 4K benchmark | `benchmark-freetoken-qwen38-next.py` |
+| DeepSeek V4 Flash FreeToken RTX 5090 launch/stop | `start-deepseek-freetoken.ps1` |
+| DeepSeek V4 effort-aware request harness | `benchmark-deepseek-freetoken.py` (`--reasoning-effort` / `--thinking-effort`) |
 | GPU memory sampling | `profile-vram.ps1` |
 | Gemma MTP comparison | `profile-gemma4-mtp.py`, `profile-gemma4-4090.py` |
 | Gemma short/long combined comparison | `profile-gemma4-combined.py` |
@@ -29,6 +32,8 @@ state rather than launch an alternative runtime:
 - `download-models.ps1` — fetches the Qwen deployment set.
 - `stage-gemma4-assets.ps1` and `download-gemma4-persona-ranged.ps1` — stages
   the isolated Gemma experiment.
+- `stage-gemma4-hauhaucs.ps1` — stages and verifies the pinned HauhauCS
+  uncensored QAT target, MTP drafter, and vision projector.
 - `collect-host-inventory.ps1` — refreshes `docs/host-inventory.md`.
 - `record-model-manifest.ps1` — refreshes `docs/models.md`.
 - `prepare-qwen38-uncensored-runtime.py` — reproduces the isolated FreeToken

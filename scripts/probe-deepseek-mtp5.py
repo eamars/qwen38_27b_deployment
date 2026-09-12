@@ -19,7 +19,7 @@ try:
     _adjust_dsv4_config(config, None)
 except ValueError as exc:
     result['startup_error'] = str(exc)
-with urllib.request.urlopen('http://127.0.0.1:1920/v1/cache/status') as response:
+with urllib.request.urlopen('http://127.0.0.1:1919/v1/cache/status') as response:
     status = response.read().decode()
 Path('/home/rba90/deepseek-freetoken-probe/final-cache-status.json').write_text(status)
 Path('/home/rba90/deepseek-freetoken-probe/mtp5-compatibility.json').write_text(json.dumps(result, indent=2))
