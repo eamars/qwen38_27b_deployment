@@ -16,9 +16,12 @@ canonical launch and profiling entry points are:
 | Gemma 4 31B HauhauCS QAT Uncensored Balanced Q4_K_M + vision/MTP, RTX 4090, 65K context | `start-gemma4-31b-hauhaucs-balanced-q4_k_m-4090-65k-mtp.ps1` |
 | Qwen API smoke/sustained checks | `profile-api.py` |
 | Qwen tokenizer-calibrated deep context | `profile-deep-context.py` |
-| Flash-Next FreeToken RTX 5090 launch/stop | `start-qwen38-flash-next-freetoken.ps1` |
-| Uncensored Flash-Next FreeToken launch/stop | `start-qwen38-flash-next-uncensored-freetoken.ps1` |
+| Flash-Next official text-only launch/stop | `start-qwen38-flash-next-freetoken.ps1` |
+| Flash-Next uncensored text-only launch/stop | `start-qwen38-flash-next-uncensored-freetoken.ps1` |
 | Flash-Next FreeToken 4K benchmark | `benchmark-freetoken-qwen38-next.py` |
+| Flash-Next official vision launch/stop | `start-qwen38-flash-next-freetoken-vision.ps1` |
+| Flash-Next uncensored vision launch/stop | `start-qwen38-flash-next-uncensored-freetoken-vision.ps1` |
+| Flash-Next 262K/4K official/uncensored vision matrix | `benchmark-qwen38-flash-next-freetoken-vision-matrix.py` |
 | DeepSeek V4 Flash FreeToken RTX 5090 launch/stop | `start-deepseek-freetoken.ps1` |
 | DeepSeek V4 effort-aware request harness | `benchmark-deepseek-freetoken.py` (`--reasoning-effort` / `--thinking-effort`) |
 | GPU memory sampling | `profile-vram.ps1` |
@@ -66,3 +69,29 @@ loading weights:
 ```
 
 The wrapper defaults to one concurrent request.
+
+The two vision launchers use the same shared FreeToken runtime, port `1919`,
+and max-context defaults. Each script fixes its own checkpoint and served model
+ID, so DSH can deploy one model at a time without a model-selection argument:
+
+| Launcher | Served model ID |
+|---|---|
+| Official vision | `qwen38-next-freetoken-vision` |
+| Uncensored vision | `qwen38-next-uncensored-freetoken-vision` |
+
+```powershell
+.\scripts\start-qwen38-flash-next-freetoken-vision.ps1
+.\scripts\start-qwen38-flash-next-uncensored-freetoken-vision.ps1
+python .\scripts\benchmark-qwen38-flash-next-freetoken-vision-matrix.py
+```
+
+Stop the active model with its matching script:
+
+```powershell
+.\scripts\start-qwen38-flash-next-freetoken-vision.ps1 -Stop
+.\scripts\start-qwen38-flash-next-uncensored-freetoken-vision.ps1 -Stop
+```
+
+The matrix fixes the context at 262,144 tokens, uses the retained 4,041-token
+prompt, runs three measured requests per configuration, and writes the result
+under `benchmarks/raw/qwen38_flash_next/<date>/`.

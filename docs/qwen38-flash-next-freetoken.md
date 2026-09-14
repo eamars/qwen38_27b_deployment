@@ -69,9 +69,16 @@ The retained benchmark used FreeToken base commit
 `a80b4d308a81986fa086ec173d7faa70ba737b2d`, which deliberately drops the
 checkpoint's `mtp.*` tensors. No MTP configuration or sidecar is retained in
 this workspace. The current local FreeToken source is upstream commit
-`953565667f3141c90d0f0eb469bb2655d2407140`, with the local Qwen3.8
+`f7dbab7f151df353d70b325a8ac09ce0f7f1c456`, which includes the upstream
+Qwen3.8 Flash-Next vision tower/mRoPE support and the ModelOpt input-scale
+fix, with the local Qwen3.8
 compressed-tensors compatibility changes described in the
 [FreeToken compatibility note](../runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
+
+The shared WSL environment also contains the upstream vision dependencies
+Pillow 12.3.0 and torchvision 0.26.0. The vision launcher enables the
+vision tower with `--mm-encoder-weights host`; the benchmark still sends
+text-only requests and no image input.
 
 ## Retained 4K benchmark
 
@@ -101,10 +108,34 @@ Evidence:
   selects the physical RTX 5090 by UUID.
 - `scripts/benchmark-freetoken-qwen38-next.py` — optional repeatable 4K
   measurement harness for the retained profile.
+- `scripts/start-qwen38-flash-next-freetoken-vision.ps1` — official
+  vision-enabled deployment launcher on the shared runtime, serving
+  `qwen38-next-freetoken-vision`.
+- `scripts/start-qwen38-flash-next-uncensored-freetoken-vision.ps1` — separate
+  uncensored vision-enabled deployment launcher on the same port, serving
+  `qwen38-next-uncensored-freetoken-vision`.
+- `scripts/benchmark-qwen38-flash-next-freetoken-vision-matrix.py` — four-way
+  262K-context/4K-input benchmark matrix.
 - `runtime/freetoken-a80b4d3` — FreeToken source tree; benchmark and current
   source revisions are recorded above.
 - `/home/rba90/.freetoken-qwen38/venv` — WSL Python environment.
 - `/home/rba90/models/Qwen3.8-Flash-Next-NVFP4` — complete WSL checkpoint.
+
+## 262K vision matrix — 2026-09-14
+
+The new matrix passed three measured requests in each configuration. Every
+request used the same 4,041-token prompt, 262,144-token context, and no image
+input. Visual cases reported `text,image` input modalities; text-only cases
+reported `text`.
+
+| Configuration | Median wall | Prompt tok/s | Decode tok/s |
+|---|---:|---:|---:|
+| Official, no visual | 18.30 s | 972.29 | 36.06 |
+| Uncensored, no visual | 17.06 s | 974.58 | 39.51 |
+| Official + visual | 18.34 s | 977.37 | 35.89 |
+| Uncensored + visual | 17.11 s | 971.87 | 39.35 |
+
+Evidence: [262K/4K matrix result](../benchmarks/raw/qwen38_flash_next/2026-09-14/freetoken-vision-262k-4k.json).
 
 The removed Windows GGUF weights, MTP sidecar, Qwen4Exp llama.cpp builds,
 alternative launchers, and intermediate benchmark probes are not required by

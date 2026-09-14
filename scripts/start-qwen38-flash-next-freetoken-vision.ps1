@@ -4,7 +4,6 @@ param(
     [string]$Profile = 'Native256K',
     [ValidateRange(1, 8)]
     [int]$MaxRunningRequests = 1,
-    [string]$Model = '/home/rba90/models/Qwen3.8-Flash-Next-NVFP4',
     [string]$GpuUuid = 'GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0',
     [int]$Port = 1919,
     [switch]$DryRun,
@@ -29,14 +28,16 @@ function ConvertTo-WslMountPath {
 
 $launchScript = ConvertTo-WslMountPath (Join-Path $PSScriptRoot 'launch-freetoken-wsl.sh')
 $freeToken = '/home/rba90/.freetoken-qwen38/venv/bin/ft'
+$model = '/home/rba90/models/Qwen3.8-Flash-Next-NVFP4'
+$servedModel = 'qwen38-next-freetoken-vision'
 $pidFile = "/tmp/qwen38-flash-next-freetoken-$Port.pid"
 
 if ($Stop) {
+    $stopErrorAction = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
     $recordedPidOutput = & wsl.exe cat $pidFile 2>$null
     $recordedPid = if ($null -eq $recordedPidOutput) { '' } else { ([string]$recordedPidOutput).Trim() }
     if ($recordedPid -match '^[1-9][0-9]*$') {
-        # The launcher records the setsid child, which is normally its own
-        # process-group leader. Try the group first, then the exact child.
         & wsl.exe kill -TERM -- "-$recordedPid" 2>$null
         Start-Sleep -Seconds 1
         & wsl.exe kill -TERM -- $recordedPid 2>$null
@@ -45,6 +46,7 @@ if ($Stop) {
         & wsl.exe kill -KILL -- $recordedPid 2>$null
     }
     & wsl.exe rm -f -- $pidFile 2>$null
+    $ErrorActionPreference = $stopErrorAction
     return
 }
 
@@ -53,13 +55,13 @@ if (-not $gpu) {
     throw "RTX 5090 UUID $GpuUuid was not found by nvidia-smi"
 }
 
-& wsl.exe test -d $Model
+& wsl.exe test -d $model
 if ($LASTEXITCODE -ne 0) {
-    throw "FreeToken checkpoint was not found in WSL: $Model"
+    throw "FreeToken checkpoint was not found in WSL: $model"
 }
-& wsl.exe test -f "$Model/model.safetensors.index.json"
+& wsl.exe test -f "$model/model.safetensors.index.json"
 if ($LASTEXITCODE -ne 0) {
-    throw "FreeToken checkpoint index was not found in WSL: $Model/model.safetensors.index.json"
+    throw "FreeToken checkpoint index was not found in WSL: $model/model.safetensors.index.json"
 }
 & wsl.exe test -x $freeToken
 if ($LASTEXITCODE -ne 0) {
@@ -70,8 +72,8 @@ $tokens = if ($Profile -eq 'Native256K') { 262144 } else { 8192 }
 $maxOutput = if ($Profile -eq 'Native256K') { 65536 } else { 512 }
 $command = @(
     $freeToken, 'serve',
-    '--model', $Model,
-    '--served-model-name', 'qwen38-next-freetoken',
+    '--model', $model,
+    '--served-model-name', $servedModel,
     '--gpu', $GpuUuid,
     '--host', '0.0.0.0',
     '--port', $Port.ToString(),
@@ -79,8 +81,6 @@ $command = @(
     '--dtype', 'bfloat16',
     '--memory-ratio', '0.90',
     '--moe-strategy', 'offload',
-    # The latest FreeToken runtime detects the WSL CUDA pin cap and locks the
-    # excess NVFP4 expert layers for CPU decode instead of aborting startup.
     '--moe-cpu-layers', 'auto',
     '--moe-cache-auto',
     '--ple-backend', 'disk',
@@ -93,16 +93,20 @@ $command = @(
     '--enable-cache-report',
     '--reasoning-parser', 'qwen3',
     '--tool-call-parser', 'qwen3_coder',
-    '--text-model-only'
+    '--mm-encoder-weights', 'host'
 )
 
 $display = @('wsl.exe', 'bash', $launchScript, $pidFile) + $command
 if ($DryRun) {
-    $display -join ' '
+    ($display | ForEach-Object {
+        if ($_ -match '\s') { "'" + $_.Replace("'", "''") + "'" } else { $_ }
+    }) -join ' '
     return
 }
 
-Write-Host "Starting $Profile on $gpu"
+Write-Host "Starting official vision deployment on $gpu"
+Write-Host "Served model: $servedModel"
+Write-Host "Profile: $Profile ($tokens tokens)"
 Write-Host "OpenAI endpoint: http://127.0.0.1:$Port/v1"
 & wsl.exe bash $launchScript $pidFile @command
 if ($LASTEXITCODE -ne 0) {

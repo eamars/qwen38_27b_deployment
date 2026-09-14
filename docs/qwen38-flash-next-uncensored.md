@@ -1,10 +1,11 @@
 # Qwen3.8 Flash-Next uncensored deployment
 
-Status (2026-09-12): the uncensored checkpoint now uses the same updated
+Status (2026-09-14): the uncensored checkpoint now uses the same updated
 FreeToken source and launcher path as the official deployment. Checkpoint
 preparation and header verification passed, followed by successful Short4K
-model loading and `/health` checks for both launchers. No benchmark or MTP
-drafter was added.
+model loading and `/health` checks for both launchers. The shared 262K visual
+matrix also passed for both text-only and vision-enabled modes. No MTP drafter
+was added.
 
 ## Retained configuration
 
@@ -24,7 +25,13 @@ drafter was added.
 | PLE | Original BF16 shards on disk, approximately 95.37 GiB |
 | Memory ratio / cache | `0.90`, radix |
 
-The complete source checkpoint is retained, including unused MTP and vision tensors. Serving remains text-only with MTP omitted, as in the existing FreeToken path. Both checkpoints are independent. No GGUF weights or checkpoint conversion are needed.
+The complete source checkpoint is retained, including unused MTP and vision
+tensors. Normal serving remains text-only with MTP omitted, as in the existing
+FreeToken path. The separate vision launcher builds the upstream vision tower
+for this checkpoint on the same port used by the official vision launcher; its
+served model ID is `qwen38-next-uncensored-freetoken-vision`, and its benchmark
+sends no image input. Both checkpoints are independent. No GGUF weights or
+checkpoint conversion are needed.
 
 ## Commands
 
@@ -67,7 +74,7 @@ The venv is not reinstalled or repointed. Both launchers invoke the same
 served name, and PID file differ.
 
 The shared source tree is at upstream commit
-`953565667f3141c90d0f0eb469bb2655d2407140`, with the local Qwen3.8
+`f7dbab7f151df353d70b325a8ac09ce0f7f1c456`, with the local Qwen3.8
 compatibility changes integrated into that runtime. They:
 
 1. Recognize compressed-tensors NVFP4 and reuse the existing expert reader with packed tensor-name mapping and reciprocal global scales.
@@ -100,6 +107,10 @@ Staging uses pinned Xet downloads for safetensors, bounded streaming for metadat
 - The shared-runtime loader probe passed with the real config/tokenizer and tiny synthetic tensors. Compressed-tensors expert names, reciprocal global scales, FP8 channel scales, and BF16/FP8 PLE rows all passed; CUDA remained uninitialized.
 - The updated official launcher loaded all checkpoint weight files, captured its CUDA graph, and returned `ok` from `/health` with served model `qwen38-next-freetoken`.
 - The uncensored launcher then loaded all uncensored model shards with the same source tree, captured its CUDA graph, and returned `ok` from `/health` with served model `qwen38-next-uncensored-freetoken`.
+- The four-way 262K/4K vision matrix passed three requests each for official
+  and uncensored text-only and vision-enabled modes. The prompt was 4,041
+  tokens, no image was sent, and visual cases advertised `text,image` input
+  modalities.
 - PowerShell parsing, both profile dry runs, and clean launcher stop paths also passed.
 
 The checkpoint preparation results are from 2026-09-06; the shared-runtime
@@ -116,7 +127,7 @@ wsl.exe mkdir -p /mnt/c/workspace/qwen38_27b/benchmarks/raw/qwen38-uncensored
 wsl.exe /home/rba90/.freetoken-qwen38/venv/bin/python /mnt/c/workspace/qwen38_27b/scripts/probe-qwen38-uncensored-runtime.py --output /mnt/c/workspace/qwen38_27b/benchmarks/raw/qwen38-uncensored/loader-probe.json
 ```
 
-Short4K initialization is validated for both launchers. Native256K capacity,
-concurrency above one, inference responses, and performance remain unvalidated;
-the official model's performance figures do not establish uncensored
-performance.
+Short4K initialization is validated for both launchers. The shared 262K matrix
+now validates inference responses and performance for both variants with and
+without the vision tower; concurrency above one and image-bearing requests
+remain unvalidated.

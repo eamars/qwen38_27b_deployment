@@ -83,6 +83,7 @@ $command = @(
     '--moe-cpu-layers', 'auto',
     '--moe-cache-auto',
     '--ple-backend', 'disk',
+    '--max-seq-len-override', $tokens.ToString(),
     '--kv-reserve-tokens', $tokens.ToString(),
     '--num-tokens', $tokens.ToString(),
     '--max-prefill-length', '8192',
@@ -90,7 +91,8 @@ $command = @(
     '--cache-type', 'radix',
     '--enable-cache-report',
     '--reasoning-parser', 'qwen3',
-    '--tool-call-parser', 'qwen3_coder'
+    '--tool-call-parser', 'qwen3_coder',
+    '--text-model-only'
 )
 
 $display = @('wsl.exe', 'bash', $launchScript, $pidFile) + $command

@@ -91,6 +91,17 @@ Dates are local host dates (Pacific/Auckland, UTC+12 in the captured runs).
 - Retired the copied uncensored runtime and the unused DeepSeek experiment
   checkout. Both were moved to recoverable local temporary directories.
 
+### 2026-09-14 — Flash-Next vision runtime and four-way matrix
+
+- Fast-forwarded the shared FreeToken runtime to upstream `f7dbab7`, including
+  Qwen3.8 Flash-Next vision tower/mRoPE support and the ModelOpt input-scale
+  fix; preserved the local uncensored BF16/FP8 and compressed-tensors patches.
+- Added separate official and uncensored vision launchers on the same DSH port,
+  plus the 262K-context/4K-input four-way benchmark matrix.
+- Passed official and uncensored text-only and vision-enabled cases with no
+  image input; all four cases resolved to 262,144 context and passed three
+  measured requests each.
+
 ## Decisions retained
 
 1. Prefer correctness and full GPU residency over a headline throughput number.
