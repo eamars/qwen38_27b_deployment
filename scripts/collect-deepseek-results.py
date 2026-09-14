@@ -34,7 +34,7 @@ for name in ('download-verified.json','gpu-kernel-probe.json','host-bank-probe.j
         shutil.copyfile(source/name,target/name)
 for path in source.glob('server-*.log'):
     shutil.copyfile(path,target/path.name)
-for folder in ('freetoken-deepseek-experiment','freetoken-deepseek-spec'):
+for folder in ('freetoken-deepseek-spec',):
     patch=subprocess.run(['/mnt/c/Program Files/Git/cmd/git.exe','-C',
                           'C:/workspace/qwen38_27b/runtime/'+folder,'diff','--binary','HEAD'],
                          check=True,capture_output=True).stdout

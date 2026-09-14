@@ -113,8 +113,9 @@ the earlier 2026-08-25 record remains unchanged for reference.
 The retained result uses FreeToken on the RTX 5090 with NVFP4,
 `--moe-backend offload --moe-cpu-layers 0 --moe-cache-auto`, disk-backed PLE,
 an 8192-token KV floor, and concurrency one for the benchmark. This is a
-benchmark-only setting; the Flash-Next launcher defaults to two concurrent
-requests. Use `-MaxRunningRequests 1` when reproducing the retained result.
+historical benchmark-only configuration; the current Flash-Next launcher uses
+`--moe-strategy offload --moe-cpu-layers auto` and defaults to one request. The
+retained benchmark was not rerun after the runtime update.
 
 | Prompt/output | Median prompt tok/s | Median decode tok/s | Median wall | Minimum free VRAM | Retrieval |
 |---|---:|---:|---:|---:|---|

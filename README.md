@@ -94,7 +94,7 @@ are staged:
 - [docs/host-inventory.md](docs/host-inventory.md) — captured hardware/build snapshot.
 - [docs/history.md](docs/history.md) — chronological project history and decision log.
 - [docs/qwen38-flash-next-freetoken.md](docs/qwen38-flash-next-freetoken.md) — retained FreeToken-only Flash-Next deployment and benchmark.
-- [docs/qwen38-flash-next-uncensored.md](docs/qwen38-flash-next-uncensored.md) — separate uncensored NVFP4 checkpoint and isolated FreeToken loader, with GPU validation deferred.
+- [docs/qwen38-flash-next-uncensored.md](docs/qwen38-flash-next-uncensored.md) — separate uncensored NVFP4 checkpoint using the shared FreeToken loader, with Short4K loading validated.
 - [scripts/README.md](scripts/README.md) — maintained script inventory.
 - [benchmarks/README.md](benchmarks/README.md) — raw-result layout and naming convention.
 
@@ -118,8 +118,8 @@ or better, DFlash2 enabled, one slot, no normal CPU offload, and at least
 1024 MiB free VRAM during the accepted stress workload.
 
 Qwen3.8-Flash-Next is retained only as a FreeToken RTX 5090 path using NVFP4,
-disk-backed PLE, `--moe-backend offload`, and explicit
-`--moe-cpu-layers 0`. Its retained three-run 4K median was 12.53 seconds,
+disk-backed PLE, `--moe-strategy offload`, and automatic CPU-layer fallback.
+Its retained three-run 4K median was 12.53 seconds,
 1656 prompt tok/s, and 50.59 decode tok/s. Native 256K validation remains
 open. Its routed-expert host-memory placement is separate from the DFlash2
 constraints above. See [the deployment record](docs/qwen38-flash-next-freetoken.md)

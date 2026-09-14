@@ -16,8 +16,7 @@ Read the documents in this order when operating the workspace:
    the retained RTX 5090 configuration, measured 4K result, and operational
    commands.
 7. [Uncensored Flash-Next deployment](qwen38-flash-next-uncensored.md) —
-   separate checkpoint, isolated loader, preparation checks and the pause before
-   model loading.
+   the separate checkpoint using the shared FreeToken loader and its load checks.
 
 The [script inventory](../scripts/README.md) lists the canonical launch,
 profiling, setup, and inventory helpers.

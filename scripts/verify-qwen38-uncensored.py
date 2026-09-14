@@ -1,4 +1,4 @@
-"""Validate local checkpoint headers against the isolated loader; no tensor payload reads."""
+"""Validate local checkpoint headers against the shared loader; no tensor payload reads."""
 
 import argparse
 import collections

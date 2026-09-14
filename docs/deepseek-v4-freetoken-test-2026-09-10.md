@@ -39,7 +39,13 @@ Speculation is **disabled by default** because it was slower even on a favorable
 
 The host reports a Gigabyte B850 AI TOP motherboard. During inference, the 5090 operates at PCIe 5.0 **x8**, although the GPU supports x16. [Gigabyte's specifications](https://www.gigabyte.com/Motherboard/B850-AI-TOP-rev-10/sp) state that populating the PCIEX8 slot makes the main slot run at x8. Excluding the 4090 from CUDA does not change physical lane sharing. Restoring x16 could improve RAM-to-GPU transfer bandwidth, but no x16 performance result has been measured here.
 
-The existing Qwen runtime was left intact. Experimental checkouts are `runtime/freetoken-deepseek-experiment` and `runtime/freetoken-deepseek-spec`; the latter contains an uncommitted merge and local changes. Nothing was published or committed. Scripts under `scripts/*deepseek*` reproduce the download, component probes, server launch, and client benchmarks. Raw outputs and logs are in `/home/rba90/deepseek-freetoken-probe` inside WSL.
+The existing Qwen runtime was left intact. At the time of this test there were
+two experimental DeepSeek checkouts; the disposable experiment checkout was
+later retired, while the spec checkout remains the active DeepSeek launcher
+runtime. Nothing was
+published or committed. Scripts under `scripts/*deepseek*` reproduce the
+download, component probes, server launch, and client benchmarks. Raw outputs
+and logs are in `/home/rba90/deepseek-freetoken-probe` inside WSL.
 
 Start the tested default from PowerShell:
 

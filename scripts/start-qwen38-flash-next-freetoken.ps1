@@ -78,8 +78,10 @@ $command = @(
     '--max-running-requests', $MaxRunningRequests.ToString(),
     '--dtype', 'bfloat16',
     '--memory-ratio', '0.90',
-    '--moe-backend', 'offload',
-    '--moe-cpu-layers', '0',
+    '--moe-strategy', 'offload',
+    # The latest FreeToken runtime detects the WSL CUDA pin cap and locks the
+    # excess NVFP4 expert layers for CPU decode instead of aborting startup.
+    '--moe-cpu-layers', 'auto',
     '--moe-cache-auto',
     '--ple-backend', 'disk',
     '--kv-reserve-tokens', $tokens.ToString(),

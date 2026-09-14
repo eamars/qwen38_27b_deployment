@@ -331,7 +331,7 @@ class FreeTokenServer:
             "--served-model-name", "qwen38-next-freetoken", "--gpu", self.args.gpu_uuid,
             "--host", "0.0.0.0", "--port", str(self.args.port),
             "--max-running-requests", "1", "--memory-ratio", str(self.args.memory_ratio),
-            "--moe-backend", self.backend, "--moe-cpu-layers", "0", "--moe-cache-auto",
+            "--moe-strategy", self.backend, "--moe-cpu-layers", "0", "--moe-cache-auto",
             "--ple-backend", "disk",
             "--kv-reserve-tokens", "8192", "--num-tokens", "8192",
             "--max-prefill-length", "8192", "--max-output-tokens", str(self.args.max_tokens),

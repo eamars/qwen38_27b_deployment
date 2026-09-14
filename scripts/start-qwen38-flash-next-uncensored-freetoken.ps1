@@ -6,31 +6,65 @@ param(
     [int]$MaxRunningRequests = 1,
     [string]$Model = '/home/rba90/models/Qwen3.8-Flash-Next-Uncensored-NVFP4',
     [string]$GpuUuid = 'GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0',
-    [ValidateRange(1, 65535)]
     [int]$Port = 1919,
     [switch]$DryRun,
-    [switch]$Check,
     [switch]$Stop
 )
 
 $ErrorActionPreference = 'Stop'
-if (([int]$DryRun.IsPresent + [int]$Check.IsPresent + [int]$Stop.IsPresent) -gt 1) {
-    throw 'Choose only one of -DryRun, -Check, or -Stop'
-}
 
 function ConvertTo-WslMountPath {
     param([Parameter(Mandatory)][string]$Path)
+
     $fullPath = [System.IO.Path]::GetFullPath($Path)
     $match = [regex]::Match($fullPath, '^(?<drive>[A-Za-z]):\\(?<tail>.*)$')
-    if (-not $match.Success) { throw "Expected a local Windows drive path: $fullPath" }
-    return '/mnt/' + $match.Groups['drive'].Value.ToLowerInvariant() + '/' + $match.Groups['tail'].Value.Replace('\', '/')
+    if (-not $match.Success) {
+        throw "Expected a local Windows drive path, got: $fullPath"
+    }
+
+    $drive = $match.Groups['drive'].Value.ToLowerInvariant()
+    $tail = $match.Groups['tail'].Value.Replace('\', '/')
+    return "/mnt/$drive/$tail"
 }
 
-$manager = ConvertTo-WslMountPath (Join-Path $PSScriptRoot 'manage-qwen38-uncensored.py')
-$python = '/home/rba90/.freetoken-qwen38/venv/bin/python'
+$launchScript = ConvertTo-WslMountPath (Join-Path $PSScriptRoot 'launch-freetoken-wsl.sh')
 $freeToken = '/home/rba90/.freetoken-qwen38/venv/bin/ft'
-$action = if ($Stop) { 'stop' } elseif ($Check) { 'check' } else { 'start' }
-$managerArgs = @($manager, '--action', $action, '--model', $Model, '--port', $Port.ToString(), '--gpu', $GpuUuid)
+$pidFile = "/tmp/qwen38-flash-next-uncensored-freetoken-$Port.pid"
+
+if ($Stop) {
+    $recordedPidOutput = & wsl.exe cat $pidFile 2>$null
+    $recordedPid = if ($null -eq $recordedPidOutput) { '' } else { ([string]$recordedPidOutput).Trim() }
+    if ($recordedPid -match '^[1-9][0-9]*$') {
+        # The launcher records the setsid child, which is normally its own
+        # process-group leader. Try the group first, then the exact child.
+        & wsl.exe kill -TERM -- "-$recordedPid" 2>$null
+        Start-Sleep -Seconds 1
+        & wsl.exe kill -TERM -- $recordedPid 2>$null
+        Start-Sleep -Seconds 1
+        & wsl.exe kill -KILL -- "-$recordedPid" 2>$null
+        & wsl.exe kill -KILL -- $recordedPid 2>$null
+    }
+    & wsl.exe rm -f -- $pidFile 2>$null
+    return
+}
+
+$gpu = nvidia-smi --query-gpu=uuid,name --format=csv,noheader | Where-Object { $_ -like "$GpuUuid,*" }
+if (-not $gpu) {
+    throw "RTX 5090 UUID $GpuUuid was not found by nvidia-smi"
+}
+
+& wsl.exe test -d $Model
+if ($LASTEXITCODE -ne 0) {
+    throw "Uncensored FreeToken checkpoint was not found in WSL: $Model"
+}
+& wsl.exe test -f "$Model/model.safetensors.index.json"
+if ($LASTEXITCODE -ne 0) {
+    throw "Uncensored FreeToken checkpoint index was not found in WSL: $Model/model.safetensors.index.json"
+}
+& wsl.exe test -x $freeToken
+if ($LASTEXITCODE -ne 0) {
+    throw "FreeToken executable was not found in WSL: $freeToken"
+}
 
 $tokens = if ($Profile -eq 'Native256K') { 262144 } else { 8192 }
 $maxOutput = if ($Profile -eq 'Native256K') { 65536 } else { 512 }
@@ -44,8 +78,9 @@ $command = @(
     '--max-running-requests', $MaxRunningRequests.ToString(),
     '--dtype', 'bfloat16',
     '--memory-ratio', '0.90',
-    '--moe-backend', 'offload',
-    '--moe-cpu-layers', '0',
+    '--moe-strategy', 'offload',
+    # Keep the official launcher's WSL pin-budget fallback for the CPU expert layers.
+    '--moe-cpu-layers', 'auto',
     '--moe-cache-auto',
     '--ple-backend', 'disk',
     '--kv-reserve-tokens', $tokens.ToString(),
@@ -57,20 +92,18 @@ $command = @(
     '--reasoning-parser', 'qwen3',
     '--tool-call-parser', 'qwen3_coder'
 )
-if ($action -eq 'start') { $managerArgs += @('--') + $command }
+
+$display = @('wsl.exe', 'bash', $launchScript, $pidFile) + $command
 if ($DryRun) {
-    $display = @('wsl.exe', '--exec', $python) + $managerArgs | ForEach-Object {
+    ($display | ForEach-Object {
         if ($_ -match '\s') { "'" + $_.Replace("'", "''") + "'" } else { $_ }
-    }
-    $display -join ' '
+    }) -join ' '
     return
 }
 
-if ($action -eq 'start') {
-    $listener = Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue
-    if ($listener) { throw "Port $Port is occupied on Windows; no model started and no process stopped" }
-    Write-Host "Starting uncensored $Profile on $GpuUuid"
-    Write-Host "OpenAI endpoint: http://127.0.0.1:$Port/v1"
+Write-Host "Starting uncensored $Profile on $gpu"
+Write-Host "OpenAI endpoint: http://127.0.0.1:$Port/v1"
+& wsl.exe bash $launchScript $pidFile @command
+if ($LASTEXITCODE -ne 0) {
+    throw "Uncensored FreeToken exited with code $LASTEXITCODE"
 }
-& wsl.exe --exec $python @managerArgs
-if ($LASTEXITCODE -ne 0) { throw "Uncensored FreeToken $action failed with code $LASTEXITCODE" }

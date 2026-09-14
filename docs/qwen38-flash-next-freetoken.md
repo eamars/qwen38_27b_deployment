@@ -8,17 +8,16 @@ RTX 5090 using `RadixArk/Qwen3.8-Flash-Next-NVFP4` under WSL.
 ```text
 GPU = RTX 5090 by UUID
 dtype = bfloat16
-MoE backend = offload
-CPU MoE layers = 0
+MoE strategy = offload
+CPU MoE layers = auto
 MoE cache = auto
 PLE backend = disk
 memory ratio = 0.90
-default max-running-requests = 2
+default max-running-requests = 1
 ```
 
-The launcher default is two concurrent requests. The retained performance
-record below was measured with one request at a time; use
-`-MaxRunningRequests 1` when reproducing that benchmark.
+The launcher default is one concurrent request. The retained performance
+record below was measured with one request at a time.
 
 Start the measured 4K profile:
 
@@ -60,16 +59,19 @@ The measured allocation used 6681 of 24576 routed expert-layer slots
 (27.19%, approximately 17.25 GiB of VRAM). Request peak was 30423 MiB and the
 minimum free VRAM sample was 1765 MiB.
 
-`--moe-cpu-layers 0` is required under WSL. Leaving it unset caused the tested
-runtime to move 15 MoE layers to CPU compute. Explicit GPU computation reduced
-median request time from 16.66 to 12.53 seconds and raised GPU utilisation.
+The updated launcher uses `--moe-cpu-layers auto` under WSL. The latest runtime
+detects the host pin-memory budget and moves only the layers that cannot be
+pinned to CPU placement instead of aborting startup. The retained benchmark
+below used the older explicit `--moe-cpu-layers 0` configuration and is not a
+benchmark of the updated runtime.
 
 The retained benchmark used FreeToken base commit
 `a80b4d308a81986fa086ec173d7faa70ba737b2d`, which deliberately drops the
 checkpoint's `mtp.*` tensors. No MTP configuration or sidecar is retained in
-this workspace. The current local FreeToken source revision is
-`593aac73dd1102a2af9f42c602039dc49bc25b90`; it includes the Qwen tool-call
-boundary fix described in the [FreeToken compatibility note](../runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
+this workspace. The current local FreeToken source is upstream commit
+`953565667f3141c90d0f0eb469bb2655d2407140`, with the local Qwen3.8
+compressed-tensors compatibility changes described in the
+[FreeToken compatibility note](../runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
 
 ## Retained 4K benchmark
 

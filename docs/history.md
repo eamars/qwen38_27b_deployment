@@ -78,6 +78,19 @@ Dates are local host dates (Pacific/Auckland, UTC+12 in the captured runs).
 - Removed the Flash-Next GGUF/MTP assets, Qwen4Exp llama.cpp runtimes,
   alternative launchers, and intermediate benchmark probes.
 
+### 2026-09-12 — Flash-Next runtime refresh and uncensored parity
+
+- Fast-forwarded the shared FreeToken runtime to upstream commit
+  `953565667f3141c90d0f0eb469bb2655d2407140`.
+- Integrated compressed-tensors NVFP4 expert mapping, FP8 dense channel-scale
+  handling, and BF16/FP8 disk-backed PLE support into that shared runtime.
+- Updated both Flash-Next launchers to the current `--moe-strategy` CLI and
+  identical `--moe-cpu-layers auto` placement. Official Short4K loading was
+  checked first; the uncensored checkpoint then passed through the same source,
+  environment, and launcher path.
+- Retired the copied uncensored runtime and the unused DeepSeek experiment
+  checkout. Both were moved to recoverable local temporary directories.
+
 ## Decisions retained
 
 1. Prefer correctness and full GPU residency over a headline throughput number.
