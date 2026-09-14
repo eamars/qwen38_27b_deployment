@@ -80,6 +80,12 @@ Pillow 12.3.0 and torchvision 0.26.0. The vision launcher enables the
 vision tower with `--mm-encoder-weights host`; the benchmark still sends
 text-only requests and no image input.
 
+When this model is exposed through DSH, use the
+[DSH vision runbook](dsh-qwen38-flash-next-vision.md). The DSH catalog entry
+must use served ID `qwen38-next-freetoken-vision`, declare `text,image` input,
+list `low`, `medium`, and `xhigh` reasoning efforts, and explicitly set
+`supportsDeveloperRole` to `false`.
+
 ## Retained 4K benchmark
 
 The final record contains three requests using a 4041-token retrieval prompt

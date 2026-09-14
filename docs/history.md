@@ -102,6 +102,23 @@ Dates are local host dates (Pacific/Auckland, UTC+12 in the captured runs).
   image input; all four cases resolved to 262,144 context and passed three
   measured requests each.
 
+### 2026-09-14 — DSH vision catalog integration
+
+- Added separate official and uncensored vision model IDs to the DSH
+  `local-qwen38-flash` catalog through the public settings RPC; both use the
+  existing `http://192.168.2.13:1919/v1` provider and are deployed one at a
+  time on port `1919`.
+- Added the explicit DSH metadata that auto-discovery cannot infer:
+  `input=[text,image]`, `contextWindow=262144`, and the `low`, `medium`, and
+  `xhigh` reasoning-effort map.
+- Set `compat.supportsDeveloperRole=false` for both Qwen vision entries and
+  the Gemma4 entries. FreeToken/Gemma reject an OpenAI `developer` role; the
+  explicit compatibility flag makes DSH adapt the request before forwarding
+  it.
+- Verified both vision IDs and their reasoning selectors through
+  `session/modelCatalog`; the complete operational procedure is in the
+  [DSH vision runbook](dsh-qwen38-flash-next-vision.md).
+
 ## Decisions retained
 
 1. Prefer correctness and full GPU residency over a headline throughput number.

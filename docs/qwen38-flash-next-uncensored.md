@@ -33,6 +33,12 @@ served model ID is `qwen38-next-uncensored-freetoken-vision`, and its benchmark
 sends no image input. Both checkpoints are independent. No GGUF weights or
 checkpoint conversion are needed.
 
+When this model is exposed through DSH, follow the
+[DSH vision runbook](dsh-qwen38-flash-next-vision.md). In addition to
+`text,image` input and the 262,144-token context, the catalog entry must list
+the three reasoning efforts and explicitly disable the developer role because
+the FreeToken endpoint rejects `developer` messages.
+
 ## Commands
 
 Preview without loading anything:

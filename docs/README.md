@@ -17,6 +17,9 @@ Read the documents in this order when operating the workspace:
    commands.
 7. [Uncensored Flash-Next deployment](qwen38-flash-next-uncensored.md) —
    the separate checkpoint using the shared FreeToken loader and its load checks.
+8. [DSH Qwen3.8 Flash-Next vision runbook](dsh-qwen38-flash-next-vision.md) —
+   the complete runtime, public-RPC catalog, compatibility, swap, and
+   verification procedure for vision-capable DSH entries.
 
 The [script inventory](../scripts/README.md) lists the canonical launch,
 profiling, setup, and inventory helpers.

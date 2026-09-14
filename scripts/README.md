@@ -50,6 +50,12 @@ records the pinned assets, shared loader changes, preparation results and live
 load checks. Generated verification reports belong under
 `benchmarks/raw/qwen38-uncensored/`, which is ignored by Git.
 
+For DSH integration, use the dedicated
+[Qwen3.8 Flash-Next vision runbook](../docs/dsh-qwen38-flash-next-vision.md).
+It documents the public-RPC catalog fields that automatic discovery cannot
+infer: `input: ["text", "image"]`, the three reasoning efforts, and the
+explicit `supportsDeveloperRole: false` compatibility setting.
+
 `start-kazusa-models.ps1` launches one shared `llama-server` router with the
 `qwen27b-5090` and `gemma4-4090` profiles. Their model-specific settings are
 hard-coded in the launcher and emitted only to a temporary preset while the

@@ -260,3 +260,10 @@ FreeToken's Qwen tool-call compatibility and the boundary between the
 `qwen3` reasoning parser and `qwen3_coder` tool parser are recorded in the
 [compatibility note](../runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
 Keep the existing Qwen3.8-27B launchers and their DFlash2 defaults unchanged.
+
+The separate vision launchers and the DSH catalog procedure are documented in
+the [Qwen3.8 Flash-Next DSH vision runbook](dsh-qwen38-flash-next-vision.md).
+That runbook is required when swapping the official and uncensored checkpoints
+on the shared `1919` port: the runtime must enable the vision tower, and DSH
+must explicitly declare image input, reasoning efforts, and
+`supportsDeveloperRole: false`.
