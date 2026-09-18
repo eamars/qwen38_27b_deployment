@@ -27,7 +27,7 @@ DEFAULT_OUTPUT = (
     ROOT / "benchmarks" / "raw" / "qwen38_flash_next" / "2026-09-14"
     / "freetoken-vision-262k-4k.json"
 )
-RUNTIME = ROOT / "runtime" / "freetoken-a80b4d3"
+RUNTIME = ROOT / "runtime" / "freetoken-eamars"
 CONTEXT_TOKENS = 262144
 PROMPT_TOKEN_MIN = 4000
 PROMPT_TOKEN_MAX = 4096

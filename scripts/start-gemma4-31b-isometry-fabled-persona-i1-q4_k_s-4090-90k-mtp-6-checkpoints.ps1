@@ -83,7 +83,7 @@ if ($ContextSize -lt 1) { throw 'ContextSize must be positive.' }
 if ($UbatchSize -gt $BatchSize) { throw 'UbatchSize cannot exceed BatchSize.' }
 
 $mode = if ($NoMtp) { 'target-only' } else { 'google-mtp' }
-$alias = "gemma4-31b-isometry-fabled-persona-4090-no-memory-checkpoint-$mode"
+$alias = "gemma4-31b-isometry-fabled-persona-4090-6-context-checkpoints-$mode"
 
 $arguments = @(
     '--model', $target
@@ -108,7 +108,7 @@ $arguments += @(
     '--gpu-layers', 'all',
     '--load-mode', 'mmap',
     '--tensor-read-lazy', 'on',
-    '--ctx-checkpoints', '0',
+    '--ctx-checkpoints', '6',
     '--ctx-size', "$ContextSize",
     '--parallel', '1',
     '--kv-unified',
@@ -133,7 +133,7 @@ if (-not $NoMtp) { Write-Host "MTP drafter: $mtpHead" }
 Write-Host "Runtime: $runtime"
 Write-Host "RTX 4090 UUID: $expectedUuid"
 Write-Host "Context: $ContextSize; target KV: K=$CacheTypeK V=$CacheTypeV; draft KV: K=$MtpCacheTypeK V=$MtpCacheTypeV"
-Write-Host 'Memory policy: mmap model loading, lazy tensor reads, and context checkpoints disabled.'
+Write-Host 'Memory policy: mmap model loading, lazy tensor reads, and up to 6 context checkpoints.'
 
 if ($DryRun) {
     Write-Host 'Dry run only: no GPU validation, server process, or model load was started.'

@@ -467,7 +467,13 @@ def main() -> int:
     document: dict[str, Any] = {
         "schema": 1, "created_utc": utc_now(), "updated_utc": utc_now(),
         "objective": "measure the retained FreeToken RTX 5090 GPU-only offload profile",
-        "runtime": {"source_commit": "a80b4d308a81986fa086ec173d7faa70ba737b2d", "checkpoint": args.model},
+        "runtime": {
+            "source_commit": subprocess.check_output(
+                ["git", "-C", str(ROOT / "runtime/freetoken-eamars"), "rev-parse", "HEAD"],
+                text=True,
+            ).strip(),
+            "checkpoint": args.model,
+        },
         "protocol": {
             "prompt": str(args.prompt.resolve()), "prompt_sha256": hashlib.sha256(prompt.encode()).hexdigest(),
             "max_tokens": args.max_tokens, "temperature": 0, "top_k": 1,

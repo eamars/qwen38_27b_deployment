@@ -68,12 +68,24 @@ benchmark of the updated runtime.
 The retained benchmark used FreeToken base commit
 `a80b4d308a81986fa086ec173d7faa70ba737b2d`, which deliberately drops the
 checkpoint's `mtp.*` tensors. No MTP configuration or sidecar is retained in
-this workspace. The current local FreeToken source is upstream commit
-`f7dbab7f151df353d70b325a8ac09ce0f7f1c456`, which includes the upstream
+this workspace. The current local FreeToken source is `eamars/FreeToken` main,
+commit `ae8b3cfaef74bb3b687dce8e761f6355171c6137` (v0.1.3 plus the checkpoint
+handoff fix), based on upstream `cac247a860e316e06580d05aeb05f2e647bde214`.
+It includes the upstream
 Qwen3.8 Flash-Next vision tower/mRoPE support and the ModelOpt input-scale
 fix, with the local Qwen3.8
 compressed-tensors compatibility changes described in the
-[FreeToken compatibility note](../runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
+[FreeToken compatibility note](../runtime/freetoken-eamars/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
+
+The runtime preserves the uncensored checkpoint patches described in
+[the uncensored deployment notes](qwen38-flash-next-uncensored.md#runtime-reuse).
+The user reported slower performance on v0.1.3 and requested the exact previous
+source for comparison. That rollback verified both patched files against the
+pre-upgrade snapshot.
+Verification for the September 17 upgrade and rollback was limited to source,
+package/version, and dependency checks. The September 18 restoration and
+uncensored-vision speed comparison are recorded in the uncensored deployment
+notes; the official checkpoint has not been re-benchmarked on v0.1.3.
 
 The shared WSL environment also contains the upstream vision dependencies
 Pillow 12.3.0 and torchvision 0.26.0. The vision launcher enables the
@@ -122,8 +134,8 @@ Evidence:
   `qwen38-next-uncensored-freetoken-vision`.
 - `scripts/benchmark-qwen38-flash-next-freetoken-vision-matrix.py` — four-way
   262K-context/4K-input benchmark matrix.
-- `runtime/freetoken-a80b4d3` — FreeToken source tree; benchmark and current
-  source revisions are recorded above.
+- `runtime/freetoken-eamars` — active FreeToken source from the user's fork.
+- `runtime/freetoken-a80b4d3` — retained previous checkout for recovery.
 - `/home/rba90/.freetoken-qwen38/venv` — WSL Python environment.
 - `/home/rba90/models/Qwen3.8-Flash-Next-NVFP4` — complete WSL checkpoint.
 

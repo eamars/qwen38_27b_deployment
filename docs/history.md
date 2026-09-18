@@ -119,6 +119,58 @@ Dates are local host dates (Pacific/Auckland, UTC+12 in the captured runs).
   `session/modelCatalog`; the complete operational procedure is in the
   [DSH vision runbook](dsh-qwen38-flash-next-vision.md).
 
+### 2026-09-17 - FreeToken v0.1.3 upgrade
+
+- Updated the shared Qwen FreeToken source from `f7dbab7` to upstream
+  `cac247a860e316e06580d05aeb05f2e647bde214` (v0.1.3).
+- Preserved both local uncensored checkpoint adaptations in `weight.py` and
+  `ple_disk.py`. They handle compressed-tensors NVFP4 expert layouts, FP8
+  channel scales, and BF16 PLE storage; upstream still needs these patches.
+- Retained the pre-upgrade patch under `artifacts/freetoken/` and a backup
+  stash in the runtime repository. Refreshed the editable package registration
+  in the existing WSL venv without changing dependencies or launcher settings.
+- Limited upgrade verification to source, package/version, and dependency
+  checks. No benchmark, model loading, inference, or server startup was run.
+  Earlier load and performance results do not validate v0.1.3.
+
+### 2026-09-17 - FreeToken rollback for slowdown investigation
+
+- The user reported slower performance after upgrading and requested the old
+  version for comparison; the slowdown was not independently benchmarked.
+- Restored the exact pre-upgrade commit
+  `f7dbab7f151df353d70b325a8ac09ce0f7f1c456` (reports v0.1.2), preserving both
+  uncensored checkpoint patches. Verified both patched files exactly match
+  the original pre-upgrade stash.
+- Rebuilt/reinstalled the editable package in the existing WSL venv, without
+  changing dependencies, launcher settings, or model files. Retained v0.1.3
+  in Git and a second stash of its local patches for later investigation.
+- No model loading, inference, server startup, or benchmarks were run.
+
+### 2026-09-18 - FreeToken checkpoint tuning and v0.1.3 comparison
+
+- Selected one request and 24 GDN checkpoint slots for the uncensored vision
+  launcher; after moving the Windows display off the RTX 5090, retained
+  4,600 GPU expert slots, 262K context, 8K prefill and memory ratio 0.90.
+- Restored v0.1.3 commit `cac247a860e316e06580d05aeb05f2e647bde214` with
+  the two uncensored loader patches and the local checkpoint-capacity CLI.
+  Reinstalled the editable package without dependency changes and verified
+  successful real-model loading and inference.
+- Reused the recorded v0.1.2 baseline and repeated the identical 36,927-token
+  cold/warm probe: 32.656/4.234 seconds became 29.219/3.859 seconds, with
+  the same 36,864-token warm hit. This is a single pair per version.
+- Reproduced the short-final-chunk checkpoint miss on v0.1.3. The user's
+  observation of increased DSH miss frequency remains unverified by a
+  matched DSH request trace. See the
+  [comparison report](freetoken-v013-comparison-2026-09-18.md).
+
+### 2026-09-18 - FreeToken checkpoint fix and fork runtime
+
+The 2026-09-18 checkpoint handoff fix was subsequently committed and pushed
+to `eamars/FreeToken` main as `ae8b3cfaef74bb3b687dce8e761f6355171c6137`.
+The shared Qwen3.8 venv was rebuilt from `runtime/freetoken-eamars`, preserving
+the local loader/CLI overlay and launcher settings. The old checkout remains
+available for recovery. See the [fork runtime record](freetoken-fork-runtime-2026-09-18.md).
+
 ## Decisions retained
 
 1. Prefer correctness and full GPU residency over a headline throughput number.

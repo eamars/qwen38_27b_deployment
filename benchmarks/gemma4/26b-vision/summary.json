@@ -1,0 +1,18 @@
+{
+  "status": "verified",
+  "context": 262144,
+  "prompt_tokens_tested": 260096,
+  "long_prompt_seconds": 145.864676,
+  "peak_gpu_used_mib": 22926,
+  "minimum_gpu_free_mib": 1213,
+  "target_layers_gpu": "31/31",
+  "draft_layers_gpu": "5/5",
+  "cpu_mapped_model_buffers": false,
+  "vision": "1536x1536 red square correctly recognized",
+  "kv": "q8_0/q8_0",
+  "parallel": 1,
+  "checkpoints_max": 6,
+  "batch": 128,
+  "ubatch": 128,
+  "host_prompt_cache_mib": 0
+}

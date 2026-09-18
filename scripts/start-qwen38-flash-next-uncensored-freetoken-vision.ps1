@@ -3,7 +3,7 @@ param(
     [ValidateSet('Short4K', 'Native256K')]
     [string]$Profile = 'Native256K',
     [ValidateRange(1, 8)]
-    [int]$MaxRunningRequests = 1,
+    [int]$MaxRunningRequests = 2,
     [string]$GpuUuid = 'GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0',
     [int]$Port = 1919,
     [switch]$DryRun,
@@ -82,7 +82,10 @@ $command = @(
     '--memory-ratio', '0.90',
     '--moe-strategy', 'offload',
     '--moe-cpu-layers', 'auto',
-    '--moe-cache-auto',
+    # Ratio 2 plus two requests restores 12 usable GDN state slots.
+    # Keep the expert cache at 4600 to retain VRAM headroom.
+    '--moe-cache-size', '4600',
+    '--linear-state-cache-ratio', '2',
     '--ple-backend', 'disk',
     '--max-seq-len-override', $tokens.ToString(),
     '--kv-reserve-tokens', $tokens.ToString(),

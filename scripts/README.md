@@ -10,9 +10,11 @@ canonical launch and profiling entry points are:
 | Shared Qwen + Gemma server | `start-kazusa-models.ps1` |
 | Gemma 4 31B Isometry Fabled Persona i1-Q4_K_M, RTX 5090 | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1` |
 | Gemma 4 31B Isometry Fabled Persona i1-Q4_K_S, RTX 4090 | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1` |
-| Gemma 4 31B Isometry Fabled Persona i1-Q4_K_S, RTX 4090 no checkpoint | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-90k-mtp-no-checkpoint.ps1` |
+| Gemma 4 31B Isometry Fabled Persona i1-Q4_K_S, RTX 4090, 6 context checkpoints | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-90k-mtp-6-checkpoints.ps1` |
 | Gemma 4 31B TeichAI Fable-5 Distill Q4_K_M, RTX 4090 | `start-gemma4-31b-fable-5-distill-q4_k_m-4090-70k-mtp.ps1` |
 | Gemma 4 31B Instruct QAT UD-Q4_K_XL, RTX 4090, 90K context | `start-gemma4-31b-it-qat-ud-q4_k_xl-4090-90k-mtp.ps1` |
+| Gemma 4 26B-A4B QAT UD-Q4_K_XL, RTX 4090, 262K context, vision/MTP | `start-gemma4-26b-a4b-it-qat-ud-q4_k_xl-4090-vision-mtp.ps1` |
+| Download and verify the matching Gemma 4 26B target, MTP and vision assets | `stage-gemma4-26b-assets.ps1` |
 | Gemma 4 31B HauhauCS QAT Uncensored Balanced Q4_K_M + vision/MTP, RTX 4090, 65K context | `start-gemma4-31b-hauhaucs-balanced-q4_k_m-4090-65k-mtp.ps1` |
 | Qwen API smoke/sustained checks | `profile-api.py` |
 | Qwen tokenizer-calibrated deep context | `profile-deep-context.py` |

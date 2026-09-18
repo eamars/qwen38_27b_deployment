@@ -1,0 +1,38 @@
+{
+  "choices": [
+    {
+      "finish_reason": "stop",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Red square."
+      }
+    }
+  ],
+  "created": 1789733405,
+  "model": "gemma4-26b-a4b-it-qat-vision-262144-qat-mtp",
+  "system_fingerprint": "b10659-4e2f54f8f",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 4,
+    "prompt_tokens": 1049,
+    "total_tokens": 1053,
+    "prompt_tokens_details": {
+      "cached_tokens": 1
+    }
+  },
+  "id": "chatcmpl-8Gm6JigBujJyRS0gzH0fmvSuNTu4VDXD",
+  "timings": {
+    "cache_n": 1,
+    "prompt_n": 1048,
+    "prompt_ms": 1091.722,
+    "prompt_per_token_ms": 1.0417194656488549,
+    "prompt_per_second": 959.9513429242976,
+    "predicted_n": 4,
+    "predicted_ms": 20.75,
+    "predicted_per_token_ms": 6.916666666666667,
+    "predicted_per_second": 144.57831325301206,
+    "draft_n": 3,
+    "draft_n_accepted": 3
+  }
+}

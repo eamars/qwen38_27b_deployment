@@ -1,0 +1,19 @@
+diff --git a/python/freetoken/server/args.py b/python/freetoken/server/args.py
+index ab2fb9b..47bf088 100644
+--- a/python/freetoken/server/args.py
++++ b/python/freetoken/server/args.py
+@@ -448,6 +448,14 @@ def parse_args(
+         "the KV/expert pools) and every multimodal input is rejected. Same as --mm-disable with "
+         "every encoder kind.",
+     )
++    parser.add_argument(
++        "--linear-state-cache-ratio",
++        type=_positive_int,
++        default=ServerArgs.linear_state_cache_ratio,
++        help="Retained GDN checkpoint slots per maximum running request. Hybrid radix also "
++        "reserves four working slots per request and at least four retained slots. "
++        "These checkpoints consume GPU memory; MoE auto sizing budgets for them.",
++    )
+     parser.add_argument(
+         "--mm-disable",
+         nargs="+",

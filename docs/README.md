@@ -20,6 +20,15 @@ Read the documents in this order when operating the workspace:
 8. [DSH Qwen3.8 Flash-Next vision runbook](dsh-qwen38-flash-next-vision.md) —
    the complete runtime, public-RPC catalog, compatibility, swap, and
    verification procedure for vision-capable DSH entries.
+9. [FreeToken v0.1.3 comparison](freetoken-v013-comparison-2026-09-18.md) —
+   matched cold/warm timings, final 4,600-slot configuration, and checkpoint-miss findings.
+10. [FreeToken checkpoint handoff fix](freetoken-checkpoint-handoff-fix-2026-09-18.md) —
+    applied v0.1.3 fix, direct reuse validation, regression tests, and limitations.
+11. [FreeToken fork runtime](freetoken-fork-runtime-2026-09-18.md) —
+    published fork commit, active source checkout, local compatibility overlay and rebuild command.
+
+The [Gemma 4 26B RTX 4090 runbook](gemma4-26b-4090-vision-mtp.md) records the
+262K Q8/Q8 vision/MTP launcher, model staging, and measured validation.
 
 The [script inventory](../scripts/README.md) lists the canonical launch,
 profiling, setup, and inventory helpers.

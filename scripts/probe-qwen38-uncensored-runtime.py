@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 os.environ["CUDA_VISIBLE_DEVICES"] = ""
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "runtime/freetoken-a80b4d3/python"))
+sys.path.insert(0, str(ROOT / "runtime/freetoken-eamars/python"))
 
 import torch
 from safetensors.torch import save_file

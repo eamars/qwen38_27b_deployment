@@ -1,0 +1,38 @@
+{
+  "choices": [
+    {
+      "finish_reason": "length",
+      "index": 0,
+      "message": {
+        "role": "assistant",
+        "content": "Here is a clean and efficient Python implementation using a loop.\n\n### The Code\n\n```python\ndef get_fibonacci_sequence(n):\n    \"\"\"\n    Returns a list containing the first n Fibonacci numbers.\n    \"\"\"\n    if n <= 0:\n        return []\n    elif n == 1:\n        return [0]\n    \n    # Initialize the sequence with the first two numbers\n    sequence = [0, 1]\n    \n    # Start loop from the 3rd number (index 2) up to n\n    while len(sequence) < n:\n        next_value = sequence[-1] + sequence[-2]\n        sequence.append(next_value)\n        \n    return sequence\n\n# Example usage:\nn = 10\nprint(f\"The first {n} Fibonacci numbers are: {get_fibonacci_sequence(n)}\")\n```\n\n### Explanation\n\n1.  **Edge Case Handling**: \n    *   If `n` is 0 or negative, we return an empty list.\n    *   If `n` is 1, we return just `[0]`, as the sequence starts with zero."
+      }
+    }
+  ],
+  "created": 1789733404,
+  "model": "gemma4-26b-a4b-it-qat-vision-262144-qat-mtp",
+  "system_fingerprint": "b10659-4e2f54f8f",
+  "object": "chat.completion",
+  "usage": {
+    "completion_tokens": 256,
+    "prompt_tokens": 28,
+    "total_tokens": 284,
+    "prompt_tokens_details": {
+      "cached_tokens": 1
+    }
+  },
+  "id": "chatcmpl-jLW37KIH9J4ypG7HfBX72prVMRNbodot",
+  "timings": {
+    "cache_n": 1,
+    "prompt_n": 27,
+    "prompt_ms": 205.056,
+    "prompt_per_token_ms": 7.594666666666667,
+    "prompt_per_second": 131.67134831460672,
+    "predicted_n": 256,
+    "predicted_ms": 1065.402,
+    "predicted_per_token_ms": 4.1780470588235294,
+    "predicted_per_second": 239.34627492721057,
+    "draft_n": 218,
+    "draft_n_accepted": 181
+  }
+}
