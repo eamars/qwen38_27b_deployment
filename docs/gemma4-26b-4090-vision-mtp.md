@@ -30,7 +30,7 @@ The target is the instruction-tuned **26B-A4B MoE** (26B total, approximately 4B
 | Context checkpoints | At most 6; runtime default spacing 8192 tokens |
 | Batch / microbatch | 128 / 128 |
 | Host prompt cache | Disabled (`--cache-ram 0`); six context checkpoints retained |
-| Reasoning | `auto`, unrestricted by default; configurable with `-Reasoning` and `-ReasoningBudget` |
+| Reasoning | `on`, fixed 64 hidden tokens by default; configurable with `-Reasoning` and `-ReasoningBudget` |
 | GPU | RTX 4090 UUID `GPU-eed52936-813f-8d68-1654-bfb56cb42bc3` |
 | Endpoint | `http://localhost:8083/v1`, binds `0.0.0.0` |
 
@@ -42,20 +42,23 @@ The context budget includes input, image tokens and generated output. The drafte
 
 ## Controlling Gemma's thinking
 
-Gemma 4's `reasoning_effort` levels such as `low` and `minimal` are not useful controls for this model's template. Use the hard reasoning budget or turn reasoning off:
+Gemma 4's `reasoning_effort` levels such as `low` and `minimal` are not useful controls for this model's template. The launcher defaults to reasoning on with a fixed 64-token hidden-thinking budget. Final generation remains unrestricted by the launcher; `max_tokens`/`n_predict` supplied by a client can still impose its own total cap. Use the hard reasoning budget or turn reasoning off:
 
 ```powershell
 # Fast conversational/roleplay output: no hidden thinking.
 .\scripts\start-gemma4-26b-a4b-it-qat-ud-q4_k_xl-4090-vision-mtp.ps1 -Reasoning off
 
-# Short deliberation, usually enough for simple character replies.
+# The default: 64 thinking tokens with unrestricted final generation.
+.\scripts\start-gemma4-26b-a4b-it-qat-ud-q4_k_xl-4090-vision-mtp.ps1
+
+# Shorter deliberation, useful for simple character replies.
 .\scripts\start-gemma4-26b-a4b-it-qat-ud-q4_k_xl-4090-vision-mtp.ps1 -Reasoning on -ReasoningBudget 64
 
 # More room for reasoning; raise the request's max_tokens too.
 .\scripts\start-gemma4-26b-a4b-it-qat-ud-q4_k_xl-4090-vision-mtp.ps1 -Reasoning on -ReasoningBudget 256
 ```
 
-The budget counts hidden thought tokens. `max_tokens`/`n_predict` also covers the final answer, so a request with a 128-token thinking budget and `max_tokens: 128` can spend all of its output allowance thinking and return no final text. For a 64-token budget, use at least 256-512 completion tokens when the final answer must be reliable. The same control can be selected per request without restarting the server by sending `thinking_budget_tokens: 0` (or `reasoning_budget_tokens: 0`) for no thinking, or a positive value for bounded thinking. `reasoning_effort: none` also disables it; `low` and `minimal` do not reliably bound Gemma 4.
+The budget counts hidden thought tokens. `max_tokens`/`n_predict` also covers the final answer, so a request with a 128-token thinking budget and `max_tokens: 128` can spend all of its output allowance thinking and return no final text. The final launcher default was selected at 64 after a no-`max_tokens` live probe: 64 produced a concise answer, while 128 spilled unfinished drafting into visible content. The same control can be selected per request without restarting the server by sending `thinking_budget_tokens: 0` (or `reasoning_budget_tokens: 0`) for no thinking, or a positive value for bounded thinking. `reasoning_effort: none` also disables it; `low` and `minimal` do not reliably bound Gemma 4.
 
 ## Reproducibility
 

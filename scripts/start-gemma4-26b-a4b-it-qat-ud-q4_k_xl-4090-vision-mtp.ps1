@@ -15,9 +15,9 @@ param(
     [ValidateRange(1, 4096)][int]$UbatchSize = 128,
     [string]$BindAddress = '0.0.0.0',
     [ValidateSet('on', 'off', 'auto')]
-    [string]$Reasoning = 'auto',
+    [string]$Reasoning = 'on',
     [ValidateRange(-1, 32768)]
-    [int]$ReasoningBudget = -1,
+    [int]$ReasoningBudget = 64,
     [string]$ReasoningBudgetMessage = '',
     [switch]$NoMtp,
     [switch]$DryRun,
