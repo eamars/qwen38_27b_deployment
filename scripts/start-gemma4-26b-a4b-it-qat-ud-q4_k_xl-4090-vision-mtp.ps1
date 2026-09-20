@@ -14,6 +14,11 @@ param(
     [ValidateRange(1, 4096)][int]$BatchSize = 128,
     [ValidateRange(1, 4096)][int]$UbatchSize = 128,
     [string]$BindAddress = '0.0.0.0',
+    [ValidateSet('on', 'off', 'auto')]
+    [string]$Reasoning = 'auto',
+    [ValidateRange(-1, 32768)]
+    [int]$ReasoningBudget = -1,
+    [string]$ReasoningBudgetMessage = '',
     [switch]$NoMtp,
     [switch]$DryRun,
     [switch]$Stop
@@ -138,10 +143,19 @@ $arguments += @(
     '--image-max-tokens', '1120',
     '--no-context-shift',
     '--jinja',
-    '--reasoning', 'auto',
+    '--reasoning', $Reasoning,
     '--verbosity', '4',
     '--metrics'
 )
+if ($ReasoningBudget -ge 0) {
+    $arguments += @('--reasoning-budget', "$ReasoningBudget")
+}
+if (-not [string]::IsNullOrWhiteSpace($ReasoningBudgetMessage)) {
+    if ($ReasoningBudget -lt 0) {
+        throw 'ReasoningBudgetMessage requires ReasoningBudget >= 0.'
+    }
+    $arguments += @('--reasoning-budget-message', $ReasoningBudgetMessage)
+}
 
 $displayCommand = ($arguments | ForEach-Object { Quote-CommandArgument ([string]$_) }) -join ' '
 Write-Host "Gemma 4 mode: $mode"
@@ -151,6 +165,7 @@ if (-not $NoMtp) { Write-Host "MTP drafter: $mtpHead" }
 Write-Host "Runtime: $runtime"
 Write-Host "RTX 4090 UUID: $expectedUuid"
 Write-Host "Context: $ContextSize; target KV: K=$CacheTypeK V=$CacheTypeV; draft KV: K=$MtpCacheTypeK V=$MtpCacheTypeV"
+Write-Host "Reasoning: $Reasoning; budget: $ReasoningBudget tokens"
 Write-Host 'Memory policy: mmap model loading, lazy tensor reads, and six context checkpoints. Checkpoint snapshots and staging still use host RAM.'
 
 if ($DryRun) {
