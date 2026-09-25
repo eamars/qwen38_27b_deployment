@@ -26,6 +26,8 @@ Read the documents in this order when operating the workspace:
     applied v0.1.3 fix, direct reuse validation, regression tests, and limitations.
 11. [FreeToken fork runtime](freetoken-fork-runtime-2026-09-18.md) —
     published fork commit, active source checkout, local compatibility overlay and rebuild command.
+12. [FreeToken parallel prefill reproduction](freetoken-parallel-prefill-reproduction-2026-09-19.md) —
+    measured duplicate cold prefill, streaming stalls, cached controls, and state-pool implications.
 
 The [Gemma 4 26B RTX 4090 runbook](gemma4-26b-4090-vision-mtp.md) records the
 262K Q8/Q8 vision/MTP launcher, model staging, and measured validation.

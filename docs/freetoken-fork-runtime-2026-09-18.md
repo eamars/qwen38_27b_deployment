@@ -34,6 +34,12 @@ tokens, 8,192-token prefill chunks and memory ratio 0.90. The checkpoint fix
 remains installed. The verification below records the earlier one-request,
 24-slot source-migration run.
 
+On 2026-09-19, after reproducing parallel prefill stalls, the user selected
+one concurrent request and eight usable state slots. The vision launcher's
+default is now `--max-running-requests 1 --linear-state-cache-ratio 2`, with
+the same 4,600 expert slots. The service was stopped when these defaults were
+saved; they apply on the next launch.
+
 Rebuild, after verifying/preserving the local overlay:
 
 ```bash

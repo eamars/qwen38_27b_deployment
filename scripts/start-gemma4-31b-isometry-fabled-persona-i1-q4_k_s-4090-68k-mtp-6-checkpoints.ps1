@@ -1,7 +1,9 @@
 [CmdletBinding()]
 param(
     [int]$Port = 8083,
-    [ValidateRange(1, 1000000)][int]$ContextSize = 90000,
+    # 68,608 targets approximately 1 GiB VRAM headroom on the RTX 4090 with
+    # this target, Google MTP drafter, q8_0 KV caches, and six checkpoints.
+    [ValidateRange(1, 1000000)][int]$ContextSize = 68608,
     [ValidateRange(1, 16)][int]$MtpNMax = 3,
     [ValidateSet('f32', 'f16', 'bf16', 'q8_0', 'q4_0', 'q4_1', 'iq4_nl', 'q5_0', 'q5_1')]
     [string]$CacheTypeK = 'q8_0',
@@ -11,7 +13,7 @@ param(
     [string]$MtpCacheTypeK = 'q8_0',
     [ValidateSet('f32', 'f16', 'bf16', 'q8_0', 'q4_0', 'q4_1', 'iq4_nl', 'q5_0', 'q5_1')]
     [string]$MtpCacheTypeV = 'q8_0',
-    [ValidateRange(1, 4096)][int]$BatchSize = 256,
+    [ValidateRange(1, 4096)][int]$BatchSize = 128,
     [ValidateRange(1, 4096)][int]$UbatchSize = 128,
     [string]$BindAddress = '0.0.0.0',
     [switch]$NoMtp,
@@ -24,6 +26,10 @@ $workspace = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtime = Join-Path $workspace 'runtime\llama.cpp-dflash2\build-dflash2\bin\Release\llama-server.exe'
 $target = Join-Path $workspace 'models\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf'
 $mtpHead = Join-Path $workspace 'models\mtp-gemma-4-31B-it-Q8_0.gguf'
+$mmproj = Join-Path $workspace 'models\Gemma-4-31B-Isometry-Fabled-Persona.mmproj-Q8_0.gguf'
+$mmprojRevision = 'ed81422010c36425224f8d86943688859df07dde'
+$mmprojBytes = 809544000
+$mmprojSha256 = 'CD927EB21FEDA3085E1ACE0EC4C507209870CD95D60CD77BD2CCBBC958B6CEAC'
 $expectedUuid = 'GPU-eed52936-813f-8d68-1654-bfb56cb42bc3'
 
 function Get-FullPath([string]$Path) {
@@ -75,18 +81,32 @@ if (-not (Test-Path -LiteralPath $runtime -PathType Leaf)) {
 if (-not (Test-Path -LiteralPath $target -PathType Leaf)) {
     throw "The exact i1-Q4_K_S Isometry-Fabled-Persona target is missing: $target"
 }
+if (-not (Test-Path -LiteralPath $mmproj -PathType Leaf)) {
+    throw "The matching Q8 vision projector is missing: $mmproj"
+}
+$mmprojInfo = Get-Item -LiteralPath $mmproj
+if ($mmprojInfo.Length -ne $mmprojBytes -or
+    (Get-FileHash -LiteralPath $mmproj -Algorithm SHA256).Hash.ToUpperInvariant() -ne $mmprojSha256) {
+    throw "The Isometry-Fabled-Persona Q8 projector does not match pinned Hugging Face revision $mmprojRevision."
+}
 if (-not $NoMtp -and -not (Test-Path -LiteralPath $mtpHead -PathType Leaf)) {
     throw "The project-local Google MTP drafter is missing: $mtpHead"
 }
 if ($Port -lt 1 -or $Port -gt 65535) { throw 'Port must be between 1 and 65535.' }
 if ($ContextSize -lt 1) { throw 'ContextSize must be positive.' }
 if ($UbatchSize -gt $BatchSize) { throw 'UbatchSize cannot exceed BatchSize.' }
+if ($UbatchSize -ne $BatchSize) { throw 'Gemma 4 image attention requires equal BatchSize and UbatchSize.' }
 
 $mode = if ($NoMtp) { 'target-only' } else { 'google-mtp' }
 $alias = "gemma4-31b-isometry-fabled-persona-4090-6-context-checkpoints-$mode"
 
 $arguments = @(
-    '--model', $target
+    '--model', $target,
+    '--mmproj', $mmproj,
+    # Keep the matched projector in host RAM; the RTX 4090 profile is already
+    # sized for the 68,608-token target and six context checkpoints.
+    '--mmproj-device', 'none',
+    '--image-max-tokens', '1120'
 )
 if (-not $NoMtp) {
     $arguments += @(
@@ -118,10 +138,11 @@ $arguments += @(
     '--batch-size', "$BatchSize",
     '--ubatch-size', "$UbatchSize",
     '--fit', 'off',
-    '--no-mmproj',
     '--no-context-shift',
     '--jinja',
     '--reasoning', 'auto',
+    # Return hidden thinking in the OpenAI-compatible reasoning_content field.
+    '--reasoning-format', 'deepseek',
     '--reasoning-preserve',
     '--metrics'
 )

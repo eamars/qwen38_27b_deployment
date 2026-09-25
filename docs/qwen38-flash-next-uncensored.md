@@ -42,10 +42,12 @@ the FreeToken endpoint rejects `developer` messages.
 ## Commands
 
 The current uncensored vision profile uses the patched v0.1.3 fork with 4,600
-GPU expert slots, 12 usable GDN state slots, two running requests, 262K shared
-KV capacity, 8K prefill chunks and memory ratio 0.90. On 2026-09-18 the default
-concurrency returned to two and `--linear-state-cache-ratio` returned to 2;
-the checkpoint handoff fix remains installed. The earlier
+GPU expert slots, 8 usable GDN state slots, one running request, 262K
+KV capacity, 8K prefill chunks and memory ratio 0.90. On 2026-09-19 the default
+concurrency returned to one after the
+[parallel prefill reproduction](freetoken-parallel-prefill-reproduction-2026-09-19.md).
+`--linear-state-cache-ratio 2` provides four working slots plus four retained-cache
+slots at that concurrency. The checkpoint handoff fix remains installed. The earlier
 [matched speed and cache comparison](freetoken-v013-comparison-2026-09-18.md)
 used one request and 24 slots after moving the Windows display off the RTX
 5090. The 4,200-slot tuning below is also historical.
