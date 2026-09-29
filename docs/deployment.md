@@ -94,6 +94,57 @@ Start the Qwen 4090 backend in another PowerShell window:
 .\scripts\start-qwen27b-4090.ps1
 ```
 
+The Turbo Fable Cold Fusion profile uses a Qwen3.8 GGUF target. Stage its
+LOW-MTP-IQ4_XS model and F16 vision projector, then launch it on the same
+RTX 4090 endpoint with native MTP, image input, 131,072-token context, and
+Q8_0 K/V cache:
+
+```powershell
+.\scripts\stage-qwen38-turbofcfusion-assets.ps1
+.\scripts\start-qwen38-turbofcfusion-4090-128k-vision-mtp.ps1 -DryRun
+.\scripts\start-qwen38-turbofcfusion-4090-128k-vision-mtp.ps1
+```
+
+Stop only that profile with:
+
+```powershell
+.\scripts\start-qwen38-turbofcfusion-4090-128k-vision-mtp.ps1 -Stop
+```
+
+It uses port `8081` and the existing pinned Windows llama.cpp build. The model
+GGUF contains its trained MTP head; the separately staged `mmproj-F16.gguf`
+enables image input. Keep the 4090 free of other model servers before launch.
+
+The LessThanThreeAI Humanlike Chat IQ4_XS profile is separate and uses the
+standard RTX 4090 port `8081`. It shares that fixed endpoint with the other
+4090 profiles, so stop the existing server first. Stage its text-only merged
+target plus the matching base Qwen3.8 MTP head and vision projector, then
+launch the local OpenAI-compatible server:
+
+```powershell
+.\scripts\stage-qwen38-humanlike-chat-vision-mtp.ps1
+.\scripts\start-qwen38-humanlike-chat-4090-128k-vision-mtp.ps1 -DryRun
+.\scripts\start-qwen38-humanlike-chat-4090-128k-vision-mtp.ps1
+```
+
+The verified shared-GPU defaults offload 14 target layers, with the MTP head
+and vision projector on the RTX 4090. They retain a 131,072-token context,
+Q8_0 target and MTP K/V caches, and one slot. The launcher requires at least
+10,000 MiB free before starting. This setting fit while ComfyUI was also using
+the 4090. If the card is otherwise free, pass
+`-GpuLayers all -RequiredFreeVramMiB 22000` to attempt full target offload. Stop
+only this profile with:
+
+```powershell
+.\scripts\start-qwen38-humanlike-chat-4090-128k-vision-mtp.ps1 -Stop
+```
+
+It binds to `127.0.0.1:8081`. Live validation on 2026-09-26 reported a 131,072
+context, `multimodal` capability, correctly answered an image request, and
+accepted 39 of 46 MTP draft tokens (84.8%). After that image request the 4090
+had 1,223 MiB free. The auxiliary MTP and vision files are from the matching
+base Qwen3.8 checkpoint; the Humanlike merged GGUF itself is text-only.
+
 The Qwen launchers start directly after validating their model, runtime, and
 GPU. Use `-Stop` to stop only the matching managed runtime and port:
 

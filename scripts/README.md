@@ -7,6 +7,8 @@ canonical launch and profiling entry points are:
 |---|---|
 | Qwen RTX 5090 launch/stop | `start-qwen27b-5090.ps1` |
 | Qwen RTX 4090 launch/stop | `start-qwen27b-4090.ps1` |
+| Qwen3.8 Turbo Fable Cold Fusion LOW-MTP-IQ4_XS, RTX 4090, 128K context, vision/MTP | `start-qwen38-turbofcfusion-4090-128k-vision-mtp.ps1` |
+| Qwen3.8 Humanlike Chat IQ4_XS, RTX 4090, 128K context, vision/MTP | `start-qwen38-humanlike-chat-4090-128k-vision-mtp.ps1` |
 | Shared Qwen + Gemma server | `start-kazusa-models.ps1` |
 | Gemma 4 31B Isometry Fabled Persona i1-Q4_K_M, RTX 5090 | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1` |
 | Gemma 4 31B Isometry Fabled Persona i1-Q4_K_S, RTX 4090 | `start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1` |
@@ -35,6 +37,10 @@ Setup and inventory helpers are also retained because they produce reproducible
 state rather than launch an alternative runtime:
 
 - `download-models.ps1` — fetches the Qwen deployment set.
+- `stage-qwen38-turbofcfusion-assets.ps1` — fetches and verifies the pinned
+  LOW-MTP-IQ4_XS target and matching Qwen3.8 vision projector.
+- `stage-qwen38-humanlike-chat-vision-mtp.ps1` — fetches and verifies the pinned
+  Humanlike IQ4_XS target plus the matching base Qwen3.8 MTP and vision assets.
 - `stage-gemma4-assets.ps1` and `download-gemma4-persona-ranged.ps1` — stages
   the isolated Gemma experiment.
 - `stage-gemma4-hauhaucs.ps1` — stages and verifies the pinned HauhauCS

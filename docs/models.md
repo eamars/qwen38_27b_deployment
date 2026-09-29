@@ -1,6 +1,6 @@
 # Model manifest
 
-Generated: 2026-09-10 19:17:56 +12:00
+Generated: 2026-09-26 14:48:01 +12:00
 
 All model artifacts are local under `models/` and are ignored by Git. SHA-256
 values below were calculated from the completed files in this workspace. The
@@ -17,7 +17,7 @@ revision and validate that all indexed shards are present.
 
 | Role | Repository | Filename | Quantization | Size bytes | Size GB | SHA-256 | Download date |
 |---|---|---|---|---:|---:|---|---|
-| RTX 5090 primary target | unsloth/Qwen3.8-27B-GGUF | Qwen3.8-27B-UD-Q6_K_M.gguf | UD-Q6_K_M | 23088409504 | 21.503 | 6629d378ec65deaa772917e9b2b031c97f07aa710f9cf218ca2a0a32e8531fcc | 2026-08-20 |
+| RTX 5090 primary target | unsloth/Qwen3.8-27B-GGUF | Qwen3.8-27B-UD-Q6_K_M.gguf | UD-Q6_K_M | 23088409504 | 21.503 | 493301830a596b8ad56dc1329f80bbcb578c8e910da395feafdc9cd8263430bb | 2026-08-20 |
 | RTX 5090 context fallback | unsloth/Qwen3.8-27B-GGUF | Qwen3.8-27B-UD-Q6_K.gguf | UD-Q6_K | 21983677344 | 20.474 | c9c206812fbe4ac7b76a729e25928b63f2ae89d37f69da7a71c20aec763cd436 | 2026-08-20 |
 | RTX 4090 primary target | unsloth/Qwen3.8-27B-GGUF | Qwen3.8-27B-UD-Q4_K_XL.gguf | UD-Q4_K_XL | 17559178144 | 16.353 | 3f227079003add2511437e5b1e94812e363385225bf6a9b47b0054a72bc8b01e | 2026-08-20 |
 | RTX 4090 context fallback | unsloth/Qwen3.8-27B-GGUF | Qwen3.8-27B-UD-Q4_K_M.gguf | UD-Q4_K_M | 16464440224 | 15.334 | 322e194ff79741c7baa497c240f677f54b201b0efab44ca8e50f122b39123482 | 2026-08-20 |
@@ -30,3 +30,5 @@ revision and validate that all indexed shards are present.
 | Gemma 4 4090 HauhauCS uncensored target | HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP | Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-Q4_K_M.gguf | QAT Q4_K_M | 18687062176 | 17.404 | 71667f9e601a4b914a98425c59150b731f6e15d260d661dbd1f1ee07469fc7db | 2026-09-10 |
 | Gemma 4 HauhauCS MTP drafter | HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP | mtp-gemma-4-31B-it.gguf | MTP | 279954368 | 0.261 | b5c4e583fc5982439080114bbc1b7edaec361f9d4c9193d6bed606a3de401b62 | 2026-09-10 |
 | Gemma 4 HauhauCS vision projector | HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP | mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf | BF16 mmproj | 1200726016 | 1.118 | 7bef0d0fb3e85fc2941ec5f1c375febf3742645f158132a43ced557093aea841 | 2026-09-10 |
+| RTX 4090 Turbo Fable Cold Fusion vision/MTP target | DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF | Qwen3.8-27B-TurboFCFusion-735-882-Here-Uncen-NEO-CODER-MAX-LOW-MTP-IQ4_XS.gguf | LOW-MTP-IQ4_XS | 15309039136 | 14.258 | fa92183638b045b01447fd657afd6220f0995ca3a31b528078cefdf26a96c820 | 2026-09-26 |
+| Qwen3.8 Turbo Fable Cold Fusion vision projector | unsloth/Qwen3.8-27B-GGUF | mmproj-F16.gguf | F16 mmproj | 927607488 | 0.864 | cbb841a9ee0636b2ec172f5bb8df2ea8dfeb01e90fe7c6126581d662a0b4e43e | 2026-09-26 |

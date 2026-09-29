@@ -17,7 +17,7 @@ $items = @(
     @{ Repo = 'incoai/Qwen3.8-27B-DFlash2-GGUF'; File = 'Qwen3.8-27B-DFlash2-Q4_K_M.gguf'; Quant = 'DFlash2 Q4_K_M'; Role = 'DFlash2 drafter for both backends' }
 )
 
-$optionalGemma = @(
+$optionalLocalAssets = @(
     @{ Repo = 'LM Studio local import'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf'; Quant = 'i1-Q4_K_M'; Role = 'Gemma 4 5090 experimental target' },
     @{ Repo = 'mradermacher/Gemma-4-31B-Isometry-Fabled-Persona-i1-GGUF'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf'; Quant = 'i1-Q4_K_S'; Role = 'Gemma 4 4090 experimental target' },
     @{ Repo = 'ggml-org/gemma-4-31B-it-GGUF'; File = 'mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 MTP drafter' },
@@ -25,9 +25,11 @@ $optionalGemma = @(
     @{ Repo = 'unsloth/gemma-4-31B-it-qat-GGUF'; Path = 'unsloth-gemma4-qat\MTP\mtp-gemma-4-31B-it-Q8_0.gguf'; File = 'MTP/mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 QAT MTP drafter' },
     @{ Repo = 'HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP'; Path = 'hauhaucs-gemma4-qat-uncensored-balanced-mtp\Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-Q4_K_M.gguf'; File = 'Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-Q4_K_M.gguf'; Quant = 'QAT Q4_K_M'; Role = 'Gemma 4 4090 HauhauCS uncensored target' },
     @{ Repo = 'HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP'; Path = 'hauhaucs-gemma4-qat-uncensored-balanced-mtp\mtp-gemma-4-31B-it.gguf'; File = 'mtp-gemma-4-31B-it.gguf'; Quant = 'MTP'; Role = 'Gemma 4 HauhauCS MTP drafter' },
-    @{ Repo = 'HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP'; Path = 'hauhaucs-gemma4-qat-uncensored-balanced-mtp\mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf'; File = 'mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf'; Quant = 'BF16 mmproj'; Role = 'Gemma 4 HauhauCS vision projector' }
+    @{ Repo = 'HauhauCS/Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-MTP'; Path = 'hauhaucs-gemma4-qat-uncensored-balanced-mtp\mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf'; File = 'mmproj-Gemma4-31B-QAT-Uncensored-HauhauCS-Balanced-BF16.gguf'; Quant = 'BF16 mmproj'; Role = 'Gemma 4 HauhauCS vision projector' },
+    @{ Repo = 'DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF'; Path = 'qwen38-turbo-fcfusion-mtp\Qwen3.8-27B-TurboFCFusion-735-882-Here-Uncen-NEO-CODER-MAX-LOW-MTP-IQ4_XS.gguf'; File = 'Qwen3.8-27B-TurboFCFusion-735-882-Here-Uncen-NEO-CODER-MAX-LOW-MTP-IQ4_XS.gguf'; Quant = 'LOW-MTP-IQ4_XS'; Role = 'RTX 4090 Turbo Fable Cold Fusion vision/MTP target' },
+    @{ Repo = 'unsloth/Qwen3.8-27B-GGUF'; Path = 'qwen38-turbo-fcfusion-mtp\mmproj-F16.gguf'; File = 'mmproj-F16.gguf'; Quant = 'F16 mmproj'; Role = 'Qwen3.8 Turbo Fable Cold Fusion vision projector' }
 )
-foreach ($item in $optionalGemma) {
+foreach ($item in $optionalLocalAssets) {
     $relativePath = if ($item.Path) { $item.Path } else { $item.File }
     if (Test-Path -LiteralPath (Join-Path $models $relativePath) -PathType Leaf) {
         $items += $item
@@ -39,7 +41,18 @@ $lines = @(
     ''
     "Generated: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss zzz')"
     ''
-    'All model artifacts are local under models/ and are ignored by Git. SHA-256 values below are calculated from the completed files in this workspace.'
+    'All model artifacts are local under `models/` and are ignored by Git. SHA-256'
+    'values below were calculated from the completed files in this workspace. The'
+    'Qwen rows are the deployment set; Gemma rows are experimental and are included'
+    'when those files are present. Regenerate this file with'
+    '`scripts/record-model-manifest.ps1` after replacing an artifact.'
+    ''
+    'The Qwen3.8 Flash-Next deployment uses the complete'
+    '`RadixArk/Qwen3.8-Flash-Next-NVFP4` checkpoint under WSL at'
+    '`/home/rba90/models/Qwen3.8-Flash-Next-NVFP4`. Its indexed weight files total'
+    '135195303851206 bytes. It is intentionally outside the generated Windows'
+    '`models/` table below; the pinned runtime and benchmark record its repository'
+    'revision and validate that all indexed shards are present.'
     ''
     '| Role | Repository | Filename | Quantization | Size bytes | Size GB | SHA-256 | Download date |'
     '|---|---|---|---|---:|---:|---|---|'
