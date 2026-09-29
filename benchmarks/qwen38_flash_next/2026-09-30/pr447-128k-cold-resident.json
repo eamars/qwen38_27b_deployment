@@ -1,0 +1,199 @@
+{
+  "input_tokens": 131072,
+  "requested_output_tokens": 1024,
+  "instance_id": "ca5506d2-eeaf-49d5-b5fd-8d6b0ac3e9e9",
+  "server_pid": 60429,
+  "started_at": "2026-09-30T01:13:37+1300",
+  "decode_windows": [
+    {
+      "tps": 0.2,
+      "log": "\u001b[1m[2026-09-30|01:14:45|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131136, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 0.20, #queue-req: 0"
+    },
+    {
+      "tps": 31.59,
+      "log": "\u001b[1m[2026-09-30|01:14:46|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131200, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.59, #queue-req: 0"
+    },
+    {
+      "tps": 31.6,
+      "log": "\u001b[1m[2026-09-30|01:14:47|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131200, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.60, #queue-req: 0"
+    },
+    {
+      "tps": 30.81,
+      "log": "\u001b[1m[2026-09-30|01:14:49|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131264, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 30.81, #queue-req: 0"
+    },
+    {
+      "tps": 31.75,
+      "log": "\u001b[1m[2026-09-30|01:14:50|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131328, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.75, #queue-req: 0"
+    },
+    {
+      "tps": 31.77,
+      "log": "\u001b[1m[2026-09-30|01:14:51|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131328, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.77, #queue-req: 0"
+    },
+    {
+      "tps": 32.51,
+      "log": "\u001b[1m[2026-09-30|01:14:52|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131392, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 32.51, #queue-req: 0"
+    },
+    {
+      "tps": 30.65,
+      "log": "\u001b[1m[2026-09-30|01:14:54|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131392, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 30.65, #queue-req: 0"
+    },
+    {
+      "tps": 30.88,
+      "log": "\u001b[1m[2026-09-30|01:14:55|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131456, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 30.88, #queue-req: 0"
+    },
+    {
+      "tps": 32.18,
+      "log": "\u001b[1m[2026-09-30|01:14:56|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131520, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 32.18, #queue-req: 0"
+    },
+    {
+      "tps": 32.08,
+      "log": "\u001b[1m[2026-09-30|01:14:57|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131520, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 32.08, #queue-req: 0"
+    },
+    {
+      "tps": 31.03,
+      "log": "\u001b[1m[2026-09-30|01:14:59|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131584, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.03, #queue-req: 0"
+    },
+    {
+      "tps": 33.01,
+      "log": "\u001b[1m[2026-09-30|01:15:00|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131648, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 33.01, #queue-req: 0"
+    },
+    {
+      "tps": 31.84,
+      "log": "\u001b[1m[2026-09-30|01:15:01|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131648, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.84, #queue-req: 0"
+    },
+    {
+      "tps": 30.8,
+      "log": "\u001b[1m[2026-09-30|01:15:02|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131712, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 30.80, #queue-req: 0"
+    },
+    {
+      "tps": 29.77,
+      "log": "\u001b[1m[2026-09-30|01:15:04|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131712, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 29.77, #queue-req: 0"
+    },
+    {
+      "tps": 29.98,
+      "log": "\u001b[1m[2026-09-30|01:15:05|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131776, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 29.98, #queue-req: 0"
+    },
+    {
+      "tps": 30.59,
+      "log": "\u001b[1m[2026-09-30|01:15:06|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131840, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 30.59, #queue-req: 0"
+    },
+    {
+      "tps": 31.37,
+      "log": "\u001b[1m[2026-09-30|01:15:08|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131840, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.37, #queue-req: 0"
+    },
+    {
+      "tps": 31.62,
+      "log": "\u001b[1m[2026-09-30|01:15:09|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131904, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.62, #queue-req: 0"
+    },
+    {
+      "tps": 31.18,
+      "log": "\u001b[1m[2026-09-30|01:15:10|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131968, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.18, #queue-req: 0"
+    },
+    {
+      "tps": 30.28,
+      "log": "\u001b[1m[2026-09-30|01:15:12|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 131968, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 30.28, #queue-req: 0"
+    },
+    {
+      "tps": 30.88,
+      "log": "\u001b[1m[2026-09-30|01:15:13|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 132032, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 30.88, #queue-req: 0"
+    },
+    {
+      "tps": 33.73,
+      "log": "\u001b[1m[2026-09-30|01:15:14|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 132032, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 33.73, #queue-req: 0"
+    },
+    {
+      "tps": 31.45,
+      "log": "\u001b[1m[2026-09-30|01:15:15|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Decode batch, #running-req: 1, #token: 132096, token usage: 0.50, #mamba-slot: 4/8, mamba usage: 0.50, gen throughput (token/s): 31.45, #queue-req: 0"
+    }
+  ],
+  "prefill_chunks": [
+    {
+      "elapsed_s": 8.41277322699898,
+      "log": "\u001b[1m[2026-09-30|01:13:46|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.06, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 58.47"
+    },
+    {
+      "elapsed_s": 12.404932543999166,
+      "log": "\u001b[1m[2026-09-30|01:13:50|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.09, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 2052.03"
+    },
+    {
+      "elapsed_s": 16.38810854300027,
+      "log": "\u001b[1m[2026-09-30|01:13:54|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.12, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 2051.50"
+    },
+    {
+      "elapsed_s": 20.3906970070002,
+      "log": "\u001b[1m[2026-09-30|01:13:58|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.16, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 2043.91"
+    },
+    {
+      "elapsed_s": 24.41470456499883,
+      "log": "\u001b[1m[2026-09-30|01:14:02|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.19, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 2039.40"
+    },
+    {
+      "elapsed_s": 28.465481774999716,
+      "log": "\u001b[1m[2026-09-30|01:14:06|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.22, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 2026.53"
+    },
+    {
+      "elapsed_s": 32.495534300000145,
+      "log": "\u001b[1m[2026-09-30|01:14:10|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.25, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 2024.82"
+    },
+    {
+      "elapsed_s": 36.56746267000017,
+      "log": "\u001b[1m[2026-09-30|01:14:14|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.28, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 2018.52"
+    },
+    {
+      "elapsed_s": 40.698669751000125,
+      "log": "\u001b[1m[2026-09-30|01:14:18|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.31, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 1984.11"
+    },
+    {
+      "elapsed_s": 44.95431627399921,
+      "log": "\u001b[1m[2026-09-30|01:14:22|core|rank=0]\u001b[0m \u001b[32mINFO    \u001b[0m Prefill batch, #new-seq: 1, #new-token: 8192, #cached-token: 0, token usage: 0.34, #mamba-slot: 3/8, mamba usage: 0.38, #running-req: 0, #queue-req: 1, input throughput (token/s): 1920.53"
+    }
+  ],
+  "model_kept_resident": true,
+  "threshold_tps": 40,
+  "usage": {
+    "prompt_tokens": 131072,
+    "completion_tokens": 1023,
+    "total_tokens": 132095
+  },
+  "status": "completed_below_40",
+  "total_s": 98.87134819499988,
+  "ttft_s": 66.06630994299849,
+  "last_token_s": 98.86944710500029,
+  "effective_prefill_tps_input_over_ttft": 1983.9461309870028,
+  "actual_prompt_tokens": 131072,
+  "actual_completion_tokens": 1023,
+  "cached_tokens": 0,
+  "decode_tps_average": 31.155556706443765,
+  "stop_reason": "completed request average below 40",
+  "health_after": {
+    "status": "ok",
+    "model": "qwen38-next-pr447-speed",
+    "instance_id": "ca5506d2-eeaf-49d5-b5fd-8d6b0ac3e9e9",
+    "uptime_s": 318,
+    "maintenance": "serving",
+    "version": "0.1.2"
+  },
+  "request_completed": true,
+  "gate": "Compare full-request average after stream completion; never abort on a single window",
+  "decode_duration_s": 32.8031371620018,
+  "decode_formula": "(completion_tokens - 1) / (last nonempty SSE text time - first nonempty SSE text time)",
+  "gain_vs_40_percent": -22.111108233890587,
+  "raw_result": "/mnt/c/workspace/qwen38_27b/benchmarks/raw/qwen38_flash_next/pr447-speed-2026-09-30/resident-131072-011337/result.json",
+  "server_log_segments": [
+    "/mnt/c/workspace/qwen38_27b/benchmarks/raw/qwen38_flash_next/pr447-speed-2026-09-30/server.log",
+    "/mnt/c/workspace/qwen38_27b/benchmarks/raw/qwen38_flash_next/pr447-speed-2026-09-30/server-128k-continuation.log"
+  ],
+  "model_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4",
+  "commit": "81d034d4a2c0f9f4024b8ba820a1cbe65db6d1d5",
+  "configuration": {
+    "tp": 2,
+    "ep": 2,
+    "context": 262144,
+    "kv_tokens": 262144,
+    "moe_cache_slots_per_rank": 3759,
+    "model_variant": "RadixArk BF16 dense / NVFP4 experts"
+  },
+  "finish_reason": "length",
+  "output_nonempty_sse_chunks": 1023,
+  "output_retokenized_count": 1023
+}

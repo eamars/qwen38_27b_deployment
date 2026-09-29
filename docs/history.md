@@ -1,7 +1,7 @@
 # Project history and decision log
 
 This record separates historical stages from the current operating guide.
-Dates are local host dates (Pacific/Auckland, UTC+12 in the captured runs).
+Dates are local host dates (Pacific/Auckland; UTC+12 or UTC+13 according to daylight saving).
 
 ## Timeline
 
@@ -171,7 +171,46 @@ The shared Qwen3.8 venv was rebuilt from `runtime/freetoken-eamars`, preserving
 the local loader/CLI overlay and launcher settings. The old checkout remains
 available for recovery. See the [fork runtime record](freetoken-fork-runtime-2026-09-18.md).
 
+### 2026-09-30 - FreeToken PR #447 heterogeneous TP2+EP2 experiment
+
+- Continued PR commit `81d034d4a2c0f9f4024b8ba820a1cbe65db6d1d5` on
+  RTX 4090 + RTX 5090, retaining the inherited minimum-VRAM budgeting patch.
+  The original uncensored model could not use this branch's BF16 dense TP
+  path, so the run used RadixArk BF16 dense/GDN/attention with NVFP4 experts.
+  No non-NVFP4 expert checkpoint was tested; CPU expert layers were disabled.
+- After a 4,096-input/127-output warmup, completed a cold 131,072-input request
+  with 1,023 output tokens on the same resident instance. Average decode was
+  **31.1556 token/s**, TTFT 66.0663 s, and input/TTFT 1,983.95 token/s.
+  The latter includes request handling and first-token latency. The 4K
+  warmup has no complete client timing and is not a formal 4K average.
+- Corrected the initial single-window stop rule: the user's 40 token/s gate
+  means the completed request's average decode, excluding TTFT. The 128K
+  request finished normally; its -22.11% result ended further experiments.
+  Model weights remained resident; no vision validation was performed.
+- Recorded equal 256/256 experts per layer, 3,759 expert cache slots per
+  rank and 262,144-token KV pools. Discussed 192/320 expert ownership and
+  placing full attention plus KV on the 5090; neither proposal was
+  implemented or benchmarked. The run does not isolate the 4090 as the
+  primary bottleneck.
+- At the user's request, closed the experiment and archived its history,
+  curated result, scripts, actual launch metadata and inherited patch.
+  Final script lifecycle corrections received syntax checks only; no new
+  inference or model restart accompanied this archival commit. Full raw
+  logs and streams remain local under the ignored `benchmarks/raw/` tree.
+  Before committing, the user requested unloading without checks, overriding
+  the earlier residency requirement. Sent SIGTERM directly to the known WSL
+  server process group 60429 (command exit 0); did not inspect health,
+  processes or VRAM afterward. Result health/residency fields remain
+  historical snapshots from the completed benchmark.
+  See the [experiment record](freetoken-pr447-local-experiment-2026-09-29.md)
+  and [curated result](../benchmarks/qwen38_flash_next/2026-09-30/pr447-128k-cold-resident.json).
+
 ## Decisions retained
+
+Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447
+experiment instead followed the user's speed-first, completed-request-average
+requirements documented above; these historical deployment rules do not
+override that experiment's scope.
 
 1. Prefer correctness and full GPU residency over a headline throughput number.
 2. Keep target KV at `Q8_0/q8_0` or better and draft KV at `f16/f16` for Qwen.
