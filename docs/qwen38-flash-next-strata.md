@@ -1,8 +1,9 @@
 # Qwen3.8 Flash-Next Strata NVFP4 on native Windows
 
 This deployment uses the RTX 5090 through the native Windows Strata engine.
-Status on 2026-10-03: verified, using shared Flash localhost port 1919 with the
-262,144-token profile, CPU vision and MTP. The longest tested input was
+Status on 2026-10-03: verified through shared Flash port 1919 with the
+262,144-token profile, CPU vision and MTP. The launcher now defaults to LAN
+binding, matching the older Flash scripts. The longest tested input was
 249,995 tokens, followed by a successful cached repeat.
 
 It follows this workspace's normal layout: model assets in `models/`, the
@@ -93,6 +94,7 @@ The launcher runs in the foreground. Its defaults are:
 | Setting | Value |
 |---|---|
 | Endpoint | `http://127.0.0.1:1919/v1` |
+| LAN bind / endpoint | `0.0.0.0:1919` / `http://192.168.2.13:1919/v1` on this host |
 | Served model | `qwen38-next-uncensored-strata-vision` |
 | GPU | RTX 5090, UUID `GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0` |
 | Profile | `Native256K`: 262,144 tokens total context |
@@ -151,9 +153,15 @@ server's lifetime. `-Stop -Port 1919` targets that port's deployment.
 The stop command waits up to 30 seconds for those captured child processes
 to finish releasing pinned RAM; the validated stop took 5.73 seconds.
 
-The server binds to localhost by default. For LAN access, set `STRATA_API_KEY`
-and supply `-BindAddress 0.0.0.0`; clients must send that key. Existing WSL
-firewall rules do not configure this native Windows server.
+The launcher binds to `0.0.0.0` by default, matching the older Flash scripts.
+Use `http://192.168.2.13:1919/v1` from the LAN, or localhost from this PC.
+`-BindAddress 127.0.0.1` selects local-only access. `STRATA_API_KEY` is optional;
+when set, the upstream server requires clients to send it. The mandatory-key
+launcher guard was removed to match the user's requested older-script behavior.
+The native server uses Python 3.12; its existing Public-profile inbound firewall
+allow rules cover the current network profile. No WSL port forwarding is needed.
+This launcher change was checked with dry runs; the model was left stopped for
+the user to start, so remote-device reachability was not tested in that change.
 
 ## Validate
 
@@ -475,7 +483,7 @@ Evidence: [strata-cache-expanded.json](../benchmarks/qwen38_flash_next/2026-10-0
 This verifies the increased slot capacity with approximately 8K histories;
 it does not establish capacity for eight simultaneous 128K snapshots.
 
-### Asuna findings and connection blocker
+### Asuna findings and LAN configuration
 
 The inspected project is `C:\workspace\asuna_cognition_core_v2`, using native
 DSH `0.2.0-rc.2` and pi-ai `0.87.1`. Its active profile is
@@ -485,13 +493,12 @@ select the same `qwen38-next-uncensored-freetoken-vision` model ID and port
 1919. That model ID was accepted by the running Strata endpoint in real tests.
 The server advertises its own Strata name in metadata.
 
-**The saved Asuna URL is `http://192.168.2.13:1919/v1`; Strata binds to
-`127.0.0.1`.** The saved LAN URL refused a connection during this investigation.
-For Asuna on this PC, set both native provider URLs to
-`http://127.0.0.1:1919/v1` through DSH's native Models UI. If LAN access is
-required, launch Strata with a configured `STRATA_API_KEY` and LAN bind, and
-configure both clients to send that key. The investigation did not change
-Asuna's saved routes, credentials, sessions or tool permissions.
+**Both saved Asuna providers use `http://192.168.2.13:1919/v1`.** The initial
+localhost-only deployment refused that address. The launcher now defaults to
+`0.0.0.0`, so the existing provider URLs match its LAN configuration on the next
+start. Local clients may also use `http://127.0.0.1:1919/v1`. If
+`STRATA_API_KEY` is set for the server, configure both clients to send it.
+Asuna's saved routes, credentials, sessions and tool permissions were not changed.
 
 The source inspection found no unavoidable cache reset from an ordinary tool
 result. Role contexts persist; action sessions are created per operation.

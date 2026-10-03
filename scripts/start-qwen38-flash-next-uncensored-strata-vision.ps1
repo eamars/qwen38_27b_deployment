@@ -12,7 +12,8 @@ param(
     [int]$HelperExpertSlots = 8000,
     [ValidateRange(1, 65535)]
     [int]$Port = 1919,
-    [string]$BindAddress = '127.0.0.1',
+    # Match the older Flash launchers: listen on the shared port from the LAN.
+    [string]$BindAddress = '0.0.0.0',
     [ValidateRange(0, 120)]
     [int]$RamBudgetGiB = 0,
     # An allocation margin, not a runtime free-VRAM floor. Measured free VRAM differs.
@@ -71,9 +72,8 @@ if ($Stop) {
     return
 }
 
-if ($BindAddress -notin @('127.0.0.1', 'localhost', '::1') -and [string]::IsNullOrWhiteSpace($env:STRATA_API_KEY)) {
-    throw 'Set STRATA_API_KEY before binding Strata beyond localhost.'
-}
+# STRATA_API_KEY remains optional, matching the existing LAN Flash deployments.
+# The upstream server reads it directly when the caller sets it.
 if ($GpuMode -ne 'Single' -and $RamBudgetGiB -gt 0) {
     throw 'The pinned engine does not support a RAM-budget tier with layer splitting or helper GPUs.'
 }
@@ -172,7 +172,10 @@ if (-not $NoMtp -and -not (Test-Path -LiteralPath (Join-Path $model 'mtp\rt\draf
 }
 if (@(Get-ManagedServer).Count -gt 0) { throw "A managed Strata server already uses port $Port." }
 # Check before rewriting the per-port config or loading weights.
-$portProbe = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $Port)
+$probeAddress = if ($BindAddress -eq 'localhost') { [System.Net.IPAddress]::Loopback } else {
+    [System.Net.IPAddress]::Parse($BindAddress)
+}
+$portProbe = [System.Net.Sockets.TcpListener]::new($probeAddress, $Port)
 try { $portProbe.Start() } finally { $portProbe.Stop() }
 New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
 $config | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath $configPath -Encoding UTF8
