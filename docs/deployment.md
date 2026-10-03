@@ -5,12 +5,9 @@
 This workspace supports two Windows deployment modes from the same pinned CUDA
 build. The normal Qwen profiles run as independent `llama-server` processes;
 each process is restricted to one physical GPU with
-`CUDA_VISIBLE_DEVICES=<UUID>`, so the selected card is runtime `CUDA0`. When
-both models must be reachable through one endpoint, the maintained
-`start-kazusa-models.ps1` launcher starts a shared `llama-server` router with
-both profiles. There is no tensor parallelism. The shared router's model
-preset is hard-coded in the launcher and exists only as a temporary runtime
-file.
+`CUDA_VISIBLE_DEVICES=<UUID>`, so the selected card is runtime `CUDA0`.
+The Kazusa shared router was removed on 2026-10-03. Use the independent
+launchers for the retained models.
 
 The accepted runtime build is llama.cpp DFlash2 commit
 `5ecbe1ac17ec0484c5b44af0bd580cdc9c428ed4`, built natively for Windows with
@@ -54,10 +51,10 @@ Record hashes after staging or replacing files:
 ```
 
 The manifest includes the Gemma files automatically when they are present.
-The Gemma experiment can be staged separately with:
+The shared Gemma 31B MTP drafter used by Fable-5 Distill can be staged with:
 
 ```powershell
-.\scripts\stage-gemma4-assets.ps1 -LmStudioTargetPath 'D:\path\to\Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf'
+.\scripts\stage-gemma4-assets.ps1
 ```
 
 The HauhauCS uncensored QAT target, MTP drafter, and vision projector are
@@ -75,8 +72,8 @@ Run the no-load check before starting a backend:
 .\scripts\check-runtime.ps1
 ```
 
-Add `-IncludeGemma` or `-IncludeHauhauCS` only when the corresponding Gemma
-assets are needed. The check verifies the pinned executable, model files,
+Add `-IncludeGemma` for Fable-5 Distill and its shared MTP sidecar, or
+`-IncludeHauhauCS` for the HauhauCS assets. The check verifies the pinned executable, model files,
 DFlash2 command-line support, and UUID-to-`CUDA0` isolation for both cards. It
 does not start a server or load a model.
 
@@ -178,63 +175,17 @@ is not needed, and stop the current model before swapping the process on `8083`:
 .\scripts\start-gemma4-31b-hauhaucs-balanced-q4_k_m-4090-65k-mtp.ps1
 ```
 
-## Shared Kazusa server
+## Retired deployments
 
-Use this mode when the Qwen RTX 5090 profile and the Gemma RTX 4090 profile
-must run behind one server port. Stop any separately launched backend first;
-the shared router uses both GPUs and port 8080 by default, so it cannot run
-alongside the independent Qwen launchers on ports 8080 and 8081.
+The Kazusa router, Gemma Persona, Gemma 26B, official Flash-Next FreeToken
+and DeepSeek FreeToken launchers and their dedicated helpers were removed
+on 2026-10-03. Their recorded results remain under `benchmarks/`, `artifacts/`
+and the historical deployment notes. Windows Persona and Gemma 26B weights
+are pending deletion after automatic approval review blocked the operation.
+See the [cleanup record](history.md#2026-10-03--deployment-cleanup).
 
-Preview the command and embedded profiles without starting a process:
-
-```powershell
-.\scripts\start-kazusa-models.ps1 -DryRun
-```
-
-Start or stop the shared server:
-
-```powershell
-.\scripts\start-kazusa-models.ps1
-.\scripts\start-kazusa-models.ps1 -Stop
-```
-
-The router exposes these model IDs through the same OpenAI-compatible endpoint:
-
-| Model ID | Physical GPU |
-|---|---|
-| `qwen27b-5090` | RTX 5090 |
-| `gemma4-4090` | RTX 4090 |
-
-Send the desired ID in each request's `model` field, for example
-`http://127.0.0.1:8080/v1/chat/completions` with
-`"model": "qwen27b-5090"` or `"model": "gemma4-4090"`. The launcher binds
-the physical cards in UUID order (`CUDA0` = RTX 5090, `CUDA1` = RTX 4090),
-validates both cards, writes its embedded preset to a unique temporary file,
-and removes that file when the server exits. No `.ini` file is required in the
-repository.
-
-## Gemma experiment
-
-The Gemma launchers and profilers are maintained as an isolated experiment:
-
-```powershell
-.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_m-5090-65k-mtp.ps1 -DryRun
-.\scripts\start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1 -DryRun
-python .\scripts\profile-gemma4-mtp.py
-python .\scripts\profile-gemma4-4090.py --dry-run --check-gpu
-```
-
-They are dry-run by default where documented. Use `--run` only when the
-target GPU is free. The recorded 4090 MTP sweep is in
-`benchmarks/gemma4/2026-08-25/`; it is a short experimental comparison, not a
-Qwen replacement or production sign-off.
-
-The active RTX 4090 Gemma default is the measured N1 profile: context `56320`,
-target KV `q8_0/f16`, draft KV `q8_0/q8_0`, MTP `n-max=3`, and batch/ubatch
-`256/128`. This is configured in both
-`start-gemma4-31b-isometry-fabled-persona-i1-q4_k_s-4090-56k-mtp.ps1` and the
-`gemma4-4090` preset embedded in `start-kazusa-models.ps1`. The historical
-benchmark records remain unchanged.
+Gemma Fable-5 Distill, QAT Instruct and HauhauCS remain available. The shared
+`models/mtp-gemma-4-31B-it-Q8_0.gguf` sidecar is retained for Fable-5 Distill.
 
 ## Performance profiling
 
@@ -297,24 +248,25 @@ build.
 
 ## Qwen3.8-Flash-Next FreeToken deployment
 
-Flash-Next is isolated from the maintained Qwen3.8-27B DFlash2 launchers. Its
-only retained path is FreeToken on the RTX 5090 with the NVFP4 checkpoint in
-WSL. Preview it without loading weights:
+Flash-Next is isolated from the maintained Qwen3.8-27B DFlash2 launchers. The
+uncensored FreeToken path runs on the RTX 5090 with its NVFP4 checkpoint in
+WSL. A separate native Windows [Strata path](qwen38-flash-next-strata.md)
+also remains available. Preview FreeToken without loading weights:
 
 ```powershell
-.\scripts\start-qwen38-flash-next-freetoken.ps1 -Profile Short4K -DryRun
+.\scripts\start-qwen38-flash-next-uncensored-freetoken.ps1 -Profile Short4K -DryRun
 ```
 
-The measured profile and memory placement are documented in
-[the FreeToken deployment record](qwen38-flash-next-freetoken.md).
+The retained checkpoint and loader are documented in
+[the uncensored FreeToken deployment record](qwen38-flash-next-uncensored.md).
 FreeToken's Qwen tool-call compatibility and the boundary between the
 `qwen3` reasoning parser and `qwen3_coder` tool parser are recorded in the
 [compatibility note](../runtime/freetoken-eamars/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
 Keep the existing Qwen3.8-27B launchers and their DFlash2 defaults unchanged.
 
-The separate vision launchers and the DSH catalog procedure are documented in
+The vision launcher and the DSH catalog procedure are documented in
 the [Qwen3.8 Flash-Next DSH vision runbook](dsh-qwen38-flash-next-vision.md).
-That runbook is required when swapping the official and uncensored checkpoints
-on the shared `1919` port: the runtime must enable the vision tower, and DSH
+The FreeToken and Strata launchers share port `1919`; run one at a time.
+For FreeToken vision the runtime must enable the vision tower, and DSH
 must explicitly declare image input, reasoning efforts, and
 `supportsDeveloperRole: false`.

@@ -1,5 +1,9 @@
 # FreeToken #447 本地实验历史
 
+2026-10-03 cleanup: the official RadixArk checkpoint and dedicated PR #447
+benchmark scripts have been removed. Results, launch metadata, patches and
+raw logs remain preserved; script references below are historical.
+
 确认日期：2026-09-29。2026-09-30 已完成 128K cold 请求，平均 decode 31.16 token/s；用户随后决定结束本轮探索、记录历史并提交。推理结束时模型保持驻留；提交前用户追加要求直接卸载且不要检查，已向服务进程组发送停止信号，未复查卸载状态。以下最新要求优先于原始范围；时间按 Pacific/Auckland 记录，本轮为 UTC+13。
 
 ## 2026-09-30 最新执行要求

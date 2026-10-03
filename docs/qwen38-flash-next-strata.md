@@ -94,7 +94,7 @@ The launcher runs in the foreground. Its defaults are:
 | Setting | Value |
 |---|---|
 | Endpoint | `http://127.0.0.1:1919/v1` |
-| LAN bind / endpoint | `0.0.0.0:1919` / `http://192.168.2.13:1919/v1` on this host |
+| LAN bind / endpoint | `0.0.0.0:1919` / `http://192.168.2.232:1919/v1` for the DSH host at `192.168.2.10` |
 | Served model | `qwen38-next-uncensored-strata-vision` |
 | GPU | RTX 5090, UUID `GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0` |
 | Profile | `Native256K`: 262,144 tokens total context |
@@ -154,7 +154,12 @@ The stop command waits up to 30 seconds for those captured child processes
 to finish releasing pinned RAM; the validated stop took 5.73 seconds.
 
 The launcher binds to `0.0.0.0` by default, matching the older Flash scripts.
-Use `http://192.168.2.13:1919/v1` from the LAN, or localhost from this PC.
+Use `http://192.168.2.232:1919/v1` from the DSH host at `192.168.2.10`, or
+localhost from this PC. Both `.13` and `.232` belong to this PC, but diagnostics
+found that the `.13` interface could not resolve/reach `.10`, while `.232`
+successfully exchanged ICMP and TCP traffic with it. The `.232` models endpoint
+returned HTTP 200 locally; a retry from the remote DSH host is still required
+to verify that direction end to end.
 `-BindAddress 127.0.0.1` selects local-only access. `STRATA_API_KEY` is optional;
 when set, the upstream server requires clients to send it. The mandatory-key
 launcher guard was removed to match the user's requested older-script behavior.
@@ -499,6 +504,9 @@ localhost-only deployment refused that address. The launcher now defaults to
 start. Local clients may also use `http://127.0.0.1:1919/v1`. If
 `STRATA_API_KEY` is set for the server, configure both clients to send it.
 Asuna's saved routes, credentials, sessions and tool permissions were not changed.
+The separate DSH host at `.10` should use `.232` while the `.13` adapter path
+is failing; the successful same-PC Asuna connection to `.13` does not prove
+remote reachability through that adapter.
 
 The source inspection found no unavoidable cache reset from an ordinary tool
 result. Role contexts persist; action sessions are created per operation.

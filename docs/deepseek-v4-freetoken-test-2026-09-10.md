@@ -1,5 +1,9 @@
 DeepSeek V4 Flash: single-5090 FreeToken experiment
 
+Historical record: the DeepSeek FreeToken launchers, dedicated helpers and
+WSL model weights were removed on 2026-10-03. The results and raw experiment
+evidence are retained; commands below describe the retired deployment.
+
 Tested 2026-09-10. This report supersedes the initial research-only recommendation. The user permits any speculative decoder, experimental PRs, and downloads, and subsequently replaced the 250K minimum with a **180K maximum**. No second GPU is used for model computation.
 
 **Result:** GPU-only expert inference works on the 5090 with Q3 experts pinned in RAM. The live server is capped at 179,968 usable tokens. It completed a 179,047-token prompt with correct retrieval of the opening reference code. The restored 1,536-slot configuration measured **19.39 tokens/s** after a cold prefill taking **488.76 seconds**. Speculation worked on the copy test after fixes but was slower, so the default is ordinary decoding.

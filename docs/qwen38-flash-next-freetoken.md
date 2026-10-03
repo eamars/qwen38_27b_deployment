@@ -1,5 +1,10 @@
 # Qwen3.8 Flash-Next FreeToken deployment
 
+Historical record: the official checkpoint, launchers and dedicated helpers
+were removed on 2026-10-03. Benchmark results below are retained; the commands
+describe the retired deployment. The uncensored FreeToken and Strata paths
+remain available.
+
 ## Retained configuration
 
 Qwen3.8 Flash-Next has one supported path in this workspace: FreeToken on the

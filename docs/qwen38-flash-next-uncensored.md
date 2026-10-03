@@ -1,5 +1,11 @@
 # Qwen3.8 Flash-Next uncensored deployment
 
+Current status (2026-10-03): the uncensored checkpoint, launchers and shared
+runtime remain available. The official checkpoint and launchers were removed;
+references to that deployment and four-way comparisons below describe the
+historical validation. The maintained vision matrix now runs the uncensored
+text and vision cases only.
+
 Status (2026-09-14): the uncensored checkpoint now uses the same updated
 FreeToken source and launcher path as the official deployment. Checkpoint
 preparation and header verification passed, followed by successful Short4K

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run the four Qwen3.8-Flash-Next FreeToken text/vision startup cases.
+"""Run the uncensored Qwen3.8-Flash-Next FreeToken text/vision startup cases.
 
 Every case uses the same shared WSL venv, a 262,144-token context, and the
 retained approximately 4K retrieval prompt.  Vision cases build the vision
@@ -24,8 +24,8 @@ from typing import Any
 ROOT = Path(__file__).resolve().parents[1]
 PROMPT = ROOT / "benchmarks" / "qwen38_flash_next" / "2026-09-02" / "freetoken-4k-prompt.txt"
 DEFAULT_OUTPUT = (
-    ROOT / "benchmarks" / "raw" / "qwen38_flash_next" / "2026-09-14"
-    / "freetoken-vision-262k-4k.json"
+    ROOT / "benchmarks" / "raw" / "qwen38_flash_next" / dt.date.today().isoformat()
+    / "uncensored-freetoken-vision-262k-4k.json"
 )
 RUNTIME = ROOT / "runtime" / "freetoken-eamars"
 CONTEXT_TOKENS = 262144
@@ -43,16 +43,12 @@ _HELPER_SPEC.loader.exec_module(_HELPER)
 
 
 CONFIGS = (
-    {"label": "official-no-visual", "variant": "Official", "vision": False},
     {"label": "uncensored-no-visual", "variant": "Uncensored", "vision": False},
-    {"label": "official-visual", "variant": "Official", "vision": True},
     {"label": "uncensored-visual", "variant": "Uncensored", "vision": True},
 )
 
 
 def served_model_name(config: dict[str, Any]) -> str:
-    if config["variant"] == "Official":
-        return "qwen38-next-freetoken-vision" if config["vision"] else "qwen38-next-freetoken"
     return (
         "qwen38-next-uncensored-freetoken-vision"
         if config["vision"]
@@ -61,18 +57,11 @@ def served_model_name(config: dict[str, Any]) -> str:
 
 
 def launcher_path(config: dict[str, Any]) -> Path:
-    if config["variant"] == "Official":
-        filename = (
-            "start-qwen38-flash-next-freetoken-vision.ps1"
-            if config["vision"]
-            else "start-qwen38-flash-next-freetoken.ps1"
-        )
-    else:
-        filename = (
-            "start-qwen38-flash-next-uncensored-freetoken-vision.ps1"
-            if config["vision"]
-            else "start-qwen38-flash-next-uncensored-freetoken.ps1"
-        )
+    filename = (
+        "start-qwen38-flash-next-uncensored-freetoken-vision.ps1"
+        if config["vision"]
+        else "start-qwen38-flash-next-uncensored-freetoken.ps1"
+    )
     return ROOT / "scripts" / filename
 
 
@@ -106,8 +95,7 @@ class TestServer:
         self.args = args
         self.config = config
         self.port = args.port
-        pid_slug = "freetoken" if config["variant"] == "Official" else "uncensored-freetoken"
-        self.pid_file = f"/tmp/qwen38-flash-next-{pid_slug}-{self.port}.pid"
+        self.pid_file = f"/tmp/qwen38-flash-next-uncensored-freetoken-{self.port}.pid"
         self.telemetry_file = f"/tmp/qwen38-vision-matrix-{config['label']}-{self.port}.jsonl"
         self.log_path = args.output.resolve().parent / "logs" / f"{config['label']}.log"
         self.process: subprocess.Popen[Any] | None = None
@@ -319,7 +307,7 @@ def main() -> int:
         "schema": 1,
         "created_utc": utc_now(),
         "updated_utc": utc_now(),
-        "objective": "compare Qwen3.8-Flash-Next official/uncensored FreeToken with vision disabled/enabled",
+        "objective": "compare Qwen3.8-Flash-Next uncensored FreeToken with vision disabled/enabled",
         "runtime": runtime_state(),
         "protocol": {
             "context_tokens": CONTEXT_TOKENS,

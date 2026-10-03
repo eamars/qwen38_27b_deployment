@@ -205,6 +205,31 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   See the [experiment record](freetoken-pr447-local-experiment-2026-09-29.md)
   and [curated result](../benchmarks/qwen38_flash_next/2026-09-30/pr447-128k-cold-resident.json).
 
+## 2026-10-03 — Deployment cleanup
+
+- Removed the seven requested launchers and the Kazusa launcher, plus their
+  dedicated download, probe, profiling and benchmark scripts: 34 scripts total.
+  Persona is no longer configured by any maintained launcher or preflight.
+- Removed the official Flash-Next NVFP4 and DeepSeek IQ3_XXS checkpoints in
+  WSL, the dedicated DeepSeek MTP source shards and quantized banks, and their
+  model-specific download metadata: 267,392,821,637 bytes of files.
+- Preserved benchmark results and raw experiment evidence. Nine reports and
+  provenance files from the deleted official Qwen checkpoint were copied to
+  `artifacts/freetoken/retired-radixark-2026-10-03/` with a SHA-256 manifest.
+- Kept the uncensored FreeToken and Strata models, remaining Qwen and Gemma
+  models, shared FreeToken environment and runtime checkouts. The root Gemma
+  31B MTP drafter remains required by Fable-5 Distill; its staging helper now
+  stages only that shared sidecar. The shared FreeToken benchmark helpers
+  now select the retained uncensored checkpoint and write to dated raw output.
+- Windows model deletion remains pending. Automatic approval review rejected
+  both the guarded batch operation and the explicit file deletion with
+  `blocked by policy`. The remaining dedicated files total 71,850,739,903 bytes:
+  the workspace Persona Q4_K_M, Q4_K_S and projector; the Gemma 26B model
+  directory; and the Persona Q4_K_M copy under
+  `D:\lm_models\mradermacher\Gemma-4-31B-Isometry-Fabled-Persona-i1-GGUF`.
+  A validated, explicit-path PowerShell cleanup script was prepared for manual
+  execution outside this session. The separate Isometry-RP model is unaffected.
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

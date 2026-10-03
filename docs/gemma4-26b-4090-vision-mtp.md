@@ -1,5 +1,10 @@
 # Gemma 4 26B-A4B QAT, vision and MTP on RTX 4090
 
+Historical record: the launcher and staging helper were removed on 2026-10-03.
+Model deletion is pending the Windows filesystem policy block recorded in
+[history](history.md#2026-10-03--deployment-cleanup). Measured results below
+are retained; the launch commands are no longer available.
+
 Launcher: `scripts/start-gemma4-26b-a4b-it-qat-ud-q4_k_xl-4090-vision-mtp.ps1`.
 
 ```powershell

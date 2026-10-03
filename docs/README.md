@@ -2,8 +2,8 @@
 
 Read the documents in this order when operating the workspace:
 
-1. [Deployment](deployment.md) — what is installed, how the independent and
-   shared launch modes are configured, and the commands to prepare, launch,
+1. [Deployment](deployment.md) — what is installed, how the independent
+   launch modes are configured, and the commands to prepare, launch,
    stop, and profile them.
 2. [Benchmarks](benchmarks.md) — what has actually been measured, what was
    selected provisionally, and which acceptance work remains.
@@ -12,9 +12,8 @@ Read the documents in this order when operating the workspace:
    used for the measurements.
 5. [History](history.md) — the timeline of deployment stages and configuration
    decisions.
-6. [Qwen3.8-Flash-Next FreeToken deployment](qwen38-flash-next-freetoken.md) —
-   the retained RTX 5090 configuration, measured 4K result, and operational
-   commands.
+6. [Historical official Flash-Next FreeToken deployment](qwen38-flash-next-freetoken.md) —
+   the retired RTX 5090 configuration and retained measured 4K result.
 7. [Uncensored Flash-Next deployment](qwen38-flash-next-uncensored.md) —
    the separate checkpoint using the shared FreeToken loader and its load checks.
 8. [DSH Qwen3.8 Flash-Next vision runbook](dsh-qwen38-flash-next-vision.md) —
@@ -35,8 +34,10 @@ Read the documents in this order when operating the workspace:
     pinned ModelOpt checkpoint, workspace layout, vision/MTP, long-output and
     multi-GPU measurements, plus two-agent tool/cache tests and Asuna findings.
 
-The [Gemma 4 26B RTX 4090 runbook](gemma4-26b-4090-vision-mtp.md) records the
-262K Q8/Q8 vision/MTP launcher, model staging, and measured validation.
+The [historical Gemma 4 26B RTX 4090 runbook](gemma4-26b-4090-vision-mtp.md)
+retains the retired profile and its measured validation. The
+[2026-10-03 cleanup record](history.md#2026-10-03--deployment-cleanup) lists
+removed deployments, preserved shared resources and pending Windows deletion.
 
 The [script inventory](../scripts/README.md) lists the canonical launch,
 profiling, setup, and inventory helpers.

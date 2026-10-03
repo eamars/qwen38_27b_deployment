@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Benchmark the retained FreeToken GPU-only profile for Qwen3.8-Flash-Next.
+"""Benchmark the retained uncensored FreeToken profile for Qwen3.8-Flash-Next.
 
 The controller runs on Windows and launches the pinned FreeToken environment in
 WSL.  ``--wsl-sampler`` is an internal Linux-only mode used to collect CPU/RAM
@@ -33,10 +33,10 @@ PROMPT = (
     / "freetoken-4k-prompt.txt"
 )
 DEFAULT_OUTPUT = (
-    ROOT / "benchmarks" / "qwen38_flash_next" / "2026-09-02"
-    / "freetoken-4k-gpu-only-winner.json"
+    ROOT / "benchmarks" / "raw" / "qwen38_flash_next" / dt.date.today().isoformat()
+    / "uncensored-freetoken-4k.json"
 )
-DEFAULT_MODEL = "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4"
+DEFAULT_MODEL = "/home/rba90/models/Qwen3.8-Flash-Next-Uncensored-NVFP4"
 DEFAULT_VENV = "/home/rba90/.freetoken-qwen38/venv"
 DEFAULT_GPU_UUID = "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0"
 ANCHORS = (
@@ -328,7 +328,7 @@ class FreeTokenServer:
     def command(self) -> list[str]:
         command = [
             f"{self.args.venv}/bin/ft", "serve", "--model", self.args.model,
-            "--served-model-name", "qwen38-next-freetoken", "--gpu", self.args.gpu_uuid,
+            "--served-model-name", "qwen38-next-uncensored-freetoken", "--gpu", self.args.gpu_uuid,
             "--host", "0.0.0.0", "--port", str(self.args.port),
             "--max-running-requests", "1", "--memory-ratio", str(self.args.memory_ratio),
             "--moe-strategy", self.backend, "--moe-cpu-layers", "0", "--moe-cache-auto",
@@ -420,7 +420,7 @@ def run_one(args: argparse.Namespace, server: FreeTokenServer, prompt: str, max_
     gpu = GpuPoller(args.gpu_uuid, args.telemetry_interval)
     gpu.start()
     try:
-        row = stream_chat(args.port, "qwen38-next-freetoken", prompt, max_tokens, args.request_timeout)
+        row = stream_chat(args.port, "qwen38-next-uncensored-freetoken", prompt, max_tokens, args.request_timeout)
     finally:
         row_gpu = gpu.stop()
     row["label"] = label

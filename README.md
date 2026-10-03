@@ -8,7 +8,7 @@ Qwen3.8-Flash-Next FreeToken and Strata paths on one Windows host:
   `126976` context tokens.
 - RTX 4090: Qwen3.8-27B `UD-Q4_K_XL` with DFlash2, currently profiled at
   `110000` context tokens.
-- RTX 5090 under WSL: Qwen3.8-Flash-Next NVFP4 through FreeToken, with routed
+- RTX 5090 under WSL: Qwen3.8-Flash-Next uncensored NVFP4 through FreeToken, with routed
   expert offload and disk-backed PLE; this path is separate from the maintained
   llama.cpp launchers.
 - RTX 5090 natively on Windows: Qwen3.8-Flash-Next uncensored ModelOpt NVFP4
@@ -18,14 +18,17 @@ Qwen3.8-Flash-Next FreeToken and Strata paths on one Windows host:
 
 All Flash-Next launchers share port `1919`; run one backend at a time.
 
-The independent launchers expose one model per port. The maintained Kazusa
-launcher can instead place the Qwen RTX 5090 profile and the experimental Gemma
-RTX 4090 profile behind one shared router endpoint.
-
-The repository also contains an experimental Gemma 4 persona + Google MTP
-profile. It is documented separately and is not the production Qwen path.
+The independent launchers expose one model per port. The Kazusa router and
+Gemma 4 Persona launchers have been retired. The Gemma Fable-5 Distill, QAT
+Instruct and HauhauCS launchers remain available.
 
 ## Current state
+
+On 2026-10-03, the official Flash-Next FreeToken, DeepSeek FreeToken, Gemma
+Persona, Gemma 26B and Kazusa launchers and their dedicated helpers were
+removed. Dedicated WSL weights were deleted and benchmark evidence was kept.
+Windows Persona and Gemma 26B model deletion is pending because automatic
+approval review blocked it; see [the cleanup record](docs/history.md#2026-10-03--deployment-cleanup).
 
 The FreeToken MTP-on-RTX-4090 experiment was closed on 2026-09-06. The
 target verifier failed the performance requirement (`G2: FAIL_ECONOMICS`),
@@ -67,25 +70,8 @@ runtime `CUDA0`, keeps target and draft layers on that GPU, and starts one
 OpenAI-compatible server. Stop a managed backend with the same script and
 `-Stop`.
 
-Choose the shared mode instead of the two independent launchers above when the
-Qwen RTX 5090 and Gemma RTX 4090 profiles should run behind one server. Use the
-Kazusa router launcher; its model settings are embedded in the script, so no
-repository `.ini` file is needed:
-
-```powershell
-.\scripts\start-kazusa-models.ps1 -DryRun
-.\scripts\start-kazusa-models.ps1
-```
-
-The shared endpoint is `http://127.0.0.1:8080`; select
-`qwen27b-5090` or `gemma4-4090` in the request `model` field. Stop it with:
-
-```powershell
-.\scripts\start-kazusa-models.ps1 -Stop
-```
-
-Run the runtime check with `-IncludeGemma` when the experimental Gemma assets
-are staged:
+Run the runtime check with `-IncludeGemma` to check the retained Gemma
+Fable-5 Distill target and shared MTP drafter:
 
 ```powershell
 .\scripts\check-runtime.ps1 -IncludeGemma
@@ -99,7 +85,7 @@ are staged:
 - [docs/models.md](docs/models.md) — local model inventory, sizes, and current hashes.
 - [docs/host-inventory.md](docs/host-inventory.md) — captured hardware/build snapshot.
 - [docs/history.md](docs/history.md) — chronological project history and decision log.
-- [docs/qwen38-flash-next-freetoken.md](docs/qwen38-flash-next-freetoken.md) — retained FreeToken-only Flash-Next deployment and benchmark.
+- [docs/qwen38-flash-next-freetoken.md](docs/qwen38-flash-next-freetoken.md) — historical official Flash-Next deployment and benchmark.
 - [docs/qwen38-flash-next-uncensored.md](docs/qwen38-flash-next-uncensored.md) — separate uncensored NVFP4 checkpoint using the shared FreeToken loader, with Short4K loading validated.
 - [scripts/README.md](scripts/README.md) — maintained script inventory.
 - [benchmarks/README.md](benchmarks/README.md) — raw-result layout and naming convention.
@@ -123,10 +109,10 @@ constraints are full target and draft GPU residency, target KV cache at `Q8_0`
 or better, DFlash2 enabled, one slot, no normal CPU offload, and at least
 1024 MiB free VRAM during the accepted stress workload.
 
-The retained Qwen3.8-Flash-Next FreeToken RTX 5090 path uses NVFP4,
+The retained uncensored Qwen3.8-Flash-Next FreeToken RTX 5090 path uses NVFP4,
 disk-backed PLE, `--moe-strategy offload`, and automatic CPU-layer fallback.
-Its retained three-run 4K median was 12.53 seconds,
+The retired official checkpoint's three-run 4K median was 12.53 seconds,
 1656 prompt tok/s, and 50.59 decode tok/s. Native 256K validation remains
 open. Its routed-expert host-memory placement is separate from the DFlash2
-constraints above. See [the deployment record](docs/qwen38-flash-next-freetoken.md)
+constraints above. See [the historical deployment record](docs/qwen38-flash-next-freetoken.md)
 and its [tool-call compatibility note](runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).

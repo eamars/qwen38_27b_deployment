@@ -9,10 +9,12 @@ the integration:
 2. DSH must carry the model capabilities that FreeToken cannot expose through
    automatic OpenAI-compatible discovery.
 
-The runtime details and checkpoint preparation remain in the
-[official deployment note](qwen38-flash-next-freetoken.md) and the
-[uncensored deployment note](qwen38-flash-next-uncensored.md). This document
-is the source of truth for the DSH catalog and swap procedure.
+The runtime details and checkpoint preparation are in the
+[uncensored deployment note](qwen38-flash-next-uncensored.md). The official
+checkpoint and launchers were removed on 2026-10-03; their
+[deployment note](qwen38-flash-next-freetoken.md) and the verified-state
+record below are historical evidence. This cleanup did not edit the remote
+DSH catalog.
 
 ## Current topology
 
@@ -29,25 +31,23 @@ is the source of truth for the DSH catalog and swap procedure.
 | context | `262144` |
 
 The public DSH RPC is used for catalog changes. SSH is not required. The
-provider can contain both model IDs even though only one checkpoint is served
-on port `1919` at a time.
+retained FreeToken checkpoint uses port `1919`, which is also used by Strata.
+Run one backend at a time.
 
 ## Required model entries
 
-The two entries must remain distinct so a harness cannot confuse a
-text-only model with a vision-capable model:
+Keep the vision ID distinct from the text-only ID:
 
 | Checkpoint | Launcher | Served model ID |
 |---|---|---|
-| Official NVFP4 | `start-qwen38-flash-next-freetoken-vision.ps1` | `qwen38-next-freetoken-vision` |
 | Uncensored NVFP4 | `start-qwen38-flash-next-uncensored-freetoken-vision.ps1` | `qwen38-next-uncensored-freetoken-vision` |
 
 Each DSH model entry must contain the following effective values:
 
 ```json
 {
-  "id": "qwen38-next-freetoken-vision",
-  "name": "qwen38-next-freetoken-vision",
+  "id": "qwen38-next-uncensored-freetoken-vision",
+  "name": "qwen38-next-uncensored-freetoken-vision",
   "contextWindow": 262144,
   "input": ["text", "image"],
   "reasoningEfforts": {
@@ -63,7 +63,7 @@ Each DSH model entry must contain the following effective values:
 }
 ```
 
-Use the uncensored ID for the uncensored entry. The model-specific
+The model-specific
 `reasoningEfforts` map is what makes the DSH thinking-effort selector render.
 The explicit `supportsDeveloperRole: false` is required because these
 FreeToken endpoints reject an OpenAI `developer` message with:
@@ -114,16 +114,12 @@ vision launchers already perform the required runtime change:
 Start exactly one model on port `1919` at a time:
 
 ```powershell
-# Official vision checkpoint
-.\scripts\start-qwen38-flash-next-freetoken-vision.ps1 -Profile Native256K
-
-# Or, after stopping the official process, the uncensored checkpoint
-.\scripts\start-qwen38-flash-next-freetoken-vision.ps1 -Stop
 .\scripts\start-qwen38-flash-next-uncensored-freetoken-vision.ps1 -Profile Native256K
+.\scripts\start-qwen38-flash-next-uncensored-freetoken-vision.ps1 -Stop
 ```
 
-The matching `-Stop` launcher must be used when swapping checkpoints. Do not
-run the official and uncensored processes simultaneously on port `1919`.
+Use the matching `-Stop` launcher before switching between FreeToken and
+Strata on port `1919`.
 
 ## DSH public-RPC procedure
 
@@ -149,7 +145,6 @@ Select the namespace `llm-pi-ai`, then inspect:
 ```text
 value.providers.local-qwen38-flash.models
 value.providers.local-gemma4-4090-only.models
-value.providers.local-kazusa.models
 revision
 ```
 
@@ -162,7 +157,6 @@ When the ID is already present, update its `name`, `contextWindow`, `input`,
 `reasoningEfforts`, and `compat` fields. When adding a new ID, clone the
 corresponding text entry so its runtime compatibility settings are preserved:
 
-- clone `qwen38-next-freetoken` for the official vision entry;
 - clone `qwen38-next-uncensored-freetoken` for the uncensored vision entry.
 
 Then apply the vision values from the model-entry example above. Do not copy a
@@ -218,7 +212,7 @@ Content-Type: application/json
 }
 ```
 
-The `local-qwen38-flash` group must contain both vision IDs. Each must expose:
+The `local-qwen38-flash` group must expose the uncensored vision ID with:
 
 ```text
 reasoning.efforts = low, medium, xhigh
@@ -233,8 +227,8 @@ Run these checks in order after a catalog change.
 
 ### DSH settings
 
-- [ ] `input` is exactly `text,image` for both vision IDs.
-- [ ] `contextWindow` is `262144` for both vision IDs.
+- [ ] `input` is exactly `text,image` for the uncensored vision ID.
+- [ ] `contextWindow` is `262144` for the uncensored vision ID.
 - [ ] `reasoningEfforts` contains `low`, `medium`, and `xhigh`.
 - [ ] `compat.supportsDeveloperRole` is explicitly `false`.
 - [ ] The text-only IDs remain text-only and retain their own IDs.
@@ -267,15 +261,13 @@ must cause DSH to adapt the request before it reaches FreeToken.
 
 ### Harness selection
 
-- [ ] Select `qwen38-next-freetoken-vision` only while the official launcher is
-  serving port `1919`.
 - [ ] Select `qwen38-next-uncensored-freetoken-vision` only while the uncensored
   launcher is serving port `1919`.
 - [ ] Confirm the request's `model` field matches `/v1/models`.
 - [ ] Refresh the DSH model selector after catalog changes if the browser holds
   a stale projection.
 
-## Current verified state
+## Historical verified state
 
 As of 2026-09-14, both Qwen vision entries are present in DSH and have been
 verified through the public RPC:
@@ -288,4 +280,3 @@ verified through the public RPC:
 The DSH settings revision at the last verification was `15`. The dedicated
 Gemma4 provider entries and its `local-kazusa` Gemma4 entry also explicitly
 disable the developer role.
-

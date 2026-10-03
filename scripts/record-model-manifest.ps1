@@ -18,8 +18,6 @@ $items = @(
 )
 
 $optionalLocalAssets = @(
-    @{ Repo = 'LM Studio local import'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf'; Quant = 'i1-Q4_K_M'; Role = 'Gemma 4 5090 experimental target' },
-    @{ Repo = 'mradermacher/Gemma-4-31B-Isometry-Fabled-Persona-i1-GGUF'; File = 'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf'; Quant = 'i1-Q4_K_S'; Role = 'Gemma 4 4090 experimental target' },
     @{ Repo = 'ggml-org/gemma-4-31B-it-GGUF'; File = 'mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 MTP drafter' },
     @{ Repo = 'unsloth/gemma-4-31B-it-qat-GGUF'; Path = 'unsloth-gemma4-qat\gemma-4-31B-it-qat-UD-Q4_K_XL.gguf'; File = 'gemma-4-31B-it-qat-UD-Q4_K_XL.gguf'; Quant = 'QAT UD-Q4_K_XL'; Role = 'Gemma 4 4090 QAT Instruct target' },
     @{ Repo = 'unsloth/gemma-4-31B-it-qat-GGUF'; Path = 'unsloth-gemma4-qat\MTP\mtp-gemma-4-31B-it-Q8_0.gguf'; File = 'MTP/mtp-gemma-4-31B-it-Q8_0.gguf'; Quant = 'MTP Q8_0'; Role = 'Gemma 4 QAT MTP drafter' },
@@ -47,12 +45,12 @@ $lines = @(
     'when those files are present. Regenerate this file with'
     '`scripts/record-model-manifest.ps1` after replacing an artifact.'
     ''
-    'The Qwen3.8 Flash-Next deployment uses the complete'
-    '`RadixArk/Qwen3.8-Flash-Next-NVFP4` checkpoint under WSL at'
-    '`/home/rba90/models/Qwen3.8-Flash-Next-NVFP4`. Its indexed weight files total'
-    '135195303851206 bytes. It is intentionally outside the generated Windows'
-    '`models/` table below; the pinned runtime and benchmark record its repository'
-    'revision and validate that all indexed shards are present.'
+    'The uncensored FreeToken checkpoint is stored separately under WSL at'
+    '`/home/rba90/models/Qwen3.8-Flash-Next-Uncensored-NVFP4`.'
+    'The native Windows Strata checkpoint and generated assets are under'
+    '`models/qwen38-flash-next-uncensored-strata/`; see the'
+    '[Strata runbook](qwen38-flash-next-strata.md) and'
+    '[checkpoint manifest](qwen38-strata-checkpoint-manifest.json).'
     ''
     '| Role | Repository | Filename | Quantization | Size bytes | Size GB | SHA-256 | Download date |'
     '|---|---|---|---|---:|---:|---|---|'

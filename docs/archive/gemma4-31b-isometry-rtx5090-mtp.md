@@ -1,5 +1,11 @@
 # Gemma 4 31B Isometry Fabled Persona — RTX 5090
 
+Retired on 2026-10-03: Persona launchers, profilers, downloader and the Kazusa
+router have been removed. Dedicated Windows weight deletion remains pending
+the filesystem policy block described in [history](../history.md#2026-10-03--deployment-cleanup).
+The shared MTP drafter is retained for Fable-5 Distill. This document preserves
+historical configurations and measurements.
+
 This setup uses the exact persona target already stored in LM Studio. It does **not** download or substitute an unmodified Gemma 4 target.
 
 ## Project-local assets

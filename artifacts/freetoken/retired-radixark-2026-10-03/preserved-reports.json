@@ -1,0 +1,56 @@
+[
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/README.md",
+    "file": "README.md",
+    "bytes": 5927,
+    "sha256": "2b62aaf5b5d876732a2f4efb5f023ca31185ba324110fc9be27c8b088ee827a2"
+  },
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/aime26_metrics.json",
+    "file": "aime26_metrics.json",
+    "bytes": 1062,
+    "sha256": "eb4acd8c64618dc36db5c909b05ead73d172f5fdc90c42b44685c77468032ae9"
+  },
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/audit_unchanged_report.json",
+    "file": "audit_unchanged_report.json",
+    "bytes": 110,
+    "sha256": "b0901c9029446c7e78f864b359096c73846c54fb8ecd7dd9c77357e4f0530f51"
+  },
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/conversion_environment.json",
+    "file": "conversion_environment.json",
+    "bytes": 344,
+    "sha256": "10dadc9b3421b669e533ffcdb3ffb1bf56f42d35936fc24aa2020db0df7480ac"
+  },
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/gsm8k_metrics.json",
+    "file": "gsm8k_metrics.json",
+    "bytes": 869,
+    "sha256": "88766f7e1da1f8a7a8adb98ba3df94c4db6982af1176e35af12e223a81952a20"
+  },
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/qualification-notes.md",
+    "file": "qualification-notes.md",
+    "bytes": 3253,
+    "sha256": "8466e1895096cf524f51bd5e971ca89e08034ac5a5a78f5259d79172c2c1b7ab"
+  },
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/smoke_report.json",
+    "file": "smoke_report.json",
+    "bytes": 389,
+    "sha256": "8282913c8502a1241ab1ac6f227e62f24616c83f0725a401353b87af390e204d"
+  },
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/validate_checkpoint_report.json",
+    "file": "validate_checkpoint_report.json",
+    "bytes": 336,
+    "sha256": "264fbdd66715cc5902da7b314b9483c9d5e5850307df889845e3ee117824c679"
+  },
+  {
+    "original_path": "/home/rba90/models/Qwen3.8-Flash-Next-NVFP4/validate_scales_report.json",
+    "file": "validate_scales_report.json",
+    "bytes": 149,
+    "sha256": "4da2ed4a9e737ec6d6b4a12109b27804856e3d47d3a15cc7317e798c2f6f3e44"
+  }
+]

@@ -19,8 +19,7 @@ $requiredModels = @(
 )
 if ($IncludeGemma) {
     $requiredModels += @(
-        'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_M.gguf',
-        'Gemma-4-31B-Isometry-Fabled-Persona.i1-Q4_K_S.gguf',
+        'Gemma-4-31B-Fable-5-Distill.q4_k_m.gguf',
         'mtp-gemma-4-31B-it-Q8_0.gguf'
     )
 }
@@ -55,10 +54,7 @@ foreach ($option in @(
         '--spec-draft-model',
         '--spec-draft-ngl',
         '--cache-type-k',
-        '--cache-type-v',
-        '--models-preset',
-        '--models-max',
-        '--models-autoload'
+        '--cache-type-v'
     )) {
     if ($help -notmatch [regex]::Escape($option)) {
         throw "Runtime help is missing required option: $option"
@@ -90,7 +86,7 @@ Write-Host 'RUNTIME CHECK PASSED'
 Write-Host "Runtime: $runtime"
 Write-Host $version
 Write-Host "Model artifacts checked: $($requiredModels.Count)"
-if ($IncludeGemma) { Write-Host 'Gemma/MTP model artifacts checked.' }
+if ($IncludeGemma) { Write-Host 'Gemma Fable-5 Distill/shared MTP model artifacts checked.' }
 if ($IncludeHauhauCS) { Write-Host 'HauhauCS target/MTP/vision artifacts checked.' }
 Write-Host 'DFlash2 options and per-GPU UUID isolation are available.'
 Write-Host 'No server was started and no model was loaded by this check.'
