@@ -31,6 +31,9 @@ Read the documents in this order when operating the workspace:
 13. [FreeToken PR #447 local experiment history](freetoken-pr447-local-experiment-2026-09-29.md) —
     RTX 5090 + 4090 TP2+EP2, 262K capacity and a completed 128K cold request:
     31.16 token/s average decode, retained launch evidence, and untested placement proposals.
+14. [Native Windows Strata Flash-Next deployment](qwen38-flash-next-strata.md) —
+    pinned ModelOpt checkpoint, workspace layout, vision/MTP, long-output and
+    multi-GPU measurements, plus two-agent tool/cache tests and Asuna findings.
 
 The [Gemma 4 26B RTX 4090 runbook](gemma4-26b-4090-vision-mtp.md) records the
 262K Q8/Q8 vision/MTP launcher, model staging, and measured validation.

@@ -15,6 +15,13 @@ The Qwen3.8 Flash-Next deployment uses the complete
 `models/` table below; the pinned runtime and benchmark record its repository
 revision and validate that all indexed shards are present.
 
+The native Windows Strata deployment has a separate ModelOpt NVFP4 checkpoint
+under `models/qwen38-flash-next-uncensored-strata/checkpoint/`. All 220 files
+(135,253,671,102 bytes) were verified on 2026-10-03 against revision
+`f24d2b68ff2814f24455ae86717be276619b5664`. The complete source inventory and
+hashes are in [qwen38-strata-checkpoint-manifest.json](qwen38-strata-checkpoint-manifest.json);
+generated assets and launch commands are in the [Strata runbook](qwen38-flash-next-strata.md).
+
 | Role | Repository | Filename | Quantization | Size bytes | Size GB | SHA-256 | Download date |
 |---|---|---|---|---:|---:|---|---|
 | RTX 5090 primary target | unsloth/Qwen3.8-27B-GGUF | Qwen3.8-27B-UD-Q6_K_M.gguf | UD-Q6_K_M | 23088409504 | 21.503 | 493301830a596b8ad56dc1329f80bbcb578c8e910da395feafdc9cd8263430bb | 2026-08-20 |

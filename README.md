@@ -1,8 +1,8 @@
 # Qwen3.8 / DFlash2 Windows workspace
 
 This repository is a reproducible local-inference workspace for two maintained
-Qwen3.8-27B llama.cpp deployment modes plus one isolated
-Qwen3.8-Flash-Next FreeToken path on one Windows host:
+Qwen3.8-27B llama.cpp deployment modes plus isolated
+Qwen3.8-Flash-Next FreeToken and Strata paths on one Windows host:
 
 - RTX 5090: Qwen3.8-27B `UD-Q6_K_M` with DFlash2, currently profiled at
   `126976` context tokens.
@@ -11,6 +11,12 @@ Qwen3.8-Flash-Next FreeToken path on one Windows host:
 - RTX 5090 under WSL: Qwen3.8-Flash-Next NVFP4 through FreeToken, with routed
   expert offload and disk-backed PLE; this path is separate from the maintained
   llama.cpp launchers.
+- RTX 5090 natively on Windows: Qwen3.8-Flash-Next uncensored ModelOpt NVFP4
+  through Strata, with CPU vision, MTP and host RAM snapshots for alternating
+  agent histories; see the
+  [Strata runbook](docs/qwen38-flash-next-strata.md).
+
+All Flash-Next launchers share port `1919`; run one backend at a time.
 
 The independent launchers expose one model per port. The maintained Kazusa
 launcher can instead place the Qwen RTX 5090 profile and the experimental Gemma
@@ -106,8 +112,8 @@ reference. They are not the current operating instructions.
 
 ```text
 docs/       current documentation and archived stage notes
-models/     local GGUF files; ignored by Git
-runtime/    retained llama.cpp and FreeToken runtimes; ignored by Git
+models/     local checkpoints and GGUF assets; ignored by Git
+runtime/    retained llama.cpp, FreeToken and Strata runtimes; ignored by Git
 scripts/    maintained launch, profiling, setup, and inventory helpers
 benchmarks/ dated JSON/CSV measurements grouped by model and run date
 ```
@@ -117,7 +123,7 @@ constraints are full target and draft GPU residency, target KV cache at `Q8_0`
 or better, DFlash2 enabled, one slot, no normal CPU offload, and at least
 1024 MiB free VRAM during the accepted stress workload.
 
-Qwen3.8-Flash-Next is retained only as a FreeToken RTX 5090 path using NVFP4,
+The retained Qwen3.8-Flash-Next FreeToken RTX 5090 path uses NVFP4,
 disk-backed PLE, `--moe-strategy offload`, and automatic CPU-layer fallback.
 Its retained three-run 4K median was 12.53 seconds,
 1656 prompt tok/s, and 50.59 decode tok/s. Native 256K validation remains

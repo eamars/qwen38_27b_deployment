@@ -1,0 +1,200 @@
+{
+  "recorded_at": "2026-10-03T04:58:33.312032+00:00",
+  "runtime": {
+    "repository": "https://github.com/sergqwer/strata-nvfp4",
+    "tag": "v0.1.37-nvfp4.2",
+    "commit": "69a60f53914f92871b883e826fbb871949d30c15",
+    "engine_sha256": "6f57ce029fe5a5ca3b2489bafefafa2ff8c7e0e42ca7c4b8fe25aa0a9eebe4c2"
+  },
+  "model": {
+    "repo": "jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4",
+    "revision": "f24d2b68ff2814f24455ae86717be276619b5664"
+  },
+  "configuration": {
+    "endpoint": "http://127.0.0.1:1919/v1",
+    "active_requests": 1,
+    "gpu": "RTX 5090",
+    "gpu_mode": "Single",
+    "context": 262144,
+    "kv": "int8",
+    "mtp_spec": 4,
+    "vram_reserve_mib": 2048,
+    "vram_free_soft_target_mib": 1024,
+    "conversation_cache_mib": 16384,
+    "parked_slots": 8,
+    "cache_physical_ram_admission_floor_mib": 2560
+  },
+  "health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen38-next-uncensored-strata-vision",
+    "images": true,
+    "api_key": false,
+    "loaded": true,
+    "service": "strata"
+  },
+  "active_request_slots": 1,
+  "passed": true,
+  "independent_histories": 9,
+  "initial_prompt_tokens_each": 8201,
+  "request_count": 18,
+  "returned_histories": 9,
+  "cache_hits_on_return": 9,
+  "peak_observed_parked_entries": 8,
+  "evictions": 0,
+  "maximum_accounted_cache_bytes": 5978900608,
+  "min_available_ram_mib": 31784.82421875,
+  "min_gpu0_free_mib": 1051,
+  "tool_and_private_code_checks": "All nine independent histories returned their own unique code and tool value.",
+  "cases": [
+    {
+      "label": "context-01-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.8741011999954935
+    },
+    {
+      "label": "context-02-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.7042858000058914
+    },
+    {
+      "label": "context-03-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.690704300010111
+    },
+    {
+      "label": "context-04-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.6885914000013145
+    },
+    {
+      "label": "context-05-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.5692973999975948
+    },
+    {
+      "label": "context-06-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.57420680001087
+    },
+    {
+      "label": "context-07-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.3844803999963915
+    },
+    {
+      "label": "context-08-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.431899599992903
+    },
+    {
+      "label": "context-09-tool",
+      "prompt_tokens": 8201,
+      "cached_tokens": 0,
+      "new_tokens": 8201,
+      "output_tokens": 40,
+      "wall_s": 2.3914064999989932
+    },
+    {
+      "label": "context-01-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 24,
+      "wall_s": 0.6109612000000197
+    },
+    {
+      "label": "context-02-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 24,
+      "wall_s": 0.45359569998981897
+    },
+    {
+      "label": "context-03-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 24,
+      "wall_s": 0.39910819999931846
+    },
+    {
+      "label": "context-04-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 24,
+      "wall_s": 0.41471420000016224
+    },
+    {
+      "label": "context-05-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 24,
+      "wall_s": 0.40211330000602175
+    },
+    {
+      "label": "context-06-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 25,
+      "wall_s": 0.37929510000685696
+    },
+    {
+      "label": "context-07-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 24,
+      "wall_s": 0.38970259999041446
+    },
+    {
+      "label": "context-08-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 24,
+      "wall_s": 0.3912135999999009
+    },
+    {
+      "label": "context-09-resume",
+      "prompt_tokens": 8281,
+      "cached_tokens": 8240,
+      "new_tokens": 41,
+      "output_tokens": 24,
+      "wall_s": 0.40055979999306146
+    }
+  ],
+  "raw_report": "benchmarks/raw/qwen38-strata/2026-10-03/cache/expanded-16gib-8slots/capacity/report.json",
+  "raw_report_sha256": "3f2ba403ca49caf24a60b91b3b46a4fafbbffbf8b7e404c69f1c1550f3f51056",
+  "raw_engine_log": "benchmarks/raw/qwen38-strata/2026-10-03/cache/expanded-16gib-8slots/capacity/engine.log",
+  "probe_script": "benchmarks/raw/qwen38-strata/2026-10-03/cache/expanded-16gib-8slots/capacity-probe.py",
+  "scope": "Eight parked slots exercised with approximately 8K-token histories; not a claim that eight 128K histories fit the 16 GiB budget."
+}

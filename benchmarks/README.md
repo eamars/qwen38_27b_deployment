@@ -7,6 +7,7 @@ qwen27b/2026-08-21/   initial dual-GPU baseline
 qwen27b/2026-08-26/   5090 DFlash2 n-max comparison
 gemma4/2026-08-25/    Gemma 4 / Google MTP experiment
 qwen38_flash_next/2026-09-02/   retained FreeToken 4K result
+qwen38_flash_next/2026-10-03/   native Strata validation, 250K retrieval, long output, multi-GPU and two-agent cache measurements
 ```
 
 JSON files contain request and summary metrics. CSV files contain the sampled

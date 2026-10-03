@@ -1,0 +1,1673 @@
+{
+  "date": "2026-10-03",
+  "runtime": {
+    "version": "0.1.37-nvfp4.2",
+    "source": "release",
+    "archs": [
+      75,
+      86,
+      89,
+      120
+    ],
+    "ptx": false,
+    "cuda": "13.3",
+    "vision": "cpu",
+    "portable": true,
+    "fork": "https://github.com/sergqwer/strata-nvfp4",
+    "commit": "69a60f5",
+    "dirty": false,
+    "engine_sha256": "6f57ce029fe5a5ca3b2489bafefafa2ff8c7e0e42ca7c4b8fe25aa0a9eebe4c2"
+  },
+  "checkpoint_revision": "f24d2b68ff2814f24455ae86717be276619b5664",
+  "host": {
+    "cpu": "Ryzen 9 9950X3D",
+    "ram_gib": 127.6,
+    "gpus": [
+      "RTX 5090 32 GB",
+      "RTX 4090 24 GB"
+    ],
+    "os": "native Windows",
+    "driver": "610.74"
+  },
+  "common_configuration": {
+    "context": 262144,
+    "kv": "int8",
+    "mtp_spec": 4,
+    "mtp_min_p": 0.5,
+    "vram_reserve_mib": 2048,
+    "vision": "CPU FP32",
+    "vision_max_tokens": 1024,
+    "port": 1920,
+    "host": "127.0.0.1",
+    "large_pages": false,
+    "large_pages_note": "Windows refused large pages with error 1450; the engine successfully used 4 KiB pages."
+  },
+  "request_configuration": {
+    "temperature": 0,
+    "reasoning_effort": "none",
+    "requested_output_tokens": 4096
+  },
+  "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+  "ordering": [
+    "single",
+    "multi",
+    "multi-long",
+    "helper",
+    "helper-long",
+    "helper-garden",
+    "multi-garden",
+    "single-garden"
+  ],
+  "raw_directory": "benchmarks/raw/qwen38-strata/2026-10-03/performance",
+  "selected_default": "Single",
+  "request_slots": {
+    "active": 1,
+    "preferred": 2,
+    "preference_met": false,
+    "evidence": "Service.run holds self.fifo; /props total_slots=1; observed one active and one queued.",
+    "cpu_expert_workers": 15,
+    "host_thread": 1,
+    "windows_shared_arena_supported": false
+  },
+  "vram_policy": {
+    "target_free_mib": 1024,
+    "soft": true,
+    "abort_at_target": false,
+    "engine_allocation_reserve_mib": 2048,
+    "sampling": "nvidia-smi, 0.5 seconds plus command duration; benchmark requests only, not startup"
+  },
+  "modes": {
+    "Single": {
+      "gpu": "5090",
+      "initial_expert_slots": 7871,
+      "automatic_prefill_chunk": 32768,
+      "elastic_kv": true
+    },
+    "LayerSplit": {
+      "gpus": [
+        "5090",
+        "4090"
+      ],
+      "layer_ranges": [
+        [
+          0,
+          30
+        ],
+        [
+          31,
+          47
+        ]
+      ],
+      "initial_expert_slots": [
+        7920,
+        4838
+      ],
+      "automatic_prefill_chunk": 16384,
+      "elastic_kv": false,
+      "wddm_arena_pin_cap_gib": 8
+    },
+    "ExpertHelper": {
+      "primary": "5090",
+      "helper": "4090",
+      "initial_expert_slots": [
+        6689,
+        8000
+      ],
+      "automatic_prefill_chunk": 32768,
+      "elastic_kv": false,
+      "wddm_arena_pin_cap_gib": 8,
+      "4k_decode_helper_wait_ms": 10921,
+      "4k_decode_helper_staging_launch_ms": 1514
+    }
+  },
+  "configurations": {
+    "single": {
+      "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata.exe",
+      "args": [
+        "--pack",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack",
+        "--native",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--native-dense-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--ple-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\ple-fp8.gguf",
+        "--embd-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\token-embd-bf16.gguf",
+        "--expert-profile",
+        "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\data\\expert-profile.bin",
+        "--expert-cache",
+        "auto",
+        "--prefill",
+        "auto",
+        "--max-context",
+        "262144",
+        "--kv",
+        "int8",
+        "--vram-reserve-mib",
+        "2048",
+        "--vision",
+        "--mtp",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mtp\\rt",
+        "--spec",
+        "4",
+        "--spec-min-p",
+        "0.5"
+      ],
+      "cwd": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4",
+      "tokenizer": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack\\tokenizer",
+      "model_name": "qwen38-next-uncensored-strata-vision",
+      "anthropic_thinking": "on_request",
+      "host": "127.0.0.1",
+      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\raw\\qwen38-strata\\server\\engine-1920.log",
+      "env": {
+        "CUDA_VISIBLE_DEVICES": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "vision": {
+        "max_tokens": 1024,
+        "mmproj": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mmproj-f32.gguf",
+        "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata-vision.exe",
+        "model": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "gpu": false
+      }
+    },
+    "multi": {
+      "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata.exe",
+      "args": [
+        "--pack",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack",
+        "--native",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--native-dense-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--ple-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\ple-fp8.gguf",
+        "--embd-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\token-embd-bf16.gguf",
+        "--expert-profile",
+        "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\data\\expert-profile.bin",
+        "--expert-cache",
+        "auto",
+        "--prefill",
+        "auto",
+        "--max-context",
+        "262144",
+        "--kv",
+        "int8",
+        "--vram-reserve-mib",
+        "2048",
+        "--vision",
+        "--mtp",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mtp\\rt",
+        "--spec",
+        "4",
+        "--spec-min-p",
+        "0.5",
+        "--layer-split",
+        "auto"
+      ],
+      "cwd": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4",
+      "tokenizer": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack\\tokenizer",
+      "model_name": "qwen38-next-uncensored-strata-vision",
+      "anthropic_thinking": "on_request",
+      "host": "127.0.0.1",
+      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\raw\\qwen38-strata\\2026-10-03\\performance\\engine-multi.log",
+      "env": {
+        "CUDA_VISIBLE_DEVICES": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0,GPU-eed52936-813f-8d68-1654-bfb56cb42bc3",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "vision": {
+        "max_tokens": 1024,
+        "mmproj": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mmproj-f32.gguf",
+        "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata-vision.exe",
+        "model": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "gpu": false
+      },
+      "gpu": [
+        0,
+        1
+      ]
+    },
+    "helper": {
+      "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata.exe",
+      "args": [
+        "--pack",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack",
+        "--native",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--native-dense-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--ple-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\ple-fp8.gguf",
+        "--embd-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\token-embd-bf16.gguf",
+        "--expert-profile",
+        "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\data\\expert-profile.bin",
+        "--expert-cache",
+        "auto",
+        "--prefill",
+        "auto",
+        "--max-context",
+        "262144",
+        "--kv",
+        "int8",
+        "--vram-reserve-mib",
+        "2048",
+        "--vision",
+        "--mtp",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mtp\\rt",
+        "--spec",
+        "4",
+        "--spec-min-p",
+        "0.5",
+        "--expert-cache-device1",
+        "8000"
+      ],
+      "cwd": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4",
+      "tokenizer": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack\\tokenizer",
+      "model_name": "qwen38-next-uncensored-strata-vision",
+      "anthropic_thinking": "on_request",
+      "host": "127.0.0.1",
+      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\raw\\qwen38-strata\\2026-10-03\\performance\\engine-helper.log",
+      "env": {
+        "CUDA_VISIBLE_DEVICES": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0,GPU-eed52936-813f-8d68-1654-bfb56cb42bc3",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "vision": {
+        "max_tokens": 1024,
+        "mmproj": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mmproj-f32.gguf",
+        "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata-vision.exe",
+        "model": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "gpu": false
+      }
+    },
+    "single-garden": {
+      "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata.exe",
+      "args": [
+        "--pack",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack",
+        "--native",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--native-dense-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--ple-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\ple-fp8.gguf",
+        "--embd-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\token-embd-bf16.gguf",
+        "--expert-profile",
+        "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\data\\expert-profile.bin",
+        "--expert-cache",
+        "auto",
+        "--prefill",
+        "auto",
+        "--max-context",
+        "262144",
+        "--kv",
+        "int8",
+        "--vram-reserve-mib",
+        "2048",
+        "--vision",
+        "--mtp",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mtp\\rt",
+        "--spec",
+        "4",
+        "--spec-min-p",
+        "0.5"
+      ],
+      "cwd": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4",
+      "tokenizer": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack\\tokenizer",
+      "model_name": "qwen38-next-uncensored-strata-vision",
+      "anthropic_thinking": "on_request",
+      "host": "127.0.0.1",
+      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\raw\\qwen38-strata\\server\\engine-1920.log",
+      "gpu": 0,
+      "env": {
+        "CUDA_VISIBLE_DEVICES": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0",
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID"
+      },
+      "vision": {
+        "model": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata-vision.exe",
+        "max_tokens": 1024,
+        "mmproj": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mmproj-f32.gguf",
+        "gpu": false
+      }
+    },
+    "multi-garden": {
+      "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata.exe",
+      "args": [
+        "--pack",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack",
+        "--native",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--native-dense-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "--ple-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\ple-fp8.gguf",
+        "--embd-gguf",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\token-embd-bf16.gguf",
+        "--expert-profile",
+        "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\data\\expert-profile.bin",
+        "--expert-cache",
+        "auto",
+        "--prefill",
+        "auto",
+        "--max-context",
+        "262144",
+        "--kv",
+        "int8",
+        "--vram-reserve-mib",
+        "2048",
+        "--vision",
+        "--mtp",
+        "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mtp\\rt",
+        "--spec",
+        "4",
+        "--spec-min-p",
+        "0.5",
+        "--layer-split",
+        "auto"
+      ],
+      "cwd": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4",
+      "tokenizer": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\pack\\tokenizer",
+      "model_name": "qwen38-next-uncensored-strata-vision",
+      "anthropic_thinking": "on_request",
+      "host": "127.0.0.1",
+      "log": "C:\\workspace\\qwen38_27b\\benchmarks\\raw\\qwen38-strata\\server\\engine-1921.log",
+      "gpu": [
+        0,
+        1
+      ],
+      "env": {
+        "CUDA_DEVICE_ORDER": "PCI_BUS_ID",
+        "CUDA_VISIBLE_DEVICES": "GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0,GPU-eed52936-813f-8d68-1654-bfb56cb42bc3"
+      },
+      "vision": {
+        "mmproj": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\mmproj-f32.gguf",
+        "exe": "C:\\workspace\\qwen38_27b\\runtime\\strata-nvfp4\\engine\\strata-vision.exe",
+        "max_tokens": 1024,
+        "gpu": false,
+        "model": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf"
+      }
+    }
+  },
+  "neutral_comparison_expert_slots": {
+    "Single": [
+      7950
+    ],
+    "LayerSplit": [
+      7936,
+      4838
+    ],
+    "ExpertHelper": [
+      6689,
+      8000
+    ]
+  },
+  "launcher_config_parity": {
+    "Single": {
+      "exe": true,
+      "args": true,
+      "cwd": true,
+      "tokenizer": true,
+      "model_name": true,
+      "anthropic_thinking": true,
+      "host": true,
+      "env": true,
+      "vision": true
+    },
+    "LayerSplit": {
+      "exe": true,
+      "args": true,
+      "cwd": true,
+      "tokenizer": true,
+      "model_name": true,
+      "anthropic_thinking": true,
+      "host": true,
+      "env": true,
+      "vision": true
+    },
+    "ExpertHelper": {
+      "exe": true,
+      "args": true,
+      "cwd": true,
+      "tokenizer": true,
+      "model_name": true,
+      "anthropic_thinking": true,
+      "host": true,
+      "env": true,
+      "vision": true
+    }
+  },
+  "runs": {
+    "single": {
+      "started_at": "2026-10-03T03:39:09.234634+00:00",
+      "label": "single-5090",
+      "health": {
+        "status": "ok",
+        "max_context": 262144,
+        "model": "qwen38-next-uncensored-strata-vision",
+        "images": true,
+        "api_key": false,
+        "loaded": true,
+        "service": "strata"
+      },
+      "props": {
+        "default_generation_settings": {
+          "n_ctx": 262144,
+          "params": {
+            "n_predict": -1
+          }
+        },
+        "total_slots": 1,
+        "model_alias": "qwen38-next-uncensored-strata-vision",
+        "modalities": {
+          "vision": true
+        },
+        "models_autoload": true,
+        "is_sleeping": false,
+        "model_path": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "build_info": "Strata 0.1.37"
+      },
+      "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+      "cases": [
+        {
+          "label": "p4096-o4096-r1",
+          "target_prompt_tokens": 4096,
+          "requested_output_tokens": 4096,
+          "start_s": 0.097651300005964,
+          "request_sha256": "c1a092054d89b41b0f142ff7a47cc9bc7076faf62ba85feed89982909df9dfce",
+          "done": true,
+          "headers_s": 0.03133749999688007,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 4096,
+            "completion_tokens": 4096,
+            "total_tokens": 8192,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 4096,
+            "prompt_ms": 2053.7,
+            "prompt_per_token_ms": 0.501,
+            "prompt_per_second": 1994.4,
+            "predicted_n": 4096,
+            "predicted_ms": 31853.4,
+            "predicted_per_token_ms": 7.777,
+            "predicted_per_second": 128.6,
+            "draft_n": 3719,
+            "draft_n_accepted": 2334
+          },
+          "total_s": 33.940980599989416,
+          "ttft_s": 2.0987726999883307,
+          "decode_interval_s": 31.841456900001504,
+          "client_decode_tok_s": 128.60592443556837,
+          "effective_prefill_tok_s": 1951.6167710885386,
+          "nonempty_events": 4051,
+          "max_event_gap_s": 0.07502730000123847,
+          "p95_event_gap_s": 0.023589229997014627,
+          "codes_correct": true,
+          "end_s": 34.04009660000156,
+          "count_endpoint_tokens": 4096
+        },
+        {
+          "label": "p131072-o4096-r1",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 35.137423399995896,
+          "request_sha256": "b74745c888ebf10c3f2587c81bfd461663e6192d45191cbd96eb8e9ca46254e3",
+          "done": true,
+          "headers_s": 0.3993549000006169,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 4096,
+            "total_tokens": 135168,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 22438.6,
+            "prompt_per_token_ms": 0.171,
+            "prompt_per_second": 5841.4,
+            "predicted_n": 4096,
+            "predicted_ms": 33242.7,
+            "predicted_per_token_ms": 8.116,
+            "predicted_per_second": 123.2,
+            "draft_n": 3762,
+            "draft_n_accepted": 2311
+          },
+          "total_s": 56.10305510000035,
+          "ttft_s": 22.879845200004638,
+          "decode_interval_s": 33.221950999999535,
+          "client_decode_tok_s": 123.26187586033275,
+          "effective_prefill_tok_s": 5728.710087600305,
+          "nonempty_events": 4007,
+          "max_event_gap_s": 0.0544211000087671,
+          "p95_event_gap_s": 0.024374300003546522,
+          "codes_correct": true,
+          "end_s": 91.24180859999615,
+          "count_endpoint_tokens": 131072
+        },
+        {
+          "label": "p4096-o4096-r2",
+          "target_prompt_tokens": 4096,
+          "requested_output_tokens": 4096,
+          "start_s": 91.33594590000575,
+          "request_sha256": "1e8e139682b9b381e1add1bbeb417fc8ba6c57a790a6e090810c6394d903a1b9",
+          "done": true,
+          "headers_s": 0.017364699990139343,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 4096,
+            "completion_tokens": 4096,
+            "total_tokens": 8192,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 4096,
+            "prompt_ms": 2150.1,
+            "prompt_per_token_ms": 0.525,
+            "prompt_per_second": 1905.0,
+            "predicted_n": 4096,
+            "predicted_ms": 32778.7,
+            "predicted_per_token_ms": 8.003,
+            "predicted_per_second": 125.0,
+            "draft_n": 3829,
+            "draft_n_accepted": 2208
+          },
+          "total_s": 34.948836700001266,
+          "ttft_s": 2.1884447999909753,
+          "decode_interval_s": 32.757898199997726,
+          "client_decode_tok_s": 125.00802020320963,
+          "effective_prefill_tok_s": 1871.6487617219732,
+          "nonempty_events": 4046,
+          "max_event_gap_s": 0.06829199999629054,
+          "p95_event_gap_s": 0.022553339989099187,
+          "codes_correct": true,
+          "end_s": 126.28656239999691,
+          "count_endpoint_tokens": 4096
+        },
+        {
+          "label": "p131072-o4096-r2",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 127.75201290000405,
+          "request_sha256": "35f1cb685b34a8fa94edb004d91e597d05db469e7be12b185cc31a57420af00f",
+          "done": true,
+          "headers_s": 0.4501544999948237,
+          "finish_reason": "stop",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 1757,
+            "total_tokens": 132829,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 22542.9,
+            "prompt_per_token_ms": 0.172,
+            "prompt_per_second": 5814.3,
+            "predicted_n": 1757,
+            "predicted_ms": 15115.8,
+            "predicted_per_token_ms": 8.603,
+            "predicted_per_second": 116.2,
+            "draft_n": 1549,
+            "draft_n_accepted": 969
+          },
+          "total_s": 38.130388399993535,
+          "ttft_s": 23.04413239999849,
+          "decode_interval_s": 15.083983299991814,
+          "client_decode_tok_s": 116.41487298656403,
+          "effective_prefill_tok_s": 5687.868726184223,
+          "nonempty_events": 1721,
+          "max_event_gap_s": 0.08121800000662915,
+          "p95_event_gap_s": 0.024970829999801936,
+          "codes_correct": true,
+          "end_s": 165.88360929999908,
+          "count_endpoint_tokens": 131072
+        }
+      ],
+      "concurrency": {
+        "a": {
+          "label": "concurrent-a",
+          "target_prompt_tokens": 4096,
+          "requested_output_tokens": 4096,
+          "start_s": 167.026071100001,
+          "request_sha256": "980b002ac1cf1750152196132a199c3aa90301784b11a6f4da716457c3256f4b",
+          "done": true,
+          "headers_s": 0.034677100004046224,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 4096,
+            "completion_tokens": 4096,
+            "total_tokens": 8192,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 4096,
+            "prompt_ms": 2147.6,
+            "prompt_per_token_ms": 0.524,
+            "prompt_per_second": 1907.2,
+            "predicted_n": 4096,
+            "predicted_ms": 34474.9,
+            "predicted_per_token_ms": 8.417,
+            "predicted_per_second": 118.8,
+            "draft_n": 3865,
+            "draft_n_accepted": 2188
+          },
+          "total_s": 36.673703299995395,
+          "ttft_s": 2.2049422999989474,
+          "decode_interval_s": 34.45476399999461,
+          "client_decode_tok_s": 118.85148886814724,
+          "effective_prefill_tok_s": 1857.6449823661849,
+          "nonempty_events": 4053,
+          "max_event_gap_s": 0.07846679999784101,
+          "p95_event_gap_s": 0.024051189999590862,
+          "codes_correct": true,
+          "end_s": 203.70136930000444
+        },
+        "b": {
+          "label": "concurrent-b",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 128,
+          "start_s": 170.67018830000598,
+          "request_sha256": "f54d825660db928ee205f5640a558867b01dd97ba0106e58223684d0fa315737",
+          "done": true,
+          "headers_s": 0.55592619998788,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 128,
+            "total_tokens": 131200,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 22921.1,
+            "prompt_per_token_ms": 0.175,
+            "prompt_per_second": 5718.4,
+            "predicted_n": 128,
+            "predicted_ms": 1632.0,
+            "predicted_per_token_ms": 12.75,
+            "predicted_per_second": 78.4,
+            "draft_n": 127,
+            "draft_n_accepted": 73
+          },
+          "total_s": 57.59456979999959,
+          "ttft_s": 55.995278199989116,
+          "decode_interval_s": 1.5978873999993084,
+          "client_decode_tok_s": 79.47994333020898,
+          "effective_prefill_tok_s": 2340.7687971809287,
+          "nonempty_events": 123,
+          "max_event_gap_s": 0.08070580000639893,
+          "p95_event_gap_s": 0.051810555004340134,
+          "codes_correct": true,
+          "end_s": 228.2654787000065
+        },
+        "b_first_event_after_a_last_s": 22.97968910000054,
+        "queued_samples": 63,
+        "status_samples": 113,
+        "b_queue_and_preparation_s_estimate": 33.07417819998912
+      },
+      "gpu_memory": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5090",
+          "samples": 394,
+          "minimum_free_mib": 1322,
+          "maximum_used_mib": 30866
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 4090",
+          "samples": 394,
+          "minimum_free_mib": 22644,
+          "maximum_used_mib": 1495
+        }
+      ]
+    },
+    "multi": {
+      "started_at": "2026-10-03T03:44:55.681817+00:00",
+      "label": "multi-5090-4090",
+      "health": {
+        "status": "ok",
+        "max_context": 262144,
+        "model": "qwen38-next-uncensored-strata-vision",
+        "images": true,
+        "api_key": false,
+        "loaded": true,
+        "service": "strata"
+      },
+      "props": {
+        "default_generation_settings": {
+          "n_ctx": 262144,
+          "params": {
+            "n_predict": -1
+          }
+        },
+        "total_slots": 1,
+        "model_alias": "qwen38-next-uncensored-strata-vision",
+        "modalities": {
+          "vision": true
+        },
+        "models_autoload": true,
+        "is_sleeping": false,
+        "model_path": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "build_info": "Strata 0.1.37"
+      },
+      "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+      "cases": [
+        {
+          "label": "p4096-o4096-r1",
+          "target_prompt_tokens": 4096,
+          "requested_output_tokens": 4096,
+          "start_s": 0.09808520000660792,
+          "request_sha256": "c1a092054d89b41b0f142ff7a47cc9bc7076faf62ba85feed89982909df9dfce",
+          "done": true,
+          "headers_s": 0.03044940000108909,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 4096,
+            "completion_tokens": 4096,
+            "total_tokens": 8192,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 4096,
+            "prompt_ms": 2796.0,
+            "prompt_per_token_ms": 0.683,
+            "prompt_per_second": 1464.9,
+            "predicted_n": 4096,
+            "predicted_ms": 31318.7,
+            "predicted_per_token_ms": 7.646,
+            "predicted_per_second": 130.8,
+            "draft_n": 3771,
+            "draft_n_accepted": 2217
+          },
+          "total_s": 34.14769199999864,
+          "ttft_s": 2.8405673999950523,
+          "decode_interval_s": 31.306930899998406,
+          "client_decode_tok_s": 130.80170691532746,
+          "effective_prefill_tok_s": 1441.9654326833204,
+          "nonempty_events": 4052,
+          "max_event_gap_s": 0.03433769999537617,
+          "p95_event_gap_s": 0.019121839996660128,
+          "codes_correct": true,
+          "end_s": 34.24730319999799,
+          "count_endpoint_tokens": 4096
+        },
+        {
+          "label": "p131072-o4096-r1",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 35.40994949999731,
+          "request_sha256": "b74745c888ebf10c3f2587c81bfd461663e6192d45191cbd96eb8e9ca46254e3",
+          "done": true,
+          "headers_s": 0.37699040000734385,
+          "finish_reason": "stop",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 2538,
+            "total_tokens": 133610,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 23069.7,
+            "prompt_per_token_ms": 0.176,
+            "prompt_per_second": 5681.6,
+            "predicted_n": 2538,
+            "predicted_ms": 20888.0,
+            "predicted_per_token_ms": 8.23,
+            "predicted_per_second": 121.5,
+            "draft_n": 2323,
+            "draft_n_accepted": 1412
+          },
+          "total_s": 44.35627720000048,
+          "ttft_s": 23.484837099997094,
+          "decode_interval_s": 20.870960800006287,
+          "client_decode_tok_s": 121.55645465058014,
+          "effective_prefill_tok_s": 5581.133028170599,
+          "nonempty_events": 2494,
+          "max_event_gap_s": 0.05456179998873267,
+          "p95_event_gap_s": 0.021015160004026257,
+          "codes_correct": true,
+          "end_s": 79.76731460000155,
+          "count_endpoint_tokens": 131072
+        },
+        {
+          "label": "p4096-o4096-r2",
+          "target_prompt_tokens": 4096,
+          "requested_output_tokens": 4096,
+          "start_s": 79.87488920000033,
+          "request_sha256": "1e8e139682b9b381e1add1bbeb417fc8ba6c57a790a6e090810c6394d903a1b9",
+          "done": true,
+          "headers_s": 0.03164939999987837,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 4096,
+            "completion_tokens": 4096,
+            "total_tokens": 8192,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 4096,
+            "prompt_ms": 2492.0,
+            "prompt_per_token_ms": 0.608,
+            "prompt_per_second": 1643.7,
+            "predicted_n": 4096,
+            "predicted_ms": 32636.6,
+            "predicted_per_token_ms": 7.968,
+            "predicted_per_second": 125.5,
+            "draft_n": 3777,
+            "draft_n_accepted": 2248
+          },
+          "total_s": 35.16327730000194,
+          "ttft_s": 2.5436328000068897,
+          "decode_interval_s": 32.61864999998943,
+          "client_decode_tok_s": 125.5416763109855,
+          "effective_prefill_tok_s": 1610.2953224965904,
+          "nonempty_events": 4027,
+          "max_event_gap_s": 0.05862489998980891,
+          "p95_event_gap_s": 0.02069925000250805,
+          "codes_correct": true,
+          "end_s": 115.04004960000748,
+          "count_endpoint_tokens": 4096
+        },
+        {
+          "label": "p131072-o4096-r2",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 116.08409390000452,
+          "request_sha256": "35f1cb685b34a8fa94edb004d91e597d05db469e7be12b185cc31a57420af00f",
+          "done": true,
+          "headers_s": 0.34591530000034254,
+          "finish_reason": "stop",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 1954,
+            "total_tokens": 133026,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 23528.6,
+            "prompt_per_token_ms": 0.18,
+            "prompt_per_second": 5570.8,
+            "predicted_n": 1954,
+            "predicted_ms": 15901.4,
+            "predicted_per_token_ms": 8.138,
+            "predicted_per_second": 122.9,
+            "draft_n": 1723,
+            "draft_n_accepted": 1086
+          },
+          "total_s": 39.796847999998135,
+          "ttft_s": 23.912802199993166,
+          "decode_interval_s": 15.855102200002875,
+          "client_decode_tok_s": 123.1780139518524,
+          "effective_prefill_tok_s": 5481.248032070347,
+          "nonempty_events": 1912,
+          "max_event_gap_s": 0.06086169999616686,
+          "p95_event_gap_s": 0.020719240000471473,
+          "codes_correct": true,
+          "end_s": 155.881982100007,
+          "count_endpoint_tokens": 131072
+        }
+      ],
+      "gpu_memory": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5090",
+          "samples": 268,
+          "minimum_free_mib": 1447,
+          "maximum_used_mib": 30741
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 4090",
+          "samples": 268,
+          "minimum_free_mib": 1520,
+          "maximum_used_mib": 22619
+        }
+      ]
+    },
+    "multi-long": {
+      "started_at": "2026-10-03T03:48:17.509619+00:00",
+      "label": "multi-5090-4090-no-markers",
+      "health": {
+        "status": "ok",
+        "max_context": 262144,
+        "model": "qwen38-next-uncensored-strata-vision",
+        "images": true,
+        "api_key": false,
+        "loaded": true,
+        "service": "strata"
+      },
+      "props": {
+        "default_generation_settings": {
+          "n_ctx": 262144,
+          "params": {
+            "n_predict": -1
+          }
+        },
+        "total_slots": 1,
+        "model_alias": "qwen38-next-uncensored-strata-vision",
+        "modalities": {
+          "vision": true
+        },
+        "models_autoload": true,
+        "is_sleeping": false,
+        "model_path": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "build_info": "Strata 0.1.37"
+      },
+      "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+      "cases": [
+        {
+          "label": "p131072-o4096-r1",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 1.3579042000055779,
+          "request_sha256": "3055a39f73b8a4ea875b11196dc66bfdc33bdb77f83719265fa3c6d371cbee14",
+          "done": true,
+          "headers_s": 0.40700249999645166,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 4096,
+            "total_tokens": 135168,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 22803.7,
+            "prompt_per_token_ms": 0.174,
+            "prompt_per_second": 5747.8,
+            "predicted_n": 4096,
+            "predicted_ms": 32821.1,
+            "predicted_per_token_ms": 8.013,
+            "predicted_per_second": 124.8,
+            "draft_n": 3819,
+            "draft_n_accepted": 2233
+          },
+          "total_s": 56.05322159999923,
+          "ttft_s": 23.246228499992867,
+          "decode_interval_s": 32.8064744000003,
+          "client_decode_tok_s": 124.8229221485611,
+          "effective_prefill_tok_s": 5638.420012951357,
+          "nonempty_events": 4025,
+          "max_event_gap_s": 0.054311300002154894,
+          "p95_event_gap_s": 0.0198958999972092,
+          "codes_correct": true,
+          "end_s": 57.412686399999075,
+          "count_endpoint_tokens": 131072
+        }
+      ],
+      "gpu_memory": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5090",
+          "samples": 99,
+          "minimum_free_mib": 1412,
+          "maximum_used_mib": 30776
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 4090",
+          "samples": 99,
+          "minimum_free_mib": 1536,
+          "maximum_used_mib": 22603
+        }
+      ]
+    },
+    "helper": {
+      "started_at": "2026-10-03T03:52:34.469133+00:00",
+      "label": "helper-4090-8000",
+      "health": {
+        "status": "ok",
+        "max_context": 262144,
+        "model": "qwen38-next-uncensored-strata-vision",
+        "images": true,
+        "api_key": false,
+        "loaded": true,
+        "service": "strata"
+      },
+      "props": {
+        "default_generation_settings": {
+          "n_ctx": 262144,
+          "params": {
+            "n_predict": -1
+          }
+        },
+        "total_slots": 1,
+        "model_alias": "qwen38-next-uncensored-strata-vision",
+        "modalities": {
+          "vision": true
+        },
+        "models_autoload": true,
+        "is_sleeping": false,
+        "model_path": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "build_info": "Strata 0.1.37"
+      },
+      "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+      "cases": [
+        {
+          "label": "p4096-o4096-r1",
+          "target_prompt_tokens": 4096,
+          "requested_output_tokens": 4096,
+          "start_s": 0.11163630000373814,
+          "request_sha256": "c1a092054d89b41b0f142ff7a47cc9bc7076faf62ba85feed89982909df9dfce",
+          "done": true,
+          "headers_s": 0.031068799988133833,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 4096,
+            "completion_tokens": 4096,
+            "total_tokens": 8192,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 4096,
+            "prompt_ms": 2544.4,
+            "prompt_per_token_ms": 0.621,
+            "prompt_per_second": 1609.8,
+            "predicted_n": 4096,
+            "predicted_ms": 47583.4,
+            "predicted_per_token_ms": 11.617,
+            "predicted_per_second": 86.1,
+            "draft_n": 3914,
+            "draft_n_accepted": 2222
+          },
+          "total_s": 50.160850599990226,
+          "ttft_s": 2.600197499996284,
+          "decode_interval_s": 47.552539099997375,
+          "client_decode_tok_s": 86.11527538810701,
+          "effective_prefill_tok_s": 1575.2649558373369,
+          "nonempty_events": 4055,
+          "max_event_gap_s": 0.08935919999203179,
+          "p95_event_gap_s": 0.034814375001587905,
+          "codes_correct": true,
+          "end_s": 50.273898800005554,
+          "count_endpoint_tokens": 4096
+        }
+      ],
+      "gpu_memory": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5090",
+          "samples": 87,
+          "minimum_free_mib": 1034,
+          "maximum_used_mib": 31154
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 4090",
+          "samples": 87,
+          "minimum_free_mib": 1385,
+          "maximum_used_mib": 22754
+        }
+      ]
+    },
+    "helper-long": {
+      "started_at": "2026-10-03T03:53:24.852648+00:00",
+      "label": "helper-4090-8000-no-markers",
+      "health": {
+        "status": "ok",
+        "max_context": 262144,
+        "model": "qwen38-next-uncensored-strata-vision",
+        "images": true,
+        "api_key": false,
+        "loaded": true,
+        "service": "strata"
+      },
+      "props": {
+        "default_generation_settings": {
+          "n_ctx": 262144,
+          "params": {
+            "n_predict": -1
+          }
+        },
+        "total_slots": 1,
+        "model_alias": "qwen38-next-uncensored-strata-vision",
+        "modalities": {
+          "vision": true
+        },
+        "models_autoload": true,
+        "is_sleeping": false,
+        "model_path": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "build_info": "Strata 0.1.37"
+      },
+      "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+      "cases": [
+        {
+          "label": "p131072-o4096-r1",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 1.2896211000042967,
+          "request_sha256": "3055a39f73b8a4ea875b11196dc66bfdc33bdb77f83719265fa3c6d371cbee14",
+          "done": true,
+          "headers_s": 0.3785609999904409,
+          "finish_reason": "stop",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 2645,
+            "total_tokens": 133717,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 26103.0,
+            "prompt_per_token_ms": 0.199,
+            "prompt_per_second": 5021.3,
+            "predicted_n": 2645,
+            "predicted_ms": 31309.8,
+            "predicted_per_token_ms": 11.837,
+            "predicted_per_second": 84.5,
+            "draft_n": 2392,
+            "draft_n_accepted": 1481
+          },
+          "total_s": 57.8142028000002,
+          "ttft_s": 26.542874899998424,
+          "decode_interval_s": 31.25645319999603,
+          "client_decode_tok_s": 84.590531852166,
+          "effective_prefill_tok_s": 4938.12371470009,
+          "nonempty_events": 2599,
+          "max_event_gap_s": 0.07731570000760257,
+          "p95_event_gap_s": 0.03798867500590859,
+          "codes_correct": true,
+          "end_s": 59.104916900003445,
+          "count_endpoint_tokens": 131072
+        }
+      ],
+      "gpu_memory": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5090",
+          "samples": 102,
+          "minimum_free_mib": 990,
+          "maximum_used_mib": 31198
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 4090",
+          "samples": 102,
+          "minimum_free_mib": 1387,
+          "maximum_used_mib": 22752
+        }
+      ]
+    },
+    "helper-garden": {
+      "started_at": "2026-10-03T03:55:47.739361+00:00",
+      "label": "helper-4090-8000-garden",
+      "health": {
+        "status": "ok",
+        "max_context": 262144,
+        "model": "qwen38-next-uncensored-strata-vision",
+        "images": true,
+        "api_key": false,
+        "loaded": true,
+        "service": "strata"
+      },
+      "props": {
+        "default_generation_settings": {
+          "n_ctx": 262144,
+          "params": {
+            "n_predict": -1
+          }
+        },
+        "total_slots": 1,
+        "model_alias": "qwen38-next-uncensored-strata-vision",
+        "modalities": {
+          "vision": true
+        },
+        "models_autoload": true,
+        "is_sleeping": false,
+        "model_path": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "build_info": "Strata 0.1.37"
+      },
+      "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+      "cases": [
+        {
+          "label": "p131072-o4096-r1",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 1.1067692000069655,
+          "request_sha256": "61f94c1ca308fc2c7bec2bdcbd2a59723abfb66702d45553c472505e7e062605",
+          "done": true,
+          "headers_s": 0.40523979999125004,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 4096,
+            "total_tokens": 135168,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 26035.3,
+            "prompt_per_token_ms": 0.199,
+            "prompt_per_second": 5034.4,
+            "predicted_n": 4096,
+            "predicted_ms": 52423.4,
+            "predicted_per_token_ms": 12.799,
+            "predicted_per_second": 78.1,
+            "draft_n": 3797,
+            "draft_n_accepted": 2180
+          },
+          "total_s": 78.88769409999077,
+          "ttft_s": 26.48498120000295,
+          "decode_interval_s": 52.40194929999416,
+          "client_decode_tok_s": 78.1459479027521,
+          "effective_prefill_tok_s": 4948.917992812674,
+          "nonempty_events": 4025,
+          "max_event_gap_s": 0.08616389999224339,
+          "p95_event_gap_s": 0.03872107499410049,
+          "codes_correct": true,
+          "end_s": 79.99597970000468,
+          "count_endpoint_tokens": 131072
+        }
+      ],
+      "gpu_memory": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5090",
+          "samples": 138,
+          "minimum_free_mib": 526,
+          "maximum_used_mib": 31662
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 4090",
+          "samples": 138,
+          "minimum_free_mib": 1004,
+          "maximum_used_mib": 23135
+        }
+      ]
+    },
+    "multi-garden": {
+      "started_at": "2026-10-03T04:00:05.756879+00:00",
+      "label": "multi-5090-4090-garden",
+      "health": {
+        "status": "ok",
+        "max_context": 262144,
+        "model": "qwen38-next-uncensored-strata-vision",
+        "images": true,
+        "api_key": false,
+        "loaded": true,
+        "service": "strata"
+      },
+      "props": {
+        "default_generation_settings": {
+          "n_ctx": 262144,
+          "params": {
+            "n_predict": -1
+          }
+        },
+        "total_slots": 1,
+        "model_alias": "qwen38-next-uncensored-strata-vision",
+        "modalities": {
+          "vision": true
+        },
+        "models_autoload": true,
+        "is_sleeping": false,
+        "model_path": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "build_info": "Strata 0.1.37"
+      },
+      "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+      "cases": [
+        {
+          "label": "p131072-o4096-r1",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 1.1042116000025999,
+          "request_sha256": "61f94c1ca308fc2c7bec2bdcbd2a59723abfb66702d45553c472505e7e062605",
+          "done": true,
+          "headers_s": 0.38472980000369716,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 4096,
+            "total_tokens": 135168,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 22444.9,
+            "prompt_per_token_ms": 0.171,
+            "prompt_per_second": 5839.7,
+            "predicted_n": 4096,
+            "predicted_ms": 34141.2,
+            "predicted_per_token_ms": 8.335,
+            "predicted_per_second": 120.0,
+            "draft_n": 3888,
+            "draft_n_accepted": 2172
+          },
+          "total_s": 56.99185980000766,
+          "ttft_s": 22.862256200009142,
+          "decode_interval_s": 34.12910059999558,
+          "client_decode_tok_s": 119.98558204022903,
+          "effective_prefill_tok_s": 5733.1174514590375,
+          "nonempty_events": 3997,
+          "max_event_gap_s": 0.05126380000729114,
+          "p95_event_gap_s": 0.02029822499025613,
+          "codes_correct": true,
+          "end_s": 58.09748580001178,
+          "count_endpoint_tokens": 131072
+        }
+      ],
+      "gpu_memory": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5090",
+          "samples": 100,
+          "minimum_free_mib": 1365,
+          "maximum_used_mib": 30823
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 4090",
+          "samples": 100,
+          "minimum_free_mib": 1477,
+          "maximum_used_mib": 22662
+        }
+      ]
+    },
+    "single-garden": {
+      "started_at": "2026-10-03T04:02:57.206218+00:00",
+      "label": "single-5090-garden",
+      "health": {
+        "status": "ok",
+        "max_context": 262144,
+        "model": "qwen38-next-uncensored-strata-vision",
+        "images": true,
+        "api_key": false,
+        "loaded": true,
+        "service": "strata"
+      },
+      "props": {
+        "default_generation_settings": {
+          "n_ctx": 262144,
+          "params": {
+            "n_predict": -1
+          }
+        },
+        "total_slots": 1,
+        "model_alias": "qwen38-next-uncensored-strata-vision",
+        "modalities": {
+          "vision": true
+        },
+        "models_autoload": true,
+        "is_sleeping": false,
+        "model_path": "C:\\workspace\\qwen38_27b\\models\\qwen38-flash-next-uncensored-strata\\orca-nvfp4.gguf",
+        "build_info": "Strata 0.1.37"
+      },
+      "method": "SSE first/last nonempty event; API actual token usage. Client decode excludes TTFT. Event gaps are delivery gaps, not per-token GPU timings. Cold means zero reused KV tokens; expert cache and OS file cache stay warm. VRAM is observational, not a stop condition.",
+      "cases": [
+        {
+          "label": "p131072-o4096-r1",
+          "target_prompt_tokens": 131072,
+          "requested_output_tokens": 4096,
+          "start_s": 1.159864799992647,
+          "request_sha256": "61f94c1ca308fc2c7bec2bdcbd2a59723abfb66702d45553c472505e7e062605",
+          "done": true,
+          "headers_s": 0.36074200000439305,
+          "finish_reason": "length",
+          "usage": {
+            "prompt_tokens": 131072,
+            "completion_tokens": 4096,
+            "total_tokens": 135168,
+            "prompt_tokens_details": {
+              "cached_tokens": 0
+            }
+          },
+          "timings": {
+            "cache_n": 0,
+            "prompt_n": 131072,
+            "prompt_ms": 22280.9,
+            "prompt_per_token_ms": 0.17,
+            "prompt_per_second": 5882.7,
+            "predicted_n": 4096,
+            "predicted_ms": 34771.8,
+            "predicted_per_token_ms": 8.489,
+            "predicted_per_second": 117.8,
+            "draft_n": 3868,
+            "draft_n_accepted": 2234
+          },
+          "total_s": 57.434726699997555,
+          "ttft_s": 22.67166530000395,
+          "decode_interval_s": 34.76254080000217,
+          "client_decode_tok_s": 117.79921449239247,
+          "effective_prefill_tok_s": 5781.313294175049,
+          "nonempty_events": 4017,
+          "max_event_gap_s": 0.057921100000385195,
+          "p95_event_gap_s": 0.02443774000130361,
+          "codes_correct": true,
+          "end_s": 58.5960131999891,
+          "count_endpoint_tokens": 131072
+        }
+      ],
+      "gpu_memory": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 5090",
+          "samples": 101,
+          "minimum_free_mib": 1267,
+          "maximum_used_mib": 30921
+        },
+        {
+          "index": 1,
+          "name": "NVIDIA GeForce RTX 4090",
+          "samples": 101,
+          "minimum_free_mib": 23295,
+          "maximum_used_mib": 844
+        }
+      ]
+    }
+  },
+  "concurrency": {
+    "a": {
+      "label": "concurrent-a",
+      "target_prompt_tokens": 4096,
+      "requested_output_tokens": 4096,
+      "start_s": 167.026071100001,
+      "request_sha256": "980b002ac1cf1750152196132a199c3aa90301784b11a6f4da716457c3256f4b",
+      "done": true,
+      "headers_s": 0.034677100004046224,
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 4096,
+        "completion_tokens": 4096,
+        "total_tokens": 8192,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 4096,
+        "prompt_ms": 2147.6,
+        "prompt_per_token_ms": 0.524,
+        "prompt_per_second": 1907.2,
+        "predicted_n": 4096,
+        "predicted_ms": 34474.9,
+        "predicted_per_token_ms": 8.417,
+        "predicted_per_second": 118.8,
+        "draft_n": 3865,
+        "draft_n_accepted": 2188
+      },
+      "total_s": 36.673703299995395,
+      "ttft_s": 2.2049422999989474,
+      "decode_interval_s": 34.45476399999461,
+      "client_decode_tok_s": 118.85148886814724,
+      "effective_prefill_tok_s": 1857.6449823661849,
+      "nonempty_events": 4053,
+      "max_event_gap_s": 0.07846679999784101,
+      "p95_event_gap_s": 0.024051189999590862,
+      "codes_correct": true,
+      "end_s": 203.70136930000444
+    },
+    "b": {
+      "label": "concurrent-b",
+      "target_prompt_tokens": 131072,
+      "requested_output_tokens": 128,
+      "start_s": 170.67018830000598,
+      "request_sha256": "f54d825660db928ee205f5640a558867b01dd97ba0106e58223684d0fa315737",
+      "done": true,
+      "headers_s": 0.55592619998788,
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 131072,
+        "completion_tokens": 128,
+        "total_tokens": 131200,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        }
+      },
+      "timings": {
+        "cache_n": 0,
+        "prompt_n": 131072,
+        "prompt_ms": 22921.1,
+        "prompt_per_token_ms": 0.175,
+        "prompt_per_second": 5718.4,
+        "predicted_n": 128,
+        "predicted_ms": 1632.0,
+        "predicted_per_token_ms": 12.75,
+        "predicted_per_second": 78.4,
+        "draft_n": 127,
+        "draft_n_accepted": 73
+      },
+      "total_s": 57.59456979999959,
+      "ttft_s": 55.995278199989116,
+      "decode_interval_s": 1.5978873999993084,
+      "client_decode_tok_s": 79.47994333020898,
+      "effective_prefill_tok_s": 2340.7687971809287,
+      "nonempty_events": 123,
+      "max_event_gap_s": 0.08070580000639893,
+      "p95_event_gap_s": 0.051810555004340134,
+      "codes_correct": true,
+      "end_s": 228.2654787000065
+    },
+    "b_first_event_after_a_last_s": 22.97968910000054,
+    "queued_samples": 63,
+    "status_samples": 113,
+    "b_queue_and_preparation_s_estimate": 33.07417819998912
+  },
+  "matched_128k_4096_output": [
+    {
+      "mode": "Single",
+      "prompt_tokens": 131072,
+      "output_tokens": 4096,
+      "engine_prefill_seconds": 22.280900000000003,
+      "engine_prefill_tok_s": 5882.7,
+      "ttft_s": 22.67166530000395,
+      "client_decode_tok_s": 117.79921449239247,
+      "engine_decode_tok_s": 117.8,
+      "total_s": 57.434726699997555,
+      "prefill_throughput_change_percent": 0.0,
+      "decode_throughput_change_percent": 0.0
+    },
+    {
+      "mode": "LayerSplit",
+      "prompt_tokens": 131072,
+      "output_tokens": 4096,
+      "engine_prefill_seconds": 22.4449,
+      "engine_prefill_tok_s": 5839.7,
+      "ttft_s": 22.862256200009142,
+      "client_decode_tok_s": 119.98558204022903,
+      "engine_decode_tok_s": 120.0,
+      "total_s": 56.99185980000766,
+      "prefill_throughput_change_percent": -0.73,
+      "decode_throughput_change_percent": 1.86
+    },
+    {
+      "mode": "ExpertHelper",
+      "prompt_tokens": 131072,
+      "output_tokens": 4096,
+      "engine_prefill_seconds": 26.0353,
+      "engine_prefill_tok_s": 5034.4,
+      "ttft_s": 26.48498120000295,
+      "client_decode_tok_s": 78.1459479027521,
+      "engine_decode_tok_s": 78.1,
+      "total_s": 78.88769409999077,
+      "prefill_throughput_change_percent": -14.42,
+      "decode_throughput_change_percent": -33.66
+    }
+  ],
+  "integration": {
+    "helper": true,
+    "multi": true,
+    "single-final": true
+  },
+  "final_health": {
+    "status": "ok",
+    "max_context": 262144,
+    "model": "qwen38-next-uncensored-strata-vision",
+    "images": true,
+    "api_key": false,
+    "loaded": true,
+    "service": "strata"
+  },
+  "limitations": [
+    "Two active request executors are unsupported by this pinned Strata server; multi-GPU still has one slot.",
+    "The synthetic inputs and handbook outputs do not establish performance for all real workloads.",
+    "Inference-handbook runs sometimes ended while discussing chat stop-marker syntax; actual shorter outputs are retained.",
+    "The neutral gardening comparison completed exactly 4096 output tokens on every mode; one trial per mode.",
+    "Cold means zero KV-prefix reuse, not cold host file cache or cold adaptive expert cache. Host workloads were not isolated.",
+    "Mode-dependent arithmetic and cache residency can produce different answers to identical requests.",
+    "Client delivery events are not necessarily one token each; throughput uses API token counts.",
+    "No tensor/expert split, alternative split points, CPU thread allocation sweep, or two-replica deployment was tested."
+  ],
+  "sources": [
+    "https://github.com/sergqwer/strata-nvfp4/blob/v0.1.37-nvfp4.2/docs/MULTI_GPU.md",
+    "https://github.com/sergqwer/strata-nvfp4/blob/v0.1.37-nvfp4.2/docs/SECOND_GPU.md",
+    "https://github.com/sergqwer/strata-nvfp4/blob/v0.1.37-nvfp4.2/serve/server.py",
+    "docs/freetoken-parallel-prefill-reproduction-2026-09-19.md",
+    "docs/freetoken-pr447-local-experiment-2026-09-29.md"
+  ]
+}
