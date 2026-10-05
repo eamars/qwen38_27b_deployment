@@ -54,6 +54,11 @@ Models, virtual environments, release archives and generated configs remain
 Git-ignored. The installer records the resolved Python dependency versions in
 `runtime/strata-nvfp4/requirements-*-installed.txt`.
 
+The installer also applies one local change to the pinned `serve/server.py`:
+`reasoning_budget()` accepts `thinking_token_budget` (the field pi-ai/DSH
+clients send) when `reasoning_budget_tokens` is absent. Reruns skip it once
+present, and the launcher refuses to start a server without it.
+
 ## Prepare
 
 From the workspace root in PowerShell:

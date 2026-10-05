@@ -165,6 +165,9 @@ foreach ($required in @($python, $config.exe, $config.vision.exe, $config.vision
         throw "Required Strata asset missing: $required. Run setup-strata-runtime.ps1 and prepare-qwen38-strata.py."
     }
 }
+if (-not (Select-String -LiteralPath (Join-Path $runtime 'serve\server.py') -SimpleMatch 'req.get("thinking_token_budget")' -Quiet)) {
+    throw 'The Strata server lacks the local thinking_token_budget alias. Run setup-strata-runtime.ps1.'
+}
 $preparation = Get-Content -LiteralPath (Join-Path $model 'preparation.json') -Raw | ConvertFrom-Json
 if (-not $preparation.complete) { throw 'Model preparation has not completed successfully.' }
 if (-not $NoMtp -and -not (Test-Path -LiteralPath (Join-Path $model 'mtp\rt\draft_vocab.bin'))) {

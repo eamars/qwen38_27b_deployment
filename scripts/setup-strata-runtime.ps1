@@ -28,6 +28,25 @@ if ((Get-FileHash -LiteralPath (Join-Path $runtime 'engine\strata.exe')).Hash -i
     throw 'The installed Strata engine does not match BUILD.json.'
 }
 
+# Local change to the pinned server: also read the thinking budget from `thinking_token_budget`, the field
+# pi-ai/DSH clients send (compat.thinkingTokenBudgetField). Without it their budget is ignored and one step can
+# think through all of its output tokens. Reapplied here because runtime/ is ignored, freshly extracted code.
+$serverPath = Join-Path $runtime 'serve\server.py'
+$server = [System.IO.File]::ReadAllText($serverPath)
+if (-not $server.Contains('req.get("thinking_token_budget")')) {
+    $anchor = [regex]::Matches($server,
+        '(?m)^( *)value = \(req or \{\}\)\.get\("reasoning_budget_tokens"\) if isinstance\(req, dict\) else None(\r?\n)')
+    if ($anchor.Count -ne 1) { throw "Cannot apply the thinking_token_budget alias: $serverPath has changed." }
+    $indent = $anchor[0].Groups[1].Value
+    $newline = $anchor[0].Groups[2].Value
+    $alias = "${indent}if value is None and isinstance(req, dict):$newline" +
+        "$indent    # The same budget under the name pi-ai/DSH clients send (compat.thinkingTokenBudgetField).$newline" +
+        "$indent    value = req.get(`"thinking_token_budget`")$newline"
+    $server = $server.Insert($anchor[0].Index + $anchor[0].Length, $alias)
+    [System.IO.File]::WriteAllText($serverPath, $server, [System.Text.UTF8Encoding]::new($false))
+    Write-Host "Applied the thinking_token_budget alias: $serverPath"
+}
+
 foreach ($role in @('convert', 'serve')) {
     $environment = Join-Path $runtime ".venv-$role"
     $python = Join-Path $environment 'Scripts\python.exe'
