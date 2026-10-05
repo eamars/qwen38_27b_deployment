@@ -99,7 +99,7 @@ The launcher runs in the foreground. Its defaults are:
 | Setting | Value |
 |---|---|
 | Endpoint | `http://127.0.0.1:1919/v1` |
-| LAN bind / endpoint | `0.0.0.0:1919` / `http://192.168.2.232:1919/v1` for the DSH host at `192.168.2.10` |
+| LAN bind / intended endpoint | `0.0.0.0:1919` / `http://192.168.2.13:1919/v1`; remote connectivity is under investigation |
 | Served model | `qwen38-next-uncensored-strata-vision` |
 | GPU | RTX 5090, UUID `GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0` |
 | Profile | `Native256K`: 262,144 tokens total context |
@@ -159,12 +159,23 @@ The stop command waits up to 30 seconds for those captured child processes
 to finish releasing pinned RAM; the validated stop took 5.73 seconds.
 
 The launcher binds to `0.0.0.0` by default, matching the older Flash scripts.
-Use `http://192.168.2.232:1919/v1` from the DSH host at `192.168.2.10`, or
-localhost from this PC. Both `.13` and `.232` belong to this PC, but diagnostics
-found that the `.13` interface could not resolve/reach `.10`, while `.232`
-successfully exchanged ICMP and TCP traffic with it. The `.232` models endpoint
-returned HTTP 200 locally; a retry from the remote DSH host is still required
-to verify that direction end to end.
+The intended fixed LAN endpoint is `http://192.168.2.13:1919/v1`; `.232` is
+the backup adapter's DHCP address, not a replacement deployment address.
+Both interfaces are up at 1 Gbps. Source-bound probes from `.13` fail to resolve
+or reach `.10` and the router `.1`, while `.232` reaches both. The Linux DSH
+host has the correct route and cached MAC for `.13` (`10:ff:e0:bd:db:07`), but
+its capture shows unanswered ARP neighbour probes followed by `FAILED`.
+Both Windows interfaces currently have equal route metrics; source-bound route
+checks nevertheless select the correct primary adapter for `.13`.
+This establishes a neighbour-resolution failure but does not yet distinguish
+the network path from the primary adapter/driver. Strata listens on all
+interfaces and returns model metadata through either address from this PC;
+these local requests do not establish remote reachability.
+`scripts/capture-strata-lan.ps1` provides a bounded ARP-only capture and source-bound
+probes for an Administrator PowerShell. It leaves an existing Packet Monitor
+capture/filter setup alone and saves evidence under `benchmarks/raw/qwen38-strata/network/`.
+The Windows capture remains unverified because the diagnostic session cannot
+access the Packet Monitor driver without elevation.
 `-BindAddress 127.0.0.1` selects local-only access. `STRATA_API_KEY` is optional;
 when set, the upstream server requires clients to send it. The mandatory-key
 launcher guard was removed to match the user's requested older-script behavior.
@@ -509,9 +520,10 @@ localhost-only deployment refused that address. The launcher now defaults to
 start. Local clients may also use `http://127.0.0.1:1919/v1`. If
 `STRATA_API_KEY` is set for the server, configure both clients to send it.
 Asuna's saved routes, credentials, sessions and tool permissions were not changed.
-The separate DSH host at `.10` should use `.232` while the `.13` adapter path
-is failing; the successful same-PC Asuna connection to `.13` does not prove
-remote reachability through that adapter.
+The separate DSH host at `.10` should retain `.13` as the intended fixed endpoint.
+The `.232` address is only a diagnostic workaround candidate; the successful
+same-PC Asuna connection to `.13` does not prove remote reachability through
+that adapter. See the LAN diagnostics above before changing provider URLs.
 
 The source inspection found no unavoidable cache reset from an ordinary tool
 result. Role contexts persist; action sessions are created per operation.
