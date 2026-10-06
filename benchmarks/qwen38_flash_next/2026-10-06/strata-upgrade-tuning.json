@@ -1,0 +1,283 @@
+{
+ "date": "2026-10-06",
+ "purpose": "Strata runtime upgrade 0.1.37-nvfp4.2 -> 0.1.39-nvfp4.3, CJK MTP draft vocabulary, conversation-cache slots",
+ "host": {
+  "gpu": "RTX 5090 (PCIe x8, probe 28.9 GB/s)",
+  "cpu": "Ryzen 9 9950X3D",
+  "ram": "2 x 64 GB DDR5-6000"
+ },
+ "common": {
+  "profile": "Native256K",
+  "kv": "int8",
+  "mtp_spec": 4,
+  "mtp_min_p": 0.5,
+  "vram_reserve_mib": 2048,
+  "temperature": 0,
+  "reasoning_effort": "none",
+  "port": "1921 (127.0.0.1, no live traffic)",
+  "order": [
+   "v0.1.37",
+   "v0.1.39",
+   "v0.1.39 + CJK vocab",
+   "v0.1.39 en+Cyrillic vocab repeat"
+  ]
+ },
+ "runtime": {
+  "previous": {
+   "version": "0.1.37-nvfp4.2",
+   "commit": "69a60f5"
+  },
+  "current": {
+   "version": "0.1.39-nvfp4.3",
+   "commit": "b17e5ef",
+   "zip_sha256": "0f2886961d3ef40ede279b083be5426c387419e17d404b4b149b544ea7be89c2",
+   "engine_sha256": "248c11893bac317154c24afddf8a3b595f020f93c0128ecefc19c97b211c4344"
+  },
+  "prepared_assets_reused": true
+ },
+ "decode_benchmark": {
+  "v0.1.37": [
+   {
+    "case": "p4096-o4096-r1",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 1836.4,
+    "decode_tok_s": 135.0,
+    "tokens_per_round": 2.092,
+    "ms_per_round": 15.49,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p4096-o4096-r2",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 2086.8,
+    "decode_tok_s": 133.4,
+    "tokens_per_round": 2.073,
+    "ms_per_round": 15.54,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p131072-o4096-r1",
+    "prompt_tokens": 131072,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 6625.1,
+    "decode_tok_s": 131.0,
+    "tokens_per_round": 2.18,
+    "ms_per_round": 16.64,
+    "retrieval_correct": true
+   }
+  ],
+  "v0.1.39": [
+   {
+    "case": "p4096-o4096-r1",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 1919.5,
+    "decode_tok_s": 129.7,
+    "tokens_per_round": 2.188,
+    "ms_per_round": 16.87,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p4096-o4096-r2",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 2026.1,
+    "decode_tok_s": 137.9,
+    "tokens_per_round": 2.086,
+    "ms_per_round": 15.12,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p131072-o4096-r1",
+    "prompt_tokens": 131072,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 6902.7,
+    "decode_tok_s": 136.9,
+    "tokens_per_round": 2.129,
+    "ms_per_round": 15.55,
+    "retrieval_correct": true
+   }
+  ],
+  "v0.1.39_cjk_vocab": [
+   {
+    "case": "p4096-o4096-r1",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 2029.4,
+    "decode_tok_s": 136.7,
+    "tokens_per_round": 2.063,
+    "ms_per_round": 15.09,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p4096-o4096-r2",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 2054.9,
+    "decode_tok_s": 138.7,
+    "tokens_per_round": 2.087,
+    "ms_per_round": 15.05,
+    "retrieval_correct": true
+   }
+  ]
+ },
+ "language_probe": {
+  "v0.1.37_en_cyrillic": {
+   "label": "v0.1.37 en+cyrillic vocab",
+   "max_tokens": 768,
+   "summary": {
+    "zh": {
+     "requests": 3,
+     "generated": 2201,
+     "acceptance": 0.419,
+     "tokens_per_round": 1.414,
+     "ms_per_round": 13.456,
+     "decode_tok_s": 105.1
+    },
+    "en": {
+     "requests": 3,
+     "generated": 2050,
+     "acceptance": 0.614,
+     "tokens_per_round": 2.245,
+     "ms_per_round": 17.194,
+     "decode_tok_s": 130.6
+    }
+   }
+  },
+  "v0.1.39_en_cyrillic": {
+   "label": "v0.1.39 en+cyrillic vocab",
+   "max_tokens": 768,
+   "summary": {
+    "zh": {
+     "requests": 3,
+     "generated": 2205,
+     "acceptance": 0.42,
+     "tokens_per_round": 1.41,
+     "ms_per_round": 12.077,
+     "decode_tok_s": 116.7
+    },
+    "en": {
+     "requests": 3,
+     "generated": 2304,
+     "acceptance": 0.632,
+     "tokens_per_round": 2.309,
+     "ms_per_round": 14.867,
+     "decode_tok_s": 155.3
+    }
+   }
+  },
+  "v0.1.39_en_cyrillic_repeats2": {
+   "label": "v0.1.39 en+cyrillic vocab repeat",
+   "max_tokens": 768,
+   "summary": {
+    "zh": {
+     "requests": 6,
+     "generated": 4424,
+     "acceptance": 0.432,
+     "tokens_per_round": 1.412,
+     "ms_per_round": 12.789,
+     "decode_tok_s": 110.4
+    },
+    "en": {
+     "requests": 6,
+     "generated": 4607,
+     "acceptance": 0.611,
+     "tokens_per_round": 2.236,
+     "ms_per_round": 15.99,
+     "decode_tok_s": 139.9
+    }
+   }
+  },
+  "v0.1.39_cjk": {
+   "label": "v0.1.39 en+cyrillic+cjk vocab",
+   "max_tokens": 768,
+   "summary": {
+    "zh": {
+     "requests": 3,
+     "generated": 2078,
+     "acceptance": 0.645,
+     "tokens_per_round": 2.108,
+     "ms_per_round": 14.434,
+     "decode_tok_s": 146.0
+    },
+    "en": {
+     "requests": 3,
+     "generated": 2241,
+     "acceptance": 0.623,
+     "tokens_per_round": 2.268,
+     "ms_per_round": 15.936,
+     "decode_tok_s": 142.3
+    }
+   }
+  },
+  "v0.1.39_cjk_repeats2": {
+   "label": "v0.1.39 cjk vocab repeat",
+   "max_tokens": 768,
+   "summary": {
+    "zh": {
+     "requests": 6,
+     "generated": 4407,
+     "acceptance": 0.639,
+     "tokens_per_round": 2.042,
+     "ms_per_round": 14.805,
+     "decode_tok_s": 137.9
+    },
+    "en": {
+     "requests": 6,
+     "generated": 4603,
+     "acceptance": 0.624,
+     "tokens_per_round": 2.266,
+     "ms_per_round": 16.283,
+     "decode_tok_s": 139.2
+    }
+   }
+  }
+ },
+ "draft_vocab": {
+  "before": {
+   "ids": 58963,
+   "han": "27/55328",
+   "head_mib": 152.9
+  },
+  "after": {
+   "ids": 124737,
+   "han": "55328/55328",
+   "head_mib": 323.6,
+   "sha256": "11c70123be79ca63f3ae86ac4fee5e19f4da4880b526df8818d419b8e7e010d5"
+  },
+  "expert_slots": {
+   "before": 8151,
+   "after": 8087
+  }
+ },
+ "conversation_cache": {
+  "live_log_before": "engine-1919.log to 2026-10-06: 291 evictions with all 8 slots full and 7-14 GB of 16 GiB parked",
+  "new_defaults": {
+   "mib": 24576,
+   "slots": 16
+  },
+  "validated_probe_4k_3_rounds": "all A/B switches reused 4,135-4,404 tokens on 0.1.39 (cache-0139-4k)",
+  "twelve_histories": "12/12 returns reused their history (3,519-3,578 tokens each) with live traffic present",
+  "sixteen_histories_note": "16 histories scanned oldest-first all missed: live requests took slots, and each miss parked a new entry that evicted the next history (LRU worst case), not a fault"
+ },
+ "smoke_on_1919": "text, stream, tool round trip, image, 4K retrieval and reuse passed (smoke-0139.json)",
+ "raw_directory": "benchmarks/raw/qwen38-strata/2026-10-06"
+}

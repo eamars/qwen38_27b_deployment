@@ -19,11 +19,12 @@ param(
     # An allocation margin, not a runtime free-VRAM floor. Measured free VRAM differs.
     [ValidateRange(1024, 16384)]
     [int]$VramReserveMiB = 2048,
-    # Host RAM snapshots preserve independent histories across sequential requests.
+    # Host RAM snapshots preserve independent histories across sequential requests. Live traffic filled all 8
+    # earlier slots with 7-14 GB parked and evicted 291 histories, so slots, not bytes, were the limit.
     [ValidateRange(0, 32768)]
-    [int]$ConversationCacheMiB = 16384,
+    [int]$ConversationCacheMiB = 24576,
     [ValidateRange(1, 16)]
-    [int]$ConversationCacheSlots = 8,
+    [int]$ConversationCacheSlots = 16,
     [switch]$NoMtp,
     [switch]$DryRun,
     [switch]$Stop

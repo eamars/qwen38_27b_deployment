@@ -230,6 +230,21 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   A validated, explicit-path PowerShell cleanup script was prepared for manual
   execution outside this session. The separate Isometry-RP model is unaffected.
 
+## 2026-10-06 — Strata upgrade and tuning
+
+- Analysed moving only the MTP head to the RTX 4090: drafting needs the verify
+  pass's final residuals, so it cannot overlap the 5090's work, and the freed
+  VRAM is worth about 0.2 ms a round. Not pursued; LayerSplit already ran MTP
+  on the 4090 without a decode gain.
+- Upgraded Strata to 0.1.39-nvfp4.3 in place, reusing the prepared assets;
+  decode rounds about 4% shorter on the same requests.
+- Added CJK to the MTP draft vocabulary: Chinese decode 110 -> 138 tok/s,
+  English unchanged.
+- Raised the conversation cache to 16 slots / 24 GiB after the live log showed
+  291 slot-limited evictions.
+- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-and-tuning-2026-10-06)
+  and [curated results](../benchmarks/qwen38_flash_next/2026-10-06/strata-upgrade-tuning.json).
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

@@ -5,6 +5,10 @@ Status on 2026-10-03: verified through shared Flash port 1919 with the
 262,144-token profile, CPU vision and MTP. The launcher now defaults to LAN
 binding, matching the older Flash scripts. The longest tested input was
 249,995 tokens, followed by a successful cached repeat.
+On 2026-10-06 the runtime moved to 0.1.39-nvfp4.3, the MTP draft vocabulary
+gained the CJK scripts and the conversation cache grew to 16 slots; see
+[Upgrade and tuning, 2026-10-06](#upgrade-and-tuning-2026-10-06). Earlier
+measurements below were made on 0.1.37-nvfp4.2.
 
 It follows this workspace's normal layout: model assets in `models/`, the
 isolated runtime in `runtime/`, operational commands in `scripts/`, and raw
@@ -14,9 +18,9 @@ validation evidence in `benchmarks/raw/qwen38-strata/`.
 
 | Input | Pin |
 |---|---|
-| Runtime | [sergqwer/strata-nvfp4 v0.1.37-nvfp4.2](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.37-nvfp4.2), commit `69a60f5` |
-| Windows release SHA-256 | `a16d868c4d47dce11b4d1dac806874c8955bcf19bd833e558b34160825d51289` |
-| Engine SHA-256 | `6f57ce029fe5a5ca3b2489bafefafa2ff8c7e0e42ca7c4b8fe25aa0a9eebe4c2` |
+| Runtime | [sergqwer/strata-nvfp4 v0.1.39-nvfp4.3](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.39-nvfp4.3), commit `b17e5ef` (until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
+| Windows release SHA-256 | `0f2886961d3ef40ede279b083be5426c387419e17d404b4b149b544ea7be89c2` |
+| Engine SHA-256 | `248c11893bac317154c24afddf8a3b595f020f93c0128ecefc19c97b211c4344` |
 | Bundled llama.cpp converter | `3cf03257f219afbe7334045ff7c6a06ac68c627d` |
 | Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) |
 | Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
@@ -105,11 +109,11 @@ The launcher runs in the foreground. Its defaults are:
 | Profile | `Native256K`: 262,144 tokens total context |
 | Short profile | `Short4K`: 8,192 total tokens, matching the FreeToken launcher's prompt/output allowance |
 | Active requests | One; Strata serializes requests |
-| Independent conversation cache | 16,384 MiB host RAM budget, eight parked slots; physical RAM admission floor 2,560 MiB |
+| Independent conversation cache | 24,576 MiB host RAM budget, 16 parked slots; physical RAM admission floor 2,560 MiB |
 | KV | Rotated INT8 with elastic growth |
 | Experts | Pinned CPU RAM with an automatic GPU expert cache |
 | VRAM reserve | 2,048 MiB |
-| MTP | Matching fine-tune head, speculative window 4, minimum probability 0.5 |
+| MTP | Matching fine-tune head, speculative window 4, minimum probability 0.5; draft vocabulary English/code + Cyrillic + CJK (124,737 tokens) |
 | Vision | CPU encoder, at most 1,024 image tokens |
 
 All Flash launchers now default to port 1919. Stop the current backend before
@@ -415,14 +419,15 @@ python .\scripts\benchmark-qwen38-strata.py --output benchmarks/raw/qwen38-strat
 Use a fresh output directory for each mode, and `--base-url` for a non-default
 port. Check the actual cached-token and output-token fields before treating a
 run as a cold 4,096-token completion. Full-context capacity remains 262,144;
-two simultaneous active requests remain unsupported by this pinned runtime.
+two simultaneous active requests were unsupported by 0.1.37. Upstream 0.1.39 adds an
+opt-in `"parallel": N`, which disables the fork's elastic K/V; it is not validated here.
 
 
 ## Two independent agent histories and tool checkpoints
 
 The shared Flash endpoint is **`http://127.0.0.1:1919/v1`**. The final
-launcher defaults to **one active request, 16 GiB host RAM conversation cache,
-eight parked slots, Single GPU mode**. Parked slots store inactive histories;
+launcher defaults to **one active request, 24 GiB host RAM conversation cache,
+16 parked slots, Single GPU mode** (since 2026-10-06; 16 GiB and eight slots before). Parked slots store inactive histories;
 the engine still runs one request at a time. Both clients send their complete,
 separate histories to the same endpoint; no separate ports are needed.
 
@@ -486,7 +491,7 @@ Whole-conversation parking is incompatible with this release's layer-split
 mode. That is an additional reason to keep Single mode for this workload,
 besides the earlier multi-GPU performance results.
 
-### Current 16 GiB / eight-slot configuration
+### 16 GiB / eight-slot configuration (2026-10-03 to 2026-10-06)
 
 The launcher defaults and running server were increased to 16,384 MiB and
 eight parked slots on 2026-10-03. The server was restarted on the same port,
@@ -552,7 +557,7 @@ application behavior change.
 ### Reproduce the cache checks
 
 Run one configuration at a time on port 1919. The launcher defaults are the
-current 16 GiB/eight-slot configuration; stop it before changing budgets or slot
+current 24 GiB/16-slot configuration; stop it before changing budgets or slot
 counts. To reproduce the original comparison table, launch with
 `-ConversationCacheMiB 8192 -ConversationCacheSlots 4`.
 
@@ -576,3 +581,99 @@ contains 139 requests across nine configurations/scenarios.
 Raw evidence: `benchmarks/raw/qwen38-strata/2026-10-03/cache/`. Intermediate
 adapter experiments lacking the normal replay metadata are not counted as
 Asuna's actual behavior in the curated results.
+
+## Upgrade and tuning, 2026-10-06
+
+Three changes, each measured before it was kept. Curated results:
+[strata-upgrade-tuning.json](../benchmarks/qwen38_flash_next/2026-10-06/strata-upgrade-tuning.json);
+raw requests and outputs: `benchmarks/raw/qwen38-strata/2026-10-06/`. A/B runs
+used a private `127.0.0.1:1921` server so that live Asuna traffic could not
+interleave; settings otherwise matched the launcher defaults.
+
+### Summary: what changed
+
+| Item | Before | After |
+|---|---|---|
+| Strata runtime | 0.1.37-nvfp4.2 (`69a60f5`) | 0.1.39-nvfp4.3 (`b17e5ef`) |
+| MTP draft vocabulary | English/code + Cyrillic, 58,963 ids (27 of 55,328 Han) | + CJK, 124,737 ids (all Han, kana, Hangul, CJK punctuation) |
+| Draft head VRAM / GPU expert slots | 152.9 MiB / 8,151 | 323.6 MiB / 8,087 |
+| Conversation cache | 8 slots, 16 GiB budget | 16 slots, 24 GiB budget |
+
+Unchanged: model assets, 262K context, INT8 KV, MTP window 4 with minimum
+probability 0.5, 2,048 MiB VRAM reserve, Single GPU, one active request, LAN
+binding.
+
+### Summary: performance, before (0.1.37, old vocabulary) and after (0.1.39, CJK vocabulary)
+
+| Same requests | Before | After | Change |
+|---|---:|---:|---:|
+| Chinese replies, decode | 105.1 tok/s (1.41 tokens/round) | 137.9–146.0 tok/s (2.04–2.11) | +31–39% |
+| English replies, decode | 130.6 tok/s | 139.2–142.3 tok/s | +7–9% |
+| English 4K input / 4K output, decode | 135.0, 133.4 tok/s | 136.7, 138.7 tok/s | +2–3% |
+| 128K input / 4K output, decode* | 131.0 tok/s | 136.9 tok/s | +4.5% |
+| 128K prompt read* | 6,625 tok/s | 6,903 tok/s | +4% |
+| Independent histories kept cached | 8 at most (291 evictions in the live log) | 12/12 resumed in testing; 16 slots | 2× capacity |
+
+\*Measured on 0.1.39 before the vocabulary change; the CJK vocabulary was
+rechecked at 4K only. Single trials vary by a few percent, so the English gains
+are small; the Chinese gain is the clear one. Attribution: the runtime gave about
+4% shorter decode rounds on every reply; the CJK vocabulary gave Chinese about
++25% over 0.1.39 with the old vocabulary, English unchanged; the slots do not
+change decode speed but avoid 20–45 s cold rereads when an evicted history
+returns. The live-traffic effect of the slots is not yet measured.
+
+### Details
+
+**Runtime 0.1.37-nvfp4.2 → 0.1.39-nvfp4.3.** `setup-strata-runtime.ps1` now
+upgrades the earlier pin in place, as the release notes direct; the virtual
+environments, configs and models stay, and the `thinking_token_budget` alias is
+reapplied. Requirements, `data/` and every converter that `prepare-qwen38-strata.py`
+runs are byte-identical between the releases, so the prepared assets were reused.
+The release also restarts the engine after an all-NaN reply instead of serving a
+broken session. Its new Host check passes IP-address hosts, so the LAN URL works.
+
+| Same requests, one trial each | 0.1.37 | 0.1.39 |
+|---|---:|---:|
+| 4K input / 4K output, ms per round | 15.49, 15.54 | 16.87, 15.12 |
+| 128K input / 4K output, ms per round (prefill tok/s) | 16.64 (6,625) | 15.55 (6,903) |
+| Short English replies, decode tok/s | 130.6 | 155.3 |
+| Short Chinese replies, decode tok/s | 105.1 | 116.7 |
+
+Rounds were about 4% shorter overall, with run-to-run noise of similar size;
+the fork's own 7% was measured on a different pack. All retrieval checks passed.
+
+**CJK draft vocabulary.** The shipped subset held 27 of 55,328 Han tokens, so
+the MTP head could hardly draft Chinese. Live traffic below 8K context, where
+short replies dominate, averaged 1.64 tokens a round against 2.2–2.5 elsewhere.
+`prepare-qwen38-strata.py` now builds `mtp/rt/draft_vocab.bin` with
+`tools/draft_vocab.py --add cjk` (124,737 ids, draft head 153 → 324 MiB,
+8,151 → 8,087 expert slots). Three Chinese and three English prompts, two
+repeats each, 768 output tokens, 0.1.39:
+
+| | en + Cyrillic | + CJK |
+|---|---:|---:|
+| Chinese: tokens per round / decode tok/s | 1.41 / 110.4 | 2.04 / 137.9 |
+| English: ms per round / decode tok/s | 15.99 / 139.9 | 16.28 / 139.2 |
+| English 4K/4K benchmark, decode tok/s | 129.7, 137.9 | 136.7, 138.7 |
+
+Chinese decode rose 25%; English stayed within noise.
+`scripts/probe-qwen38-strata-draft-lang.py` reproduces the language probe.
+
+**Conversation cache: 16 slots, 24 GiB.** The live log to 2026-10-06 recorded
+291 evictions with all eight slots full while only 7–14 GB of the 16 GiB budget
+was parked: the slot count was the limit. 344 requests in that log reread more
+than 20K prompt tokens (6,357 s of prefill); not all were evictions. With the
+engine stopped 105.8 GiB of RAM was available; a loaded engine leaves roughly
+38 GiB, so the 24 GiB budget keeps about 14 GiB for other programs, and the
+2,560 MiB admission floor still applies. On the production server, the validated
+two-agent cache probe hit every switch (4,135–4,404 tokens reused), and twelve
+independent 3.6K histories opened in turn all resumed from their snapshots
+(12/12) with live traffic present. A sixteen-history oldest-first scan missed
+throughout: live requests took slots, and each miss parked a new entry that
+evicted the next history. That is LRU's worst case, not a fault. Eight slots
+could not have held the twelve histories at all.
+
+The production server on 1919 passed text, streaming, tool call and result
+continuation, image recognition and 4K retrieval with reuse on the new runtime.
+Rollback: re-extract `runtime/strata-nvfp4-v0.1.37-nvfp4.2-windows-x64.zip`
+over the runtime and restore the previous script pins from Git.

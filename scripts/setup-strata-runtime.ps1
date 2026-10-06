@@ -5,10 +5,15 @@ $ErrorActionPreference = 'Stop'
 $workspace = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeRoot = Join-Path $workspace 'runtime'
 $runtime = Join-Path $runtimeRoot 'strata-nvfp4'
-$version = '0.1.37-nvfp4.2'
+$version = '0.1.39-nvfp4.3'
+$commit = 'b17e5ef'
 $archiveName = "strata-nvfp4-v$version-windows-x64.zip"
 $archive = Join-Path $runtimeRoot $archiveName
-$expectedHash = 'a16d868c4d47dce11b4d1dac806874c8955bcf19bd833e558b34160825d51289'
+$expectedHash = '0f2886961d3ef40ede279b083be5426c387419e17d404b4b149b544ea7be89c2'
+# Earlier pinned releases upgraded in place, as the release notes direct ("unzip over the previous folder"): the
+# virtual environments, configs and models outside the zip stay. Their requirements, data files and the converters
+# behind the prepared model assets are identical to this release's (checked 2026-10-06).
+$upgradeFrom = @('0.1.37-nvfp4.2')
 
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
     Invoke-WebRequest -Uri "https://github.com/sergqwer/strata-nvfp4/releases/download/v$version/$archiveName" -OutFile "$archive.partial"
@@ -17,11 +22,21 @@ if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
 if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ine $expectedHash) {
     throw "Strata release hash mismatch: $archive"
 }
-if (-not (Test-Path -LiteralPath (Join-Path $runtime 'engine\BUILD.json'))) {
+$buildPath = Join-Path $runtime 'engine\BUILD.json'
+if (-not (Test-Path -LiteralPath $buildPath)) {
     Expand-Archive -LiteralPath $archive -DestinationPath $runtimeRoot
+} else {
+    $installed = Get-Content -LiteralPath $buildPath -Raw | ConvertFrom-Json
+    if ($installed.version -ne $version -and $installed.version -in $upgradeFrom -and -not $installed.dirty) {
+        if (@(Get-Process -Name strata, strata-vision -ErrorAction SilentlyContinue).Count -gt 0) {
+            throw 'Stop the running Strata servers before upgrading the runtime.'
+        }
+        Write-Host "Upgrading Strata $($installed.version) to $version in place; virtual environments and models stay."
+        Expand-Archive -LiteralPath $archive -DestinationPath $runtimeRoot -Force
+    }
 }
-$build = Get-Content -LiteralPath (Join-Path $runtime 'engine\BUILD.json') -Raw | ConvertFrom-Json
-if ($build.version -ne $version -or $build.commit -ne '69a60f5' -or $build.dirty) {
+$build = Get-Content -LiteralPath $buildPath -Raw | ConvertFrom-Json
+if ($build.version -ne $version -or $build.commit -ne $commit -or $build.dirty) {
     throw 'The existing runtime differs from the pinned release. Refusing to overwrite it.'
 }
 if ((Get-FileHash -LiteralPath (Join-Path $runtime 'engine\strata.exe')).Hash -ine $build.engine_sha256) {

@@ -4,7 +4,6 @@ import argparse
 import json
 import os
 from pathlib import Path
-import shutil
 import subprocess
 import time
 
@@ -12,6 +11,10 @@ WORKSPACE = Path(__file__).resolve().parents[1]
 RUNTIME = WORKSPACE / "runtime" / "strata-nvfp4"
 MODEL = WORKSPACE / "models" / "qwen38-flash-next-uncensored-strata"
 REVISION = "f24d2b68ff2814f24455ae86717be276619b5664"
+RUNTIME_VERSION, RUNTIME_COMMIT = "0.1.39-nvfp4.3", "b17e5ef"
+# Releases whose converters below (and data/draft_vocab.bin) are byte-identical to the pinned one's, so assets they
+# prepared stay valid (compared 2026-10-06).
+COMPATIBLE_PREPARED = {"0.1.37-nvfp4.2", RUNTIME_VERSION}
 
 
 def main():
@@ -37,13 +40,13 @@ def main():
             raise RuntimeError(f"Verified checkpoint file is now missing or has changed: {path}")
 
     build = json.loads((RUNTIME / "engine" / "BUILD.json").read_text())
-    if build["version"] != "0.1.37-nvfp4.2" or build["commit"] != "69a60f5":
+    if build["version"] != RUNTIME_VERSION or build["commit"] != RUNTIME_COMMIT:
         raise RuntimeError("Unexpected runtime version; use scripts/setup-strata-runtime.ps1")
     state_path = MODEL / "preparation.json"
     state = json.loads(state_path.read_text()) if state_path.exists() else {
         "revision": REVISION, "runtime_version": build["version"], "complete": False, "steps": {}
     }
-    if state["revision"] != REVISION or state["runtime_version"] != build["version"]:
+    if state["revision"] != REVISION or state["runtime_version"] not in COMPATIBLE_PREPARED:
         raise RuntimeError("Existing prepared assets belong to a different checkpoint or runtime")
     state["llama_cpp_commit"] = (RUNTIME / "third_party/llama.cpp/COMMIT").read_text().strip()
     environment = dict(os.environ, PYTHONUTF8="1", PYTHONUNBUFFERED="1", OMP_NUM_THREADS="8", MKL_NUM_THREADS="8")
@@ -97,7 +100,10 @@ def main():
         ["tools/mtp_pack.py", "--src", mtp, "--experts", "q2_0", "--out", mtp / "mtp-q2_0.gguf"],
         ["tools/mtp_rt.py", "--gguf", mtp / "mtp-q2_0.gguf", "--out", mtp / "rt"],
     ], [mtp / "rt/experts.bin", mtp / "rt/dense.bin", mtp / "rt/dense.txt"])
-    shutil.copy2(RUNTIME / "data/draft_vocab.bin", mtp / "rt/draft_vocab.bin")
+    # The shipped subset (English/code + Cyrillic) holds 27 of 55,328 Han tokens, so Chinese replies drafted ~1.4
+    # tokens a round. With CJK added (+171 MiB of draft head): Chinese 110 -> 138 tok/s, English unchanged (2026-10-06).
+    step("draft_vocab", [["tools/draft_vocab.py", "--gguf", gguf, "--base", RUNTIME / "data/draft_vocab.bin",
+                          "--add", "cjk", "--out", mtp / "rt/draft_vocab.bin"]], [mtp / "rt/draft_vocab.bin"])
     state["complete"] = True
     save()
     print(f"Prepared Strata assets: {MODEL}", flush=True)
