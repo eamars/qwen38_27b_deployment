@@ -56,6 +56,12 @@ foreach ($role in @('convert', 'serve')) {
     }
     & $python -m pip install --disable-pip-version-check -r (Join-Path $runtime "requirements-$role.txt")
     if ($LASTEXITCODE -ne 0) { throw "Strata $role dependency installation failed." }
+    if ($role -eq 'serve') {
+        # Local addition: the server converts images its vision decoder cannot read (WebP, which DSH sends for
+        # transparent pictures) with Pillow, and refuses the whole request without it.
+        & $python -m pip install --disable-pip-version-check pillow
+        if ($LASTEXITCODE -ne 0) { throw 'Pillow installation for the Strata server failed.' }
+    }
     & $python -m pip check
     if ($LASTEXITCODE -ne 0) { throw "Strata $role dependency check failed." }
     & $python -m pip freeze | Set-Content -LiteralPath (Join-Path $runtime "requirements-$role-installed.txt")
