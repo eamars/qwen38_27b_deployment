@@ -260,6 +260,16 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - Not covered: tags other than `</think>` (Asuna's own guard), and why the
   first leaks in long agent contexts start at all. See
   [the Strata runbook](qwen38-flash-next-strata.md#locations).
+- v3, same night: v2 moved the answer to the reasoning whenever a `</think>`
+  on its own line followed it, so an answer followed by a stray tag and a tool
+  call (`answer\n</think>\n\n<tool_call>`) or by the end of the reply reached
+  the client with no text, and Asuna's turn ended silent. The tag now decides
+  by what follows: more answer moves the text before it to the reasoning, a
+  tool call or the end keeps it as the answer. Replayed through the parser,
+  streamed and whole: 8/8 (this case, a stray tag at the end, one and five
+  repeats, plain answers with and without a call, a tag quoted in the answer
+  and in the reasoning). The installer passes the release archive, so an
+  earlier version of the patch is replaced from the release.
 
 ## Decisions retained
 

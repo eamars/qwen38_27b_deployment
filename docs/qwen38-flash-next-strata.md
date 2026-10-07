@@ -71,9 +71,12 @@ The installer also applies two local changes to the pinned server:
   `</think>` that does not follow a newline in the reasoning (on 0.1.39, 420
   of 420 real closes followed one, 13 of 14 quoted tags did not). If the reply
   ends still thinking, the text after the last quoted tag becomes the answer.
-  In the answer, a `</think>` on its own line (`X\n</think>\n\nX`) marks
-  more thinking. The answer's first 512 characters are held back: such a tag
-  there moves them to the reasoning, and a later one is dropped. A `</think>`
+  In the answer, a `</think>` on its own line (`X\n</think>\n\nX`) is
+  decided by what follows it. The answer's first 512 characters are held back:
+  if more answer follows such a tag there, the text before it was more
+  thinking and moves to the reasoning; if a tool call or the end of the reply
+  follows, it was the answer and only the tag is dropped. A later tag is
+  dropped. A `</think>`
   inside a line of the answer is the model quoting it and stays text; the
   first version also split there and cut such replies in half on the live
   check. Only thinking replies longer than 512 characters start their answer
