@@ -9,16 +9,21 @@ A. The template's own close is "\n</think>": 420 of 420 real closes followed a n
    not. A `</think>` after any other character stays reasoning. If the reply then ends still thinking, the text
    after the last such tag is returned as the answer.
 B. A `</think>` on its own line inside the answer ("X\n</think>\n\nX"). The answer's first ANSWER_HOLD characters
-   are held back; such a tag there means they were more thinking, so they become reasoning. After the window the
-   tag is dropped. A `</think>` inside a line of the answer is the model quoting it and stays text (live check:
-   replies explaining the tag quote it mid-sentence).
+   are held back, and such a tag there decides by what follows it: more answer means the text before it was more
+   thinking, so it becomes reasoning (the reply written twice is sent once); a tool call or the end of the reply
+   means it was the answer, and only the tag is dropped (an answer followed by a stray tag and a tool call was lost
+   to the reasoning by v2). After the window the tag is dropped. A `</think>` inside a line of the answer is the
+   model quoting it and stays text (live check: replies explaining the tag quote it mid-sentence).
 
-Usage: python strata-think-echo.py <runtime>/serve/frontend.py   (idempotent; refuses a changed file)
+Usage: python strata-think-echo.py <runtime>/serve/frontend.py [release.zip]
+Idempotent; refuses a changed file. With the release archive, a file carrying an earlier version of this patch is
+first restored from the release.
 """
 import sys
+import zipfile
 from pathlib import Path
 
-MARK = "# local: strata-think-echo v2"
+MARK = "# local: strata-think-echo v3"
 OLD_MARK = "# local: strata-think-echo"
 
 REPLACEMENTS = [
@@ -31,8 +36,10 @@ REPLACEMENTS = [
         self.lead = False
         ''' + MARK + r''': the last reasoning character, the reasoning written since the last quoted </think>
         # (None: none quoted), the answer held back after the close (None: not holding), whether the thinking has
-        # closed, and the last answer character
+        # closed, the last answer character, and the answer before a repeated </think> (None: none) that is
+        # thinking if more answer follows and the answer if a tool call or the end does
         self.rlast, self.quoted, self.held, self.closed, self.clast = "", None, None, False, ""
+        self.pending = None
 '''),
     # feed: rule A in the reasoning state
     (r'''                if i:
@@ -76,10 +83,12 @@ REPLACEMENTS = [
                 e = self._echo_at() if self.closed else -1  ''' + MARK + r''': </think> again, on its own line
                 if e >= 0 and (i < 0 or e < i):
                     text, self.buf, self.lead = self.buf[:e], self.buf[e + len(THINK_END):], True
-                    if self.held is not None and len(self.held + text) <= self.ANSWER_HOLD:   # none sent: thinking
+                    if self.held is not None and len(self.held + text) <= self.ANSWER_HOLD:   # none sent yet
                         text, self.held = self.held + text, ""
-                        if text.strip():
-                            out.append(Event("reasoning", "\n" + text.strip("\n") + "\n"))
+                        if text.strip():            # thinking if more answer follows, else the answer
+                            if self.pending:        # the answer again after the last one: that was thinking
+                                out.append(Event("reasoning", "\n" + self.pending.strip("\n") + "\n"))
+                            self.pending = text
                     else:                                   # the answer is out: drop the tag only
                         out += self._release()
                         if text.strip():                    # its newlines go as streaming holds them back
@@ -138,27 +147,47 @@ REPLACEMENTS = [
         return -1
 
     def _answer(self, text: str) -> list[Event]:
+        out = []
+        if self.pending and text.strip():           # more answer came: the text before the tag was thinking
+            out.append(Event("reasoning", "\n" + self.pending.strip("\n") + "\n"))
+            self.pending = None
         if text:
             self.clast = text[-1]
         if self.held is None:
-            return [Event("content", text)]
+            return out + [Event("content", text)]
         self.held += text
-        return self._release() if len(self.held) >= self.ANSWER_HOLD else []
+        return out + (self._release() if len(self.held) >= self.ANSWER_HOLD else [])
 
     def _release(self) -> list[Event]:
+        out = []
+        if self.pending:                            # a tool call or the end came instead: it was the answer
+            out.append(Event("content", self.pending.strip("\n")))
+            self.pending = None
         held, self.held = self.held, None
-        return [Event("content", held)] if held else []
+        return out + ([Event("content", held)] if held else [])
 
     def feed(self, delta: str) -> list[Event]:
 '''),
 ]
 
 
-def patch(text: str) -> str:
+RELEASE_PATH = "strata-nvfp4/serve/frontend.py"
+
+
+def release_text(archive: Path) -> str:
+    with zipfile.ZipFile(archive) as release:
+        return release.read(RELEASE_PATH).decode("utf-8").replace("\r\n", "\n")
+
+
+def patch(text: str, archive: Path | None = None) -> str:
     if MARK in text:
         return text
     if OLD_MARK in text:
-        raise SystemExit("strata-think-echo: an older version is applied; restore the release's frontend.py first")
+        if archive is None:
+            raise SystemExit("strata-think-echo: an older version is applied; pass the release archive to replace it")
+        text = release_text(archive)
+        if OLD_MARK in text:
+            raise SystemExit("strata-think-echo: the release's frontend.py already carries a version of this patch")
     for old, new in REPLACEMENTS:
         if text.count(old) != 1:
             raise SystemExit(f"strata-think-echo: anchor not found once, the server has changed:\n{old[:200]}")
@@ -168,10 +197,11 @@ def patch(text: str) -> str:
 
 def main():
     path = Path(sys.argv[1])
+    archive = Path(sys.argv[2]) if len(sys.argv) > 2 else None
     raw = path.read_bytes().decode("utf-8")
     crlf = "\r\n" in raw
     text = raw.replace("\r\n", "\n")
-    out = patch(text)
+    out = patch(text, archive)
     if out == text:
         print(f"strata-think-echo: already applied: {path}")
         return
