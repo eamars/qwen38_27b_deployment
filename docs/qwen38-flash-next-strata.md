@@ -84,6 +84,15 @@ The installer also applies two local changes to the pinned server:
 
 Reruns skip both once present.
 
+Known limitation, not patched: the server reads only `enable_thinking` and
+`reasoning_effort` from a request's `chat_template_kwargs`; any other key is
+dropped, although the template has more (`preserve_thinking`). Clients get the
+template's defaults for the rest. `preserve_thinking` defaults to on, as in the
+model's own template: earlier turns' reasoning stays in the prompt, which keeps
+the prefix stable for the conversation cache (89% of prompt tokens reused over
+400 Asuna requests on 2026-10-08), and also keeps a stray thought the model
+then repeats until the conversation is compacted.
+
 ## Prepare
 
 From the workspace root in PowerShell:
