@@ -245,6 +245,22 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-and-tuning-2026-10-06)
   and [curated results](../benchmarks/qwen38_flash_next/2026-10-06/strata-upgrade-tuning.json).
 
+### 2026-10-07 — Strata quoted `</think>` patch
+
+- Reproduced the stray `</think>` and repeated replies seen from Asuna: a user
+  message quoting `</think>` leaked reasoning and the reply written twice into
+  `content` on 8/8 turns (6/6 single requests). Quoting `</next_thinking>`
+  did not (0/13). Upstream knows the cause (Niko1221/Strata #537, #1053): the
+  parser switches to the answer at the first `</think>` token, quoted or not.
+- Added `scripts/patches/strata-think-echo.py`, applied by the installer: a
+  `</think>` that does not follow a newline stays reasoning, and one on its own
+  line early in the answer moves the text before it to the reasoning. Its
+  first version also split at a tag quoted mid-sentence in the answer and cut
+  such replies in half on the live check; the current version passed 12/12.
+- Not covered: tags other than `</think>` (Asuna's own guard), and why the
+  first leaks in long agent contexts start at all. See
+  [the Strata runbook](qwen38-flash-next-strata.md#locations).
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

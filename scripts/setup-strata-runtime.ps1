@@ -62,6 +62,11 @@ if (-not $server.Contains('req.get("thinking_token_budget")')) {
     Write-Host "Applied the thinking_token_budget alias: $serverPath"
 }
 
+# Local change to the pinned server: a </think> the model writes while quoting the tag, or again inside its answer,
+# no longer leaks reasoning and a repeated reply into the answer (upstream #537, #1053). Idempotent; see the script.
+& python (Join-Path $PSScriptRoot 'patches\strata-think-echo.py') (Join-Path $runtime 'serve\frontend.py')
+if ($LASTEXITCODE -ne 0) { throw 'Cannot apply strata-think-echo to the Strata server.' }
+
 foreach ($role in @('convert', 'serve')) {
     $environment = Join-Path $runtime ".venv-$role"
     $python = Join-Path $environment 'Scripts\python.exe'

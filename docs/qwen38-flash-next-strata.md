@@ -58,10 +58,28 @@ Models, virtual environments, release archives and generated configs remain
 Git-ignored. The installer records the resolved Python dependency versions in
 `runtime/strata-nvfp4/requirements-*-installed.txt`.
 
-The installer also applies one local change to the pinned `serve/server.py`:
-`reasoning_budget()` accepts `thinking_token_budget` (the field pi-ai/DSH
-clients send) when `reasoning_budget_tokens` is absent. Reruns skip it once
-present, and the launcher refuses to start a server without it.
+The installer also applies two local changes to the pinned server:
+
+- `serve/server.py`: `reasoning_budget()` accepts `thinking_token_budget` (the
+  field pi-ai/DSH clients send) when `reasoning_budget_tokens` is absent. The
+  launcher refuses to start a server without it.
+- `serve/frontend.py`, by `scripts/patches/strata-think-echo.py`: the model
+  writes `</think>` as one token whether it ends its thinking or quotes the
+  tag, and the stock parser switches to the answer at the first one (upstream
+  #537, #1053). A quoted tag then leaks the rest of the reasoning, a stray
+  `</think>` and the reply written twice into `content`. The patch keeps a
+  `</think>` that does not follow a newline in the reasoning (on 0.1.39, 420
+  of 420 real closes followed one, 13 of 14 quoted tags did not). If the reply
+  ends still thinking, the text after the last quoted tag becomes the answer.
+  In the answer, a `</think>` on its own line (`X\n</think>\n\nX`) marks
+  more thinking. The answer's first 512 characters are held back: such a tag
+  there moves them to the reasoning, and a later one is dropped. A `</think>`
+  inside a line of the answer is the model quoting it and stays text; the
+  first version also split there and cut such replies in half on the live
+  check. Only thinking replies longer than 512 characters start their answer
+  slightly later.
+
+Reruns skip both once present.
 
 ## Prepare
 
