@@ -271,6 +271,24 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   and in the reasoning). The installer passes the release archive, so an
   earlier version of the patch is replaced from the release.
 
+### 2026-10-08 — Strata 0.1.40.2-nvfp4.1
+
+- Upstream answered #1053 with an opt-in `reasoning_close_retry` (0.1.40.2):
+  a reply that stops inside its thinking with no answer is closed once and
+  continued. It does not change the quoted-`</think>` parsing, so
+  strata-think-echo stays.
+- Upgraded the runtime 0.1.39-nvfp4.3 → 0.1.40.2-nvfp4.1 in place, reusing the
+  prepared assets. The launcher turns `reasoning_close_retry` on. Same-day A/B on
+  a private port: prompt reads +11–17%, decode +7–10% except the 128K run
+  (+1%), draft acceptance unchanged, all retrieval and smoke checks passed.
+- The 0.1.39 check found a strata-think-echo v3 bug: a quote that started a
+  line in the answer cut it in half (11/12 live, reproduced offline). Ported
+  the patch to the new parser as v4, which decides by whole lines: 12/12 live,
+  720 recorded replies replayed clean, and the fork's 546 tests differ from
+  unpatched only by the patch's documented costs.
+- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-08)
+  and [curated results](../benchmarks/qwen38_flash_next/2026-10-08/strata-0140-upgrade.json).
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

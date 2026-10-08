@@ -7,8 +7,10 @@ binding, matching the older Flash scripts. The longest tested input was
 249,995 tokens, followed by a successful cached repeat.
 On 2026-10-06 the runtime moved to 0.1.39-nvfp4.3, the MTP draft vocabulary
 gained the CJK scripts and the conversation cache grew to 16 slots; see
-[Upgrade and tuning, 2026-10-06](#upgrade-and-tuning-2026-10-06). Earlier
-measurements below were made on 0.1.37-nvfp4.2.
+[Upgrade and tuning, 2026-10-06](#upgrade-and-tuning-2026-10-06). On
+2026-10-08 it moved to 0.1.40.2-nvfp4.1: 7–17% faster prompts and decode on
+the same requests; see [Upgrade, 2026-10-08](#upgrade-2026-10-08). Earlier
+measurements below were made on 0.1.37-nvfp4.2 or 0.1.39-nvfp4.3.
 
 It follows this workspace's normal layout: model assets in `models/`, the
 isolated runtime in `runtime/`, operational commands in `scripts/`, and raw
@@ -18,9 +20,9 @@ validation evidence in `benchmarks/raw/qwen38-strata/`.
 
 | Input | Pin |
 |---|---|
-| Runtime | [sergqwer/strata-nvfp4 v0.1.39-nvfp4.3](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.39-nvfp4.3), commit `b17e5ef` (until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
-| Windows release SHA-256 | `0f2886961d3ef40ede279b083be5426c387419e17d404b4b149b544ea7be89c2` |
-| Engine SHA-256 | `248c11893bac317154c24afddf8a3b595f020f93c0128ecefc19c97b211c4344` |
+| Runtime | [sergqwer/strata-nvfp4 v0.1.40.2-nvfp4.1](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.40.2-nvfp4.1), commit `d147ca4f` (until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
+| Windows release SHA-256 | `75a12607946b834d128dd4ef03955ca8209a3c8796e4754e4fc545bd39d9b706` |
+| Engine SHA-256 | `09cd28dcc1ea1b9c202aa5faa87405e00b210bbe481fa342c12559d91f5963b8` |
 | Bundled llama.cpp converter | `3cf03257f219afbe7334045ff7c6a06ac68c627d` |
 | Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) |
 | Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
@@ -58,31 +60,42 @@ Models, virtual environments, release archives and generated configs remain
 Git-ignored. The installer records the resolved Python dependency versions in
 `runtime/strata-nvfp4/requirements-*-installed.txt`.
 
-The installer also applies two local changes to the pinned server:
+The installer also applies two local changes to the pinned server, and the
+launcher turns on one upstream option:
 
 - `serve/server.py`: `reasoning_budget()` accepts `thinking_token_budget` (the
   field pi-ai/DSH clients send) when `reasoning_budget_tokens` is absent. The
   launcher refuses to start a server without it.
-- `serve/frontend.py`, by `scripts/patches/strata-think-echo.py`: the model
-  writes `</think>` as one token whether it ends its thinking or quotes the
-  tag, and the stock parser switches to the answer at the first one (upstream
-  #537, #1053). A quoted tag then leaks the rest of the reasoning, a stray
-  `</think>` and the reply written twice into `content`. The patch keeps a
-  `</think>` that does not follow a newline in the reasoning (on 0.1.39, 420
-  of 420 real closes followed one, 13 of 14 quoted tags did not). If the reply
-  ends still thinking, the text after the last quoted tag becomes the answer.
-  In the answer, a `</think>` on its own line (`X\n</think>\n\nX`) is
-  decided by what follows it. The answer's first 512 characters are held back:
-  if more answer follows such a tag there, the text before it was more
-  thinking and moves to the reasoning; if a tool call or the end of the reply
-  follows, it was the answer and only the tag is dropped. A later tag is
-  dropped. A `</think>`
-  inside a line of the answer is the model quoting it and stays text; the
-  first version also split there and cut such replies in half on the live
-  check. Only thinking replies longer than 512 characters start their answer
-  slightly later.
+- `serve/frontend.py`, by `scripts/patches/strata-think-echo.py` (v4): the
+  model writes `</think>` as one token whether it ends its thinking or quotes
+  the tag, and the stock parser switches to the answer at the first one
+  (upstream #537, #1053; unchanged in 0.1.40.2). A quoted tag then leaks the
+  rest of the reasoning, a stray `</think>` and the reply written twice into
+  `content`. The model's own close ends its line, and starts it or is followed
+  by a blank line (`\n</think>\n\n`, or `text</think>\n\n`): on 0.1.39, 420 of
+  420 real closes followed a newline, and none of 13 recorded quotes was
+  followed by a blank line. While the model thinks, any other `</think>` is
+  a quote and stays reasoning. If the reply then stops still thinking, the
+  text after the last quoted tag becomes the answer. In the answer, a
+  `</think>` alone on its line (`X\n</think>\n\nX`) is decided by what
+  follows it. The answer's first 512 characters are held back: if more answer
+  follows such a tag there, the text before it was more thinking and moves to
+  the reasoning; if a tool call or the end follows, it was the answer and only
+  the tag is dropped. A later one is dropped. A `</think>` that starts or sits
+  inside a line of the answer is the model quoting it and stays text. Earlier
+  versions cut replies in half twice on live checks: v1 at a mid-sentence
+  quote, v3 at a quote that started a line. Costs, seen in the fork's
+  own tests: a thinking reply's answer streams only after 512 characters or
+  its end, a stop string inside that window stops the engine late, and
+  `reasoning_tokens` counts the newline after the close.
+- `"reasoning_close_retry": true` in the launcher's config (upstream #1053,
+  opt-in since 0.1.40.2): a reply that ends on its end-of-turn token still
+  inside the thinking, with no answer and no tool call, is continued once with
+  the thinking closed, so the client gets an answer instead of empty content.
+  A reply that quoted `</think>` and then stopped is closed this way too,
+  before strata-think-echo's fallback applies.
 
-Reruns skip both once present.
+Reruns skip the changes once present.
 
 Known limitation, not patched: the server reads only `enable_thinking` and
 `reasoning_effort` from a request's `chat_template_kwargs`; any other key is
@@ -707,3 +720,54 @@ The production server on 1919 passed text, streaming, tool call and result
 continuation, image recognition and 4K retrieval with reuse on the new runtime.
 Rollback: re-extract `runtime/strata-nvfp4-v0.1.37-nvfp4.2-windows-x64.zip`
 over the runtime and restore the previous script pins from Git.
+
+## Upgrade, 2026-10-08
+
+Runtime 0.1.39-nvfp4.3 → 0.1.40.2-nvfp4.1 (`d147ca4f`). Curated results:
+[strata-0140-upgrade.json](../benchmarks/qwen38_flash_next/2026-10-08/strata-0140-upgrade.json);
+raw requests and outputs: `benchmarks/raw/qwen38-strata/2026-10-08/`. Both
+versions were measured the same day on a private `127.0.0.1:1921` server with
+Asuna down, with the 2026-10-06 benchmark set and launcher defaults (CJK draft
+vocabulary, 16 cache slots). One trial per case except the language probe, so
+differences of a few percent are within noise.
+
+| Same requests | 0.1.39-nvfp4.3 | 0.1.40.2-nvfp4.1 | Change |
+|---|---:|---:|---:|
+| 4K input / 4K output, prompt read | 1,817, 2,054 tok/s | 2,118, 2,364 tok/s | +15–17% |
+| 4K input / 4K output, decode | 148.4, 154.2 tok/s | 163.4, 168.9 tok/s | +10% |
+| 128K prompt read | 6,908 tok/s | 7,689 tok/s | +11% |
+| 128K input / 4K output, decode | 149.1 tok/s | 150.9 tok/s | +1% |
+| Chinese replies, decode (ms per round) | 146.9 tok/s (14.04) | 158.2 tok/s (13.02) | +8% |
+| English replies, decode (ms per round) | 149.2 tok/s (15.33) | 159.8 tok/s (14.26) | +7% |
+
+Draft acceptance and tokens per round did not change (0.59–0.64; 2.06 Chinese,
+2.28–2.29 English), so the gain is shorter rounds and faster prompt reads, as
+the fork's notes describe: expert gate/up on the FP4 tensor cores, prompt
+attention on INT8 tensor cores, the DeltaNet recurrence in chunks, and a gated
+CPU share of short prompt chunks. GPU expert slots: 8,029 before, 8,022 after.
+The same-day 0.1.39 decode was 8–12% faster than its 2026-10-06 run (148–154
+against 137–139 tok/s at 4K), so compare within this table, not across days.
+All retrieval checks and the smoke checks (text, streaming, tool round trip,
+image, 4K retrieval with reuse) passed on both.
+
+**Assets.** Requirements, `data/` and the converters that
+`prepare-qwen38-strata.py` runs are identical, except `tools/iq_pack.py`, which
+only adds IQ3_XXS and IQ4_XS to the native PLE key formats. This model's
+`ple_key` is BF16, so the prepared assets were reused.
+
+**Server patches.** The `thinking_token_budget` alias applies unchanged.
+`reasoning_close_retry` is now upstream's own option, so the launcher only sets
+it. strata-think-echo was ported as v4: the new parser keeps reasoning-held
+tool calls under names v3 used, so v3 could not be re-applied. The 0.1.39 check
+on the same day caught a v3 bug: one streamed reply quoted `</think>` at the
+start of a line and lost its first half (11/12; reproduced offline). v4 decides
+by whole lines and passed 12/12 on 0.1.40.2. Its replay of 720 recorded
+replies leaves every normal one unchanged and recovers all 42 leaked ones,
+streamed one character at a time, in random chunks and whole. The fork's test
+suite at `d147ca4f` gives 546 run, 2 errors unpatched. With v4 there are 5
+more failures and 1 more error, all from the costs listed under
+[Locations](#locations).
+
+Rollback: stop the server, re-extract
+`runtime/strata-nvfp4-v0.1.39-nvfp4.3-windows-x64.zip` over the runtime, and
+restore the previous script pins and strata-think-echo v3 from Git.

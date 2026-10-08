@@ -5,15 +5,16 @@ $ErrorActionPreference = 'Stop'
 $workspace = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeRoot = Join-Path $workspace 'runtime'
 $runtime = Join-Path $runtimeRoot 'strata-nvfp4'
-$version = '0.1.39-nvfp4.3'
-$commit = 'b17e5ef'
+$version = '0.1.40.2-nvfp4.1'
+$commit = 'd147ca4f'
 $archiveName = "strata-nvfp4-v$version-windows-x64.zip"
 $archive = Join-Path $runtimeRoot $archiveName
-$expectedHash = '0f2886961d3ef40ede279b083be5426c387419e17d404b4b149b544ea7be89c2'
+$expectedHash = '75a12607946b834d128dd4ef03955ca8209a3c8796e4754e4fc545bd39d9b706'
 # Earlier pinned releases upgraded in place, as the release notes direct ("unzip over the previous folder"): the
 # virtual environments, configs and models outside the zip stay. Their requirements, data files and the converters
-# behind the prepared model assets are identical to this release's (checked 2026-10-06).
-$upgradeFrom = @('0.1.37-nvfp4.2')
+# behind the prepared model assets are identical to this release's (checked 2026-10-06 and 2026-10-08; 0.1.40.2
+# only adds PLE key formats to tools/iq_pack.py that this model's BF16 key does not use).
+$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3')
 
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
     Invoke-WebRequest -Uri "https://github.com/sergqwer/strata-nvfp4/releases/download/v$version/$archiveName" -OutFile "$archive.partial"

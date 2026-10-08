@@ -1,0 +1,159 @@
+{
+ "date": "2026-10-08",
+ "purpose": "Upgrade Strata 0.1.39-nvfp4.3 -> 0.1.40.2-nvfp4.1 and repeat the 2026-10-06 benchmark set on the same day, same host state",
+ "common": {
+  "profile": "Native256K",
+  "kv": "int8",
+  "mtp_spec": 4,
+  "mtp_min_p": 0.5,
+  "draft_vocab": "en+Cyrillic+CJK",
+  "vram_reserve_mib": 2048,
+  "conversation_cache": "16 slots / 24 GiB",
+  "temperature": 0,
+  "reasoning_effort": "none",
+  "port": "1921 (127.0.0.1, no live traffic; Asuna down)",
+  "trials": "4K/4K x2, 128K/4K x1, language probe 3 zh + 3 en x2 at 768 tokens",
+  "gpu_expert_slots": {
+   "v0.1.39": 8029,
+   "v0.1.40.2": 8022
+  }
+ },
+ "runtime": {
+  "previous": {
+   "version": "0.1.39-nvfp4.3",
+   "commit": "b17e5ef"
+  },
+  "current": {
+   "version": "0.1.40.2-nvfp4.1",
+   "commit": "d147ca4f",
+   "zip_sha256": "75a12607946b834d128dd4ef03955ca8209a3c8796e4754e4fc545bd39d9b706",
+   "engine_sha256": "09cd28dcc1ea1b9c202aa5faa87405e00b210bbe481fa342c12559d91f5963b8"
+  },
+  "prepared_assets_reused": true,
+  "asset_check": "requirements, data/ and the converters prepare-qwen38-strata.py runs are identical except tools/iq_pack.py, which only adds IQ3_XXS/IQ4_XS PLE keys; this model's ple_key is BF16"
+ },
+ "decode_benchmark": {
+  "v0.1.39": [
+   {
+    "case": "p4096-o4096-r1",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 1817.2,
+    "decode_tok_s": 148.4,
+    "draft_acceptance": 0.586,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p4096-o4096-r2",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 2054.4,
+    "decode_tok_s": 154.2,
+    "draft_acceptance": 0.625,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p131072-o4096-r1",
+    "prompt_tokens": 131072,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 6907.6,
+    "decode_tok_s": 149.1,
+    "draft_acceptance": 0.612,
+    "retrieval_correct": true
+   }
+  ],
+  "v0.1.40.2": [
+   {
+    "case": "p4096-o4096-r1",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 2118.0,
+    "decode_tok_s": 163.4,
+    "draft_acceptance": 0.586,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p4096-o4096-r2",
+    "prompt_tokens": 4096,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 2363.9,
+    "decode_tok_s": 168.9,
+    "draft_acceptance": 0.636,
+    "retrieval_correct": true
+   },
+   {
+    "case": "p131072-o4096-r1",
+    "prompt_tokens": 131072,
+    "cached_tokens": 0,
+    "output_tokens": 4096,
+    "finish_reason": "length",
+    "prefill_tok_s": 7688.7,
+    "decode_tok_s": 150.9,
+    "draft_acceptance": 0.621,
+    "retrieval_correct": true
+   }
+  ]
+ },
+ "language_probe": {
+  "v0.1.39": {
+   "zh": {
+    "requests": 6,
+    "generated": 4450,
+    "acceptance": 0.628,
+    "tokens_per_round": 2.062,
+    "ms_per_round": 14.039,
+    "decode_tok_s": 146.9
+   },
+   "en": {
+    "requests": 6,
+    "generated": 4565,
+    "acceptance": 0.626,
+    "tokens_per_round": 2.288,
+    "ms_per_round": 15.334,
+    "decode_tok_s": 149.2
+   }
+  },
+  "v0.1.40.2": {
+   "zh": {
+    "requests": 6,
+    "generated": 4469,
+    "acceptance": 0.626,
+    "tokens_per_round": 2.058,
+    "ms_per_round": 13.015,
+    "decode_tok_s": 158.2
+   },
+   "en": {
+    "requests": 6,
+    "generated": 4525,
+    "acceptance": 0.61,
+    "tokens_per_round": 2.278,
+    "ms_per_round": 14.255,
+    "decode_tok_s": 159.8
+   }
+  }
+ },
+ "smoke": {
+  "v0.1.39": "text, stream, tool round trip, image, 4K retrieval and reuse passed (smoke-0139.json)",
+  "v0.1.40.2": "text, stream, tool round trip, image, 4K retrieval and reuse passed (smoke-0140.json)"
+ },
+ "think_tag_check": {
+  "v0.1.39 with strata-think-echo v3": "11/12: one streamed reply quoting </think> at the start of a line lost its first half (a v3 bug, reproduced offline)",
+  "v0.1.40.2 with strata-think-echo v4": "12/12"
+ },
+ "fork_test_suite": {
+  "commit": "d147ca4f",
+  "unpatched": "546 run, 2 errors (test_mcp import, prompt encoder), 9 skipped",
+  "with strata-think-echo v4": "546 run, 5 failures + 1 extra error, all from the answer hold-back window and the one-character close lookahead (stop-string early stop, an immediate mid-answer chunk, reasoning_tokens +1)"
+ },
+ "raw_directory": "benchmarks/raw/qwen38-strata/2026-10-08/"
+}

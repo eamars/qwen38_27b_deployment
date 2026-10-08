@@ -133,6 +133,9 @@ $config = [ordered]@{
     tokenizer = Join-Path $model 'pack\tokenizer'
     model_name = $servedModel
     anthropic_thinking = 'on_request'
+    # A reply that ends inside its thinking with no answer is closed once and continued (upstream #1053, opt-in
+    # since 0.1.40.2); without it an agent turn ends with empty content.
+    reasoning_close_retry = $true
     host = $BindAddress
     log = Join-Path $logDirectory "engine-$Port.log"
     gpu = $monitorGpus
