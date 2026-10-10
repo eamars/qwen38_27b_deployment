@@ -9,8 +9,10 @@ On 2026-10-06 the runtime moved to 0.1.39-nvfp4.3, the MTP draft vocabulary
 gained the CJK scripts and the conversation cache grew to 16 slots; see
 [Upgrade and tuning, 2026-10-06](#upgrade-and-tuning-2026-10-06). On
 2026-10-08 it moved to 0.1.40.2-nvfp4.1: 7–17% faster prompts and decode on
-the same requests; see [Upgrade, 2026-10-08](#upgrade-2026-10-08). Earlier
-measurements below were made on 0.1.37-nvfp4.2 or 0.1.39-nvfp4.3.
+the same requests; see [Upgrade, 2026-10-08](#upgrade-2026-10-08). On
+2026-10-10 it moved to 0.1.41-nvfp4.4: another 7–11% faster chat; see
+[Upgrade, 2026-10-10](#upgrade-2026-10-10). Earlier measurements below were
+made on earlier runtimes.
 
 It follows this workspace's normal layout: model assets in `models/`, the
 isolated runtime in `runtime/`, operational commands in `scripts/`, and raw
@@ -20,9 +22,9 @@ validation evidence in `benchmarks/raw/qwen38-strata/`.
 
 | Input | Pin |
 |---|---|
-| Runtime | [sergqwer/strata-nvfp4 v0.1.40.2-nvfp4.1](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.40.2-nvfp4.1), commit `d147ca4f` (until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
-| Windows release SHA-256 | `75a12607946b834d128dd4ef03955ca8209a3c8796e4754e4fc545bd39d9b706` |
-| Engine SHA-256 | `09cd28dcc1ea1b9c202aa5faa87405e00b210bbe481fa342c12559d91f5963b8` |
+| Runtime | [sergqwer/strata-nvfp4 v0.1.41-nvfp4.4](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.41-nvfp4.4), commit `ec1ea2d0` (until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
+| Windows release SHA-256 | `ffddc598cff0de516acf9247a43e01a3c19aa9cd456f822143817dd37b830a15` |
+| Engine SHA-256 | `1217e500e8cc64fbc0b51ddfbb84bf978431733ea308566122bebb47e04f67c2` |
 | Bundled llama.cpp converter | `3cf03257f219afbe7334045ff7c6a06ac68c627d` |
 | Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) |
 | Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
@@ -771,3 +773,46 @@ more failures and 1 more error, all from the costs listed under
 Rollback: stop the server, re-extract
 `runtime/strata-nvfp4-v0.1.39-nvfp4.3-windows-x64.zip` over the runtime, and
 restore the previous script pins and strata-think-echo v3 from Git.
+
+## Upgrade, 2026-10-10
+
+Runtime 0.1.40.2-nvfp4.1 → 0.1.41-nvfp4.4 (`ec1ea2d0`), with the same ModelOpt
+pack. The fork also offers a ready-made GPTQ pack of the same OrcaRouter model
+(`orca-nvfp4`); it was measured and not taken. Curated results:
+[strata-0141-ab.json](../benchmarks/qwen38_flash_next/2026-10-10/strata-0141-ab.json);
+raw: `benchmarks/raw/qwen38-strata/2026-10-10/ab/`.
+`scripts/benchmark-qwen38-strata-ab.py` ran every arm from the production
+launcher's config on `127.0.0.1:1921`, after a reboot, with nothing else on
+the GPU. One trial per case, so a few percent is noise.
+
+| | 0.1.40.2 + ModelOpt | **0.1.41 + ModelOpt** | 0.1.41 + GPTQ |
+|---|---:|---:|---:|
+| Chinese / English chat decode, tok/s | 152.3 / 148.7 | **162.6 / 164.9** | 164.8 / 168.3 |
+| 4K prompt read / decode, tok/s | 2,292 / 159.0 | **2,349 / 169.5** | 2,357 / 168.4 |
+| 128K prompt read / decode, tok/s | 7,690 / 149.5 | **8,136 / 156.1** | 8,399 / 164.0 |
+| Two agents switching 32K histories, s per turn | 0.99 | **0.90** | 0.89 |
+| Retrieval, smoke, `</think>` (12/12), exact answers (12/12) | pass | **pass** | pass |
+| Long thinking: 3 hard prompts, greedy, 16K cap | 2/3 | **2/3** | 1/3 |
+
+The runtime is the gain: +7% Chinese and +11% English decode, +4–6% at 128K.
+The GPTQ pack adds 1–2% on chat and fails more long-thinking prompts. On the
+12-coin puzzle it collapsed into a repeated `H?` that both ModelOpt arms
+answered. The bracket-coding prompt hit the 16K cap on every arm: production
+and GPTQ looped, 0.1.41 + ModelOpt was still writing code. The fork's
+suggested `--spec 6 --spec-min-p 0.7` was within noise of 4 / 0.5, so the
+launcher keeps 4 / 0.5.
+
+What else 0.1.41 brings here: a fix for an expert computed on the CPU from a
+stale activation just after its eviction (0.1.40.3-nvfp4.1); a full
+conversation cache that evicts old entries to make room instead of dropping
+the new snapshot; and a restart of an engine that is silent, idle and uses no
+CPU or I/O for 90 s. That watchdog needs psutil, which the installer now adds
+beside Pillow. Since 0.1.41-nvfp4.2 the engine warns below 60,000 MB of page
+file and, short of commit, shrinks the GPU expert cache (17–38% slower rounds
+in the fork's measurements). This PC now has a fixed 64,000 MB page file. The
+prepared assets were reused: requirements, `data/` and the converters are
+unchanged. The installed server is byte-identical to the benchmarked arm.
+
+Rollback: stop the server, re-extract
+`runtime/strata-nvfp4-v0.1.40.2-nvfp4.1-windows-x64.zip` over the runtime, and
+restore the previous installer pin from Git.

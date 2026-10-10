@@ -310,6 +310,21 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   7.6 GiB, `ext4.vhdx` went from 450.2 GiB to 9.3 GiB (440.9 GiB returned to
   C:), and Ubuntu is kept.
 
+### 2026-10-10 — Strata 0.1.41-nvfp4.4, GPTQ pack rejected
+
+- A/B after a reboot, every arm from the production launcher's config: 0.1.40.2
+  vs 0.1.41 with the ModelOpt pack, and 0.1.41 with the fork's GPTQ pack of the
+  same OrcaRouter model. 0.1.41 gave +7% Chinese and +11% English decode, +4–6%
+  at 128K, every correctness check passing.
+- The GPTQ pack added 1–2% on chat and failed 2 of 3 long-thinking prompts, one
+  by collapsing into a repeated token. Not taken. The fork's `--spec 6
+  --spec-min-p 0.7` was within noise, so the launcher keeps 4 / 0.5.
+- Upgraded production in place (assets reused); the installer now adds psutil
+  for 0.1.41's frozen-engine watchdog. The page file is a fixed 64,000 MB, as
+  the fork requires.
+- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-10) and
+  [curated results](../benchmarks/qwen38_flash_next/2026-10-10/strata-0141-ab.json).
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

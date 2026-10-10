@@ -5,16 +5,16 @@ $ErrorActionPreference = 'Stop'
 $workspace = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeRoot = Join-Path $workspace 'runtime'
 $runtime = Join-Path $runtimeRoot 'strata-nvfp4'
-$version = '0.1.40.2-nvfp4.1'
-$commit = 'd147ca4f'
+$version = '0.1.41-nvfp4.4'
+$commit = 'ec1ea2d0'
 $archiveName = "strata-nvfp4-v$version-windows-x64.zip"
 $archive = Join-Path $runtimeRoot $archiveName
-$expectedHash = '75a12607946b834d128dd4ef03955ca8209a3c8796e4754e4fc545bd39d9b706'
+$expectedHash = 'ffddc598cff0de516acf9247a43e01a3c19aa9cd456f822143817dd37b830a15'
 # Earlier pinned releases upgraded in place, as the release notes direct ("unzip over the previous folder"): the
 # virtual environments, configs and models outside the zip stay. Their requirements, data files and the converters
-# behind the prepared model assets are identical to this release's (checked 2026-10-06 and 2026-10-08; 0.1.40.2
-# only adds PLE key formats to tools/iq_pack.py that this model's BF16 key does not use).
-$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3')
+# behind the prepared model assets are identical to this release's (checked 2026-10-06, 2026-10-08 and 2026-10-10;
+# 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does not use).
+$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1')
 
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
     Invoke-WebRequest -Uri "https://github.com/sergqwer/strata-nvfp4/releases/download/v$version/$archiveName" -OutFile "$archive.partial"
@@ -81,8 +81,10 @@ foreach ($role in @('convert', 'serve')) {
     if ($role -eq 'serve') {
         # Local addition: the server converts images its vision decoder cannot read (WebP, which DSH sends for
         # transparent pictures) with Pillow, and refuses the whole request without it.
-        & $python -m pip install --disable-pip-version-check pillow
-        if ($LASTEXITCODE -ne 0) { throw 'Pillow installation for the Strata server failed.' }
+        # psutil: since 0.1.41 the server restarts an engine that is silent, idle and uses no CPU or I/O for 90 s, and
+        # without psutil it cannot tell, so nothing is ended (the fork's setup installs it; its requirements do not).
+        & $python -m pip install --disable-pip-version-check pillow psutil
+        if ($LASTEXITCODE -ne 0) { throw 'Pillow and psutil installation for the Strata server failed.' }
     }
     & $python -m pip check
     if ($LASTEXITCODE -ne 0) { throw "Strata $role dependency check failed." }

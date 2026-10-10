@@ -24,6 +24,9 @@ canonical launch and profiling entry points are:
 | Asuna's installed DSH adapter, reasoning replay and waiting-parent cache probe | `probe-asuna-strata-cache.mjs` |
 | Strata cold prefill, long streaming output, request queuing and VRAM measurements | `benchmark-qwen38-strata.py` |
 | Strata MTP draft acceptance and decode speed for Chinese vs English replies | `probe-qwen38-strata-draft-lang.py` |
+| Strata live check of quoted `</think>` handling (12 requests) | `probe-qwen38-strata-think-tags.py` |
+| Strata short quality check: long-thinking loops and 12 exact answers | `probe-qwen38-strata-quality.py` |
+| Same-session A/B of production's Strata runtime against a staged candidate, both from the launcher's config | `benchmark-qwen38-strata-ab.py` |
 | GPU memory sampling | `profile-vram.ps1` |
 | Runtime/model/GPU preflight | `check-runtime.ps1` |
 
