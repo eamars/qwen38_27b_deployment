@@ -14,9 +14,6 @@ canonical launch and profiling entry points are:
 | Gemma 4 31B HauhauCS QAT Uncensored Balanced Q4_K_M + vision/MTP, RTX 4090, 65K context | `start-gemma4-31b-hauhaucs-balanced-q4_k_m-4090-65k-mtp.ps1` |
 | Qwen API smoke/sustained checks | `profile-api.py` |
 | Qwen tokenizer-calibrated deep context | `profile-deep-context.py` |
-| Flash-Next uncensored text-only launch/stop | `start-qwen38-flash-next-uncensored-freetoken.ps1` |
-| Flash-Next uncensored FreeToken 4K benchmark and shared telemetry helpers | `benchmark-freetoken-qwen38-next.py` |
-| Flash-Next uncensored vision launch/stop | `start-qwen38-flash-next-uncensored-freetoken-vision.ps1` |
 | Flash-Next uncensored native Windows Strata vision/MTP launch/stop | `start-qwen38-flash-next-uncensored-strata-vision.ps1` |
 | Install the pinned Windows Strata runtime and Python environments | `setup-strata-runtime.ps1` |
 | Strata server patch: quoted or repeated `</think>` stays out of the answer (applied by the installer) | `patches/strata-think-echo.py` |
@@ -27,7 +24,6 @@ canonical launch and profiling entry points are:
 | Asuna's installed DSH adapter, reasoning replay and waiting-parent cache probe | `probe-asuna-strata-cache.mjs` |
 | Strata cold prefill, long streaming output, request queuing and VRAM measurements | `benchmark-qwen38-strata.py` |
 | Strata MTP draft acceptance and decode speed for Chinese vs English replies | `probe-qwen38-strata-draft-lang.py` |
-| Flash-Next 262K/4K uncensored text/vision matrix | `benchmark-qwen38-flash-next-freetoken-vision-matrix.py` |
 | GPU memory sampling | `profile-vram.ps1` |
 | Runtime/model/GPU preflight | `check-runtime.ps1` |
 
@@ -45,16 +41,6 @@ state rather than launch an alternative runtime:
   uncensored QAT target, MTP drafter, and vision projector.
 - `collect-host-inventory.ps1` — refreshes `docs/host-inventory.md`.
 - `record-model-manifest.ps1` — refreshes `docs/models.md`.
-- `stage-qwen38-uncensored.py` — stages and verifies the pinned checkpoint in WSL.
-- `verify-qwen38-uncensored.py` — checks all local tensor headers against the
-  shared loader's expected layouts without reading tensor payloads.
-- `probe-qwen38-uncensored-runtime.py` — checks the shared loaders with tiny
-  synthetic tensors and the compiled CPU disk reader; never initializes CUDA.
-
-The [uncensored deployment note](../docs/qwen38-flash-next-uncensored.md)
-records the pinned assets, shared loader changes, preparation results and live
-load checks. Generated verification reports belong under
-`benchmarks/raw/qwen38-uncensored/`, which is ignored by Git.
 
 For DSH integration, use the dedicated
 [Qwen3.8 Flash-Next vision runbook](../docs/dsh-qwen38-flash-next-vision.md).
@@ -71,18 +57,7 @@ and its shared MTP sidecar.
 The unvalidated two-slot Qwen launcher remains removed. Cleanup and restoration
 history is recorded in [docs/history.md](../docs/history.md).
 
-The uncensored Qwen3.8 Flash-Next FreeToken profile uses the RTX 5090,
-NVFP4, disk-backed PLE, and `--moe-strategy offload --moe-cpu-layers auto`.
-Preview without
-loading weights:
-
-```powershell
-.\scripts\start-qwen38-flash-next-uncensored-freetoken.ps1 -Profile Short4K -DryRun
-```
-
-The wrapper defaults to one concurrent request.
-
-The separate native Windows [Strata deployment](../docs/qwen38-flash-next-strata.md)
+The native Windows [Strata deployment](../docs/qwen38-flash-next-strata.md)
 uses the same RTX 5090, a ModelOpt checkpoint under `models/`, CPU vision and
 MTP. All Flash launchers share port `1919`; Strata defaults to LAN binding
 (`0.0.0.0`) on that port and a 262K context, matching the older launchers.
@@ -97,25 +72,5 @@ includes the two-agent tool tests and Asuna connection/configuration findings.
 records actual output lengths, and can reproduce overlapping request arrival
 with `--concurrency`. It observes VRAM without cancelling a request at a threshold.
 
-The uncensored FreeToken vision launcher uses port `1919` and fixes its
-checkpoint and served model ID:
-
-| Launcher | Served model ID |
-|---|---|
-| Uncensored vision | `qwen38-next-uncensored-freetoken-vision` |
-
-```powershell
-.\scripts\start-qwen38-flash-next-uncensored-freetoken-vision.ps1
-python .\scripts\benchmark-qwen38-flash-next-freetoken-vision-matrix.py
-```
-
-Stop the active model with its matching script:
-
-```powershell
-.\scripts\start-qwen38-flash-next-uncensored-freetoken-vision.ps1 -Stop
-```
-
-The matrix compares the uncensored text and vision launchers. It fixes the
-context at 262,144 tokens, uses the retained 4,041-token
-prompt, runs three measured requests per configuration, and writes the result
-under `benchmarks/raw/qwen38_flash_next/<date>/`.
+The uncensored FreeToken launchers, WSL wrapper, staging, verification and
+benchmark helpers were removed on 2026-10-10 when Strata replaced FreeToken.

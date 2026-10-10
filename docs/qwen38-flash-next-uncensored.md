@@ -1,5 +1,11 @@
 # Qwen3.8 Flash-Next uncensored deployment
 
+Retired (2026-10-10): Strata replaced this path. The launchers, WSL wrapper and
+helpers named below were removed from `scripts/`, and the WSL checkpoint,
+environments and runtime checkouts were scheduled for deletion. This note is
+historical evidence. The current path is the
+[Strata runbook](qwen38-flash-next-strata.md).
+
 Current status (2026-10-03): the uncensored checkpoint, launchers and shared
 runtime remain available. The official checkpoint and launchers were removed;
 references to that deployment and four-way comparisons below describe the

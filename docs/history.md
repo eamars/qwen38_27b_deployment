@@ -289,6 +289,27 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-08)
   and [curated results](../benchmarks/qwen38_flash_next/2026-10-08/strata-0140-upgrade.json).
 
+## 2026-10-10 — FreeToken retired
+
+- Strata replaced the uncensored Flash-Next FreeToken path. Removed its two
+  launchers, the WSL wrapper, the 4K benchmark, the vision matrix, and the
+  staging, header-verification and loader-probe helpers: 8 scripts. Benchmark
+  results, patches under `artifacts/` and the FreeToken notes in `docs/`
+  remain as historical evidence. Strata still accepts the
+  `qwen38-next-uncensored-freetoken-vision` model ID that Asuna's DSH
+  profiles request.
+- Disk check: the WSL disk file `ext4.vhdx` was 450.2 GiB, but the distro held
+  only 199 GiB. The 267 GB deleted on 2026-10-03 was never returned to Windows
+  because the VHDX does not shrink on its own. Of the remaining 199 GiB,
+  171 GiB is the uncensored NVFP4 checkpoint, 20 GiB is the uv package cache
+  behind the FreeToken environments, and the rest is the Ubuntu system plus
+  small leftovers.
+- The user deleted the WSL checkpoint, FreeToken environments, uv cache and
+  kernel caches, ran `fstrim`, compacted the VHDX with `diskpart`, and removed
+  the ignored `runtime/freetoken-*` checkouts. Result: the distro holds
+  7.6 GiB, `ext4.vhdx` went from 450.2 GiB to 9.3 GiB (440.9 GiB returned to
+  C:), and Ubuntu is kept.
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

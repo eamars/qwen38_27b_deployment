@@ -45,8 +45,6 @@ $lines = @(
     'when those files are present. Regenerate this file with'
     '`scripts/record-model-manifest.ps1` after replacing an artifact.'
     ''
-    'The uncensored FreeToken checkpoint is stored separately under WSL at'
-    '`/home/rba90/models/Qwen3.8-Flash-Next-Uncensored-NVFP4`.'
     'The native Windows Strata checkpoint and generated assets are under'
     '`models/qwen38-flash-next-uncensored-strata/`; see the'
     '[Strata runbook](qwen38-flash-next-strata.md) and'

@@ -14,8 +14,8 @@ Read the documents in this order when operating the workspace:
    decisions.
 6. [Historical official Flash-Next FreeToken deployment](qwen38-flash-next-freetoken.md) —
    the retired RTX 5090 configuration and retained measured 4K result.
-7. [Uncensored Flash-Next deployment](qwen38-flash-next-uncensored.md) —
-   the separate checkpoint using the shared FreeToken loader and its load checks.
+7. [Historical uncensored Flash-Next FreeToken deployment](qwen38-flash-next-uncensored.md) —
+   the WSL checkpoint and loader checks, retired 2026-10-10 in favour of Strata.
 8. [DSH Qwen3.8 Flash-Next vision runbook](dsh-qwen38-flash-next-vision.md) —
    the complete runtime, public-RPC catalog, compatibility, swap, and
    verification procedure for vision-capable DSH entries.

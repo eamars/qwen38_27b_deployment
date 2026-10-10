@@ -28,7 +28,7 @@ validation evidence in `benchmarks/raw/qwen38-strata/`.
 | Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
 | Source download | 220 files, 135,253,671,102 bytes (125.965 GiB) |
 
-The existing FreeToken model under WSL uses compressed-tensors NVFP4 and a
+The retired FreeToken model under WSL used compressed-tensors NVFP4 and a
 different PLE representation. This installation uses the fork's documented
 ModelOpt checkpoint and converters. Its source checkpoint and generated assets
 are independent of the FreeToken runtime.

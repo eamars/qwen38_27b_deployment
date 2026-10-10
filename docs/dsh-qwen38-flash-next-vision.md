@@ -1,5 +1,11 @@
 # DSH: Qwen3.8 Flash-Next vision integration
 
+Note (2026-10-10): FreeToken is retired and its launchers were removed. Strata
+now serves port `1919` and accepts the existing
+`qwen38-next-uncensored-freetoken-vision` model ID, so DSH entries keep
+working. The FreeToken launcher steps below are historical; use the
+[Strata runbook](qwen38-flash-next-strata.md) to start the server.
+
 This is the canonical runbook for adding or switching a vision-capable
 Qwen3.8 Flash-Next model in DeepSeek Harness (DSH). It records both sides of
 the integration:

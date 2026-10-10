@@ -1,28 +1,29 @@
 # Qwen3.8 / DFlash2 Windows workspace
 
 This repository is a reproducible local-inference workspace for two maintained
-Qwen3.8-27B llama.cpp deployment modes plus isolated
-Qwen3.8-Flash-Next FreeToken and Strata paths on one Windows host:
+Qwen3.8-27B llama.cpp deployment modes plus an isolated
+Qwen3.8-Flash-Next Strata path on one Windows host:
 
 - RTX 5090: Qwen3.8-27B `UD-Q6_K_M` with DFlash2, currently profiled at
   `126976` context tokens.
 - RTX 4090: Qwen3.8-27B `UD-Q4_K_XL` with DFlash2, currently profiled at
   `110000` context tokens.
-- RTX 5090 under WSL: Qwen3.8-Flash-Next uncensored NVFP4 through FreeToken, with routed
-  expert offload and disk-backed PLE; this path is separate from the maintained
-  llama.cpp launchers.
 - RTX 5090 natively on Windows: Qwen3.8-Flash-Next uncensored ModelOpt NVFP4
   through Strata, with CPU vision, MTP and host RAM snapshots for alternating
   agent histories; see the
   [Strata runbook](docs/qwen38-flash-next-strata.md).
 
-All Flash-Next launchers share port `1919`; run one backend at a time.
+The Strata launcher uses port `1919`.
 
 The independent launchers expose one model per port. The Kazusa router and
 Gemma 4 Persona launchers have been retired. The Gemma Fable-5 Distill, QAT
 Instruct and HauhauCS launchers remain available.
 
 ## Current state
+
+On 2026-10-10 the uncensored Flash-Next FreeToken path was retired in favour of
+Strata. Its launchers and helpers were removed; benchmark evidence and
+historical notes were kept. See [the retirement record](docs/history.md#2026-10-10--freetoken-retired).
 
 On 2026-10-03, the official Flash-Next FreeToken, DeepSeek FreeToken, Gemma
 Persona, Gemma 26B and Kazusa launchers and their dedicated helpers were
@@ -86,7 +87,7 @@ Fable-5 Distill target and shared MTP drafter:
 - [docs/host-inventory.md](docs/host-inventory.md) — captured hardware/build snapshot.
 - [docs/history.md](docs/history.md) — chronological project history and decision log.
 - [docs/qwen38-flash-next-freetoken.md](docs/qwen38-flash-next-freetoken.md) — historical official Flash-Next deployment and benchmark.
-- [docs/qwen38-flash-next-uncensored.md](docs/qwen38-flash-next-uncensored.md) — separate uncensored NVFP4 checkpoint using the shared FreeToken loader, with Short4K loading validated.
+- [docs/qwen38-flash-next-uncensored.md](docs/qwen38-flash-next-uncensored.md) — historical uncensored FreeToken deployment, retired 2026-10-10.
 - [scripts/README.md](scripts/README.md) — maintained script inventory.
 - [benchmarks/README.md](benchmarks/README.md) — raw-result layout and naming convention.
 
@@ -99,7 +100,7 @@ reference. They are not the current operating instructions.
 ```text
 docs/       current documentation and archived stage notes
 models/     local checkpoints and GGUF assets; ignored by Git
-runtime/    retained llama.cpp, FreeToken and Strata runtimes; ignored by Git
+runtime/    retained llama.cpp and Strata runtimes; ignored by Git
 scripts/    maintained launch, profiling, setup, and inventory helpers
 benchmarks/ dated JSON/CSV measurements grouped by model and run date
 ```
@@ -109,10 +110,5 @@ constraints are full target and draft GPU residency, target KV cache at `Q8_0`
 or better, DFlash2 enabled, one slot, no normal CPU offload, and at least
 1024 MiB free VRAM during the accepted stress workload.
 
-The retained uncensored Qwen3.8-Flash-Next FreeToken RTX 5090 path uses NVFP4,
-disk-backed PLE, `--moe-strategy offload`, and automatic CPU-layer fallback.
-The retired official checkpoint's three-run 4K median was 12.53 seconds,
-1656 prompt tok/s, and 50.59 decode tok/s. Native 256K validation remains
-open. Its routed-expert host-memory placement is separate from the DFlash2
-constraints above. See [the historical deployment record](docs/qwen38-flash-next-freetoken.md)
-and its [tool-call compatibility note](runtime/freetoken-a80b4d3/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
+The Flash-Next FreeToken paths are retired; their measured results remain in
+[docs/benchmarks.md](docs/benchmarks.md) and [the historical deployment record](docs/qwen38-flash-next-freetoken.md).

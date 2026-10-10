@@ -246,27 +246,15 @@ Do not solve a VRAM problem by lowering target KV below `Q8_0`, enabling normal
 CPU target offload, adding slots, or silently switching to a different runtime
 build.
 
-## Qwen3.8-Flash-Next FreeToken deployment
+## Qwen3.8-Flash-Next deployment
 
-Flash-Next is isolated from the maintained Qwen3.8-27B DFlash2 launchers. The
-uncensored FreeToken path runs on the RTX 5090 with its NVFP4 checkpoint in
-WSL. A separate native Windows [Strata path](qwen38-flash-next-strata.md)
-also remains available. Preview FreeToken without loading weights:
-
-```powershell
-.\scripts\start-qwen38-flash-next-uncensored-freetoken.ps1 -Profile Short4K -DryRun
-```
-
-The retained checkpoint and loader are documented in
-[the uncensored FreeToken deployment record](qwen38-flash-next-uncensored.md).
-FreeToken's Qwen tool-call compatibility and the boundary between the
-`qwen3` reasoning parser and `qwen3_coder` tool parser are recorded in the
-[compatibility note](../runtime/freetoken-eamars/docs/models.md#known-compatibility-issue-qwen38-flash-next-tool-calls-while-thinking).
+Flash-Next is isolated from the maintained Qwen3.8-27B DFlash2 launchers. It
+runs natively on Windows through the [Strata path](qwen38-flash-next-strata.md)
+on the RTX 5090. The WSL FreeToken path was retired on 2026-10-10; its
+[deployment record](qwen38-flash-next-uncensored.md) is historical.
 Keep the existing Qwen3.8-27B launchers and their DFlash2 defaults unchanged.
 
 The vision launcher and the DSH catalog procedure are documented in
 the [Qwen3.8 Flash-Next DSH vision runbook](dsh-qwen38-flash-next-vision.md).
-The FreeToken and Strata launchers share port `1919`; run one at a time.
-For FreeToken vision the runtime must enable the vision tower, and DSH
-must explicitly declare image input, reasoning efforts, and
-`supportsDeveloperRole: false`.
+Strata uses port `1919`. DSH must explicitly declare image input, reasoning
+efforts, and `supportsDeveloperRole: false`.

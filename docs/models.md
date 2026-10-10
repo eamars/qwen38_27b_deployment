@@ -13,9 +13,9 @@ Qwen rows are the deployment set; Gemma rows are experimental and are included
 when those files are present. Regenerate this file with
 `scripts/record-model-manifest.ps1` after replacing an artifact.
 
-The retained uncensored FreeToken checkpoint is stored under WSL at
-`/home/rba90/models/Qwen3.8-Flash-Next-Uncensored-NVFP4`. The shared FreeToken
-environment and runtimes remain available for that deployment.
+The uncensored FreeToken checkpoint under WSL
+(`/home/rba90/models/Qwen3.8-Flash-Next-Uncensored-NVFP4`) was retired on
+2026-10-10 together with the FreeToken environments and runtimes.
 
 The native Windows Strata deployment has a separate ModelOpt NVFP4 checkpoint
 under `models/qwen38-flash-next-uncensored-strata/checkpoint/`. All 220 files
