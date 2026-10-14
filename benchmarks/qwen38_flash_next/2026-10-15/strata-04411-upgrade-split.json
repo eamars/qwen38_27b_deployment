@@ -1,0 +1,191 @@
+{
+ "date": "2026-10-15",
+ "question": "Is 0.1.44.1-nvfp4.1 at least as good as the 0.1.41-nvfp4.4 record, and does the 5090+4090 layer split with parallel 2 beat the 5090 alone at C1 and C2?",
+ "decision": "Production runs 0.1.44.1-nvfp4.1 on the 5090 alone, parallel 1 (held). The split is not taken.",
+ "method": "scripts/benchmark-qwen38-strata-ab.py on 127.0.0.1:1921, production launcher config, nothing else on the 5090; one trial per case. C1/C2 from scripts/probe-qwen38-strata-concurrency.py (3 pairs of ~768-token chat answers, temperature 0, reasoning off).",
+ "record_0141": {
+  "zh_decode_tok_s": 162.6,
+  "en_decode_tok_s": 164.9,
+  "bench4k_prefill_tok_s": 2348.5,
+  "bench4k_decode_tok_s": 169.5,
+  "bench128k_prefill_tok_s": 8136.1,
+  "bench128k_decode_tok_s": 156.1,
+  "cache_switch_wall_s_mean": 0.9,
+  "think_tags": "12/12",
+  "long_thinking": "2/3",
+  "exact_answers": "12/12",
+  "source": "../2026-10-10/strata-0141-ab.json"
+ },
+ "upgrade_04411_5090": {
+  "engine": "0.1.44.1",
+  "probes": {
+   "lang": {
+    "exit": 0,
+    "seconds": 58.3
+   },
+   "bench4k": {
+    "exit": 0,
+    "seconds": 26.4
+   },
+   "bench128k": {
+    "exit": 0,
+    "seconds": 41.1
+   },
+   "cache32k": {
+    "exit": 0,
+    "seconds": 14.0
+   },
+   "smoke": {
+    "exit": 0,
+    "seconds": 4.9
+   },
+   "think_tags": {
+    "exit": 0,
+    "seconds": 14.3
+   },
+   "quality": {
+    "exit": 0,
+    "seconds": 224.9
+   }
+  },
+  "zh_decode_tok_s": 166.1,
+  "en_decode_tok_s": 165.7,
+  "bench4k_prefill_tok_s": 2331.4,
+  "bench4k_decode_tok_s": 167.6,
+  "bench4k_retrieval": true,
+  "bench128k_prefill_tok_s": 8458.8,
+  "bench128k_decode_tok_s": 162.4,
+  "bench128k_retrieval": true,
+  "cache_passed": true,
+  "cache_switch_wall_s_mean": 0.9,
+  "smoke_passed": true,
+  "think_tags": "12/12",
+  "long_thinking": "2/3",
+  "exact_answers": "12/12",
+  "gpu_expert_slots": 8066,
+  "what": "0.1.44.1-nvfp4.1, 5090 alone, parallel 1 (first run)"
+ },
+ "baseline_5090_same_session": {
+  "engine": "0.1.44.1",
+  "probes": {
+   "lang": {
+    "exit": 0,
+    "seconds": 58.8
+   },
+   "bench4k": {
+    "exit": 0,
+    "seconds": 26.2
+   },
+   "bench128k": {
+    "exit": 0,
+    "seconds": 41.3
+   },
+   "cache32k": {
+    "exit": 0,
+    "seconds": 14.0
+   },
+   "concurrency": {
+    "exit": 0,
+    "seconds": 61.1
+   },
+   "smoke": {
+    "exit": 0,
+    "seconds": 5.4
+   },
+   "think_tags": {
+    "exit": 0,
+    "seconds": 11.8
+   },
+   "quality": {
+    "exit": 0,
+    "seconds": 210.0
+   }
+  },
+  "zh_decode_tok_s": 163.3,
+  "en_decode_tok_s": 165.8,
+  "bench4k_prefill_tok_s": 2363.1,
+  "bench4k_decode_tok_s": 169.0,
+  "bench4k_retrieval": true,
+  "bench128k_prefill_tok_s": 8450.8,
+  "bench128k_decode_tok_s": 161.5,
+  "bench128k_retrieval": true,
+  "cache_passed": true,
+  "cache_switch_wall_s_mean": 0.9,
+  "c1_tok_s": 149.3,
+  "c2_total_tok_s": 149.4,
+  "c2_stream_engine_decode_tok_s": 160.8,
+  "smoke_passed": true,
+  "think_tags": "12/12",
+  "long_thinking": "2/3",
+  "exact_answers": "11/12",
+  "gpu_expert_slots": 8066,
+  "what": "0.1.44.1-nvfp4.1, 5090 alone, parallel 1 (second run, before the split)",
+  "note": "exact_answers 11/12: the miss answered 堪培拉 (Canberra in Chinese)"
+ },
+ "split_parallel2": {
+  "engine": "0.1.44.1",
+  "probes": {
+   "lang": {
+    "exit": 0,
+    "seconds": 72.7
+   },
+   "bench4k": {
+    "exit": 0,
+    "seconds": 29.7
+   },
+   "bench128k": {
+    "exit": 0,
+    "seconds": 45.8
+   },
+   "cache32k": {
+    "exit": 0,
+    "seconds": 21.9
+   },
+   "concurrency": {
+    "exit": 0,
+    "seconds": 74.8
+   },
+   "smoke": {
+    "exit": 0,
+    "seconds": 9.1
+   },
+   "think_tags": {
+    "exit": 0,
+    "seconds": 15.0
+   },
+   "quality": {
+    "exit": 0,
+    "seconds": 243.0
+   }
+  },
+  "zh_decode_tok_s": 138.6,
+  "en_decode_tok_s": 141.2,
+  "bench4k_prefill_tok_s": 1415.6,
+  "bench4k_decode_tok_s": 153.8,
+  "bench4k_retrieval": true,
+  "bench128k_prefill_tok_s": 7419.5,
+  "bench128k_decode_tok_s": 148.2,
+  "bench128k_retrieval": true,
+  "cache_passed": true,
+  "cache_switch_wall_s_mean": 1.36,
+  "c1_tok_s": 117.6,
+  "c2_total_tok_s": 122.8,
+  "c2_stream_engine_decode_tok_s": 69.2,
+  "smoke_passed": true,
+  "think_tags": "12/12",
+  "long_thinking": "2/3",
+  "exact_answers": "12/12",
+  "gpu_expert_slots": 7177,
+  "what": "5090+4090 auto layer split (K=31: layers 0-30 on the 5090, 31-47 on the 4090), parallel 2 with full-context slots, STRATA_ARENA_PIN_PER_STAGE=0",
+  "gpu_expert_slots_cuda1": 4076,
+  "batch": "pipelined, 2 groups of 1 slot: the batch windows run no MTP drafts"
+ },
+ "split_per_stage_pin": "Without STRATA_ARENA_PIN_PER_STAGE=0 the engine pinned the arena per card (40.87 + 22.41 GiB) and then read 0 GiB free VRAM on both cards: no expert cache, the engine exited (raw: split/candidate/engine.log). The fork notes this path never ran on a Windows PC with several GPUs (sergqwer/strata-nvfp4#7).",
+ "fork_release": {
+  "tag": "v0.1.44.1-nvfp4.1",
+  "commit": "3fa66b43",
+  "zip_sha256": "4545b4dd3dca294f97518e031a6878e1987ae2c7b0bd3f081d147155582f48bd",
+  "engine_sha256": "3dc869fb8bd9ef8456622cc14be0b0f02c353960707ecdf09d9e972e234265e5"
+ },
+ "raw_directory": "../../raw/qwen38-strata/2026-10-15/"
+}

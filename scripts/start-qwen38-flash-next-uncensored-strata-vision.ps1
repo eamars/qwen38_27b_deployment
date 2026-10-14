@@ -25,6 +25,10 @@ param(
     [int]$ConversationCacheMiB = 24576,
     [ValidateRange(1, 16)]
     [int]$ConversationCacheSlots = 16,
+    # Requests decoded together in the engine's batch slots ("parallel"); 1 queues the rest. Each slot's K/V grows
+    # with its conversation and takes VRAM from the expert cache (the fork measured -10% for one dialog at 2).
+    [ValidateRange(1, 8)]
+    [int]$Parallel = 1,
     [switch]$NoMtp,
     [switch]$DryRun,
     [switch]$Stop
@@ -77,9 +81,6 @@ if ($Stop) {
 # The upstream server reads it directly when the caller sets it.
 if ($GpuMode -ne 'Single' -and $RamBudgetGiB -gt 0) {
     throw 'The pinned engine does not support a RAM-budget tier with layer splitting or helper GPUs.'
-}
-if ($GpuMode -eq 'LayerSplit' -and $ConversationCacheMiB -gt 0) {
-    throw 'The pinned engine does not support conversation snapshots with layer splitting. Use -ConversationCacheMiB 0 for that benchmark.'
 }
 $gpuRows = @(& nvidia-smi --query-gpu=index,uuid,name --format=csv,noheader |
     ConvertFrom-Csv -Header Index, Uuid, Name)
@@ -148,9 +149,15 @@ $config = [ordered]@{
         max_tokens = 1024
     }
 }
+if ($Parallel -gt 1) { $config.parallel = $Parallel }
+if ($GpuMode -ne 'Single') {
+    # 0.1.44.1 pins the expert arena in each card's own context under WDDM; on this 5090 + 4090 both cards then
+    # reported no free VRAM and the engine exited. 0 keeps the shared pin (8 GiB cap), which loads.
+    $config.env.STRATA_ARENA_PIN_PER_STAGE = '0'
+}
 
 Write-Host "Strata model: $servedModel; profile: $Profile ($tokens tokens); GPU mode: $GpuMode"
-Write-Host "Visible GPUs: $visibleGpus; active request slots: 1 (additional requests queue)"
+Write-Host "Visible GPUs: $visibleGpus; active request slots: $Parallel (additional requests queue)"
 Write-Host "Conversation snapshots: $ConversationCacheMiB MiB host RAM budget, $ConversationCacheSlots parked slots"
 Write-Host "OpenAI endpoint: http://127.0.0.1:$Port/v1 (bind $BindAddress)"
 Write-Host "Engine log: $($config.log)"

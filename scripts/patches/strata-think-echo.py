@@ -2,7 +2,8 @@ r"""Local change to the pinned Strata server: a `</think>` the model writes whil
 its answer, no longer leaks reasoning and a repeated reply into `content`.
 
 Qwen3.8 writes `</think>` as one token (248069) whether it ends its thinking or quotes the tag, and the pinned
-`OutputParser` switches to the answer at the first one (upstream #537, #1053; still so in 0.1.40.2). The model's
+`OutputParser` switches to the answer at the first one (upstream #537, #1053; since 0.1.42 it keeps only a tag right
+after a quote mark or backtick, #1526, which none of 65 recorded quotes was; v4 applies unchanged to 0.1.44.1). The model's
 own close is a `</think>` alone on its line: on 0.1.39, 420 of 420 real closes followed a newline and 13 of 14
 quoted tags did not, and the template writes "\n</think>\n\n". Two rules wrap the parser:
 

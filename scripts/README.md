@@ -26,7 +26,8 @@ canonical launch and profiling entry points are:
 | Strata MTP draft acceptance and decode speed for Chinese vs English replies | `probe-qwen38-strata-draft-lang.py` |
 | Strata live check of quoted `</think>` handling (12 requests) | `probe-qwen38-strata-think-tags.py` |
 | Strata short quality check: long-thinking loops and 12 exact answers | `probe-qwen38-strata-quality.py` |
-| Same-session A/B of production's Strata runtime against a staged candidate, both from the launcher's config | `benchmark-qwen38-strata-ab.py` |
+| Same-session A/B of production's Strata runtime against a staged candidate or other launcher switches (`--candidate-args`), both from the launcher's config; alone without either | `benchmark-qwen38-strata-ab.py` |
+| Strata C1 against C2: the same chat requests one at a time, then two at once | `probe-qwen38-strata-concurrency.py` |
 | GPU memory sampling | `profile-vram.ps1` |
 | Runtime/model/GPU preflight | `check-runtime.ps1` |
 

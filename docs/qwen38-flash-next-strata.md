@@ -11,7 +11,9 @@ gained the CJK scripts and the conversation cache grew to 16 slots; see
 2026-10-08 it moved to 0.1.40.2-nvfp4.1: 7–17% faster prompts and decode on
 the same requests; see [Upgrade, 2026-10-08](#upgrade-2026-10-08). On
 2026-10-10 it moved to 0.1.41-nvfp4.4: another 7–11% faster chat; see
-[Upgrade, 2026-10-10](#upgrade-2026-10-10). Earlier measurements below were
+[Upgrade, 2026-10-10](#upgrade-2026-10-10). On 2026-10-15 it moved to
+0.1.44.1-nvfp4.1: chat level, 128K +4%, and the conversation-cache fixes; see
+[Upgrade, 2026-10-15](#upgrade-2026-10-15). Earlier measurements below were
 made on earlier runtimes.
 
 It follows this workspace's normal layout: model assets in `models/`, the
@@ -22,9 +24,9 @@ validation evidence in `benchmarks/raw/qwen38-strata/`.
 
 | Input | Pin |
 |---|---|
-| Runtime | [sergqwer/strata-nvfp4 v0.1.41-nvfp4.4](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.41-nvfp4.4), commit `ec1ea2d0` (until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
-| Windows release SHA-256 | `ffddc598cff0de516acf9247a43e01a3c19aa9cd456f822143817dd37b830a15` |
-| Engine SHA-256 | `1217e500e8cc64fbc0b51ddfbb84bf978431733ea308566122bebb47e04f67c2` |
+| Runtime | [sergqwer/strata-nvfp4 v0.1.44.1-nvfp4.1](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.44.1-nvfp4.1), commit `3fa66b43` (until 2026-10-15: v0.1.41-nvfp4.4, `ec1ea2d0`; until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
+| Windows release SHA-256 | `4545b4dd3dca294f97518e031a6878e1987ae2c7b0bd3f081d147155582f48bd` |
+| Engine SHA-256 | `3dc869fb8bd9ef8456622cc14be0b0f02c353960707ecdf09d9e972e234265e5` |
 | Bundled llama.cpp converter | `3cf03257f219afbe7334045ff7c6a06ac68c627d` |
 | Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) |
 | Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
@@ -71,7 +73,11 @@ launcher turns on one upstream option:
 - `serve/frontend.py`, by `scripts/patches/strata-think-echo.py` (v4): the
   model writes `</think>` as one token whether it ends its thinking or quotes
   the tag, and the stock parser switches to the answer at the first one
-  (upstream #537, #1053; unchanged in 0.1.40.2). A quoted tag then leaks the
+  (upstream #537, #1053). Since 0.1.42 upstream keeps a tag in the reasoning
+  only when it follows `"`, `'` or a backtick and no line break follows it
+  (#1526); this model quotes it after a space (63 of 65 recorded quotes) or a
+  CJK character (2), so the stock 0.1.44.1 parser still leaks 10 of the 14
+  recorded leaked replies. Uncaught, a quoted tag leaks the
   rest of the reasoning, a stray `</think>` and the reply written twice into
   `content`. The model's own close ends its line, and starts it or is followed
   by a blank line (`\n</think>\n\n`, or `text</think>\n\n`): on 0.1.39, 420 of
@@ -430,6 +436,8 @@ time 0.443 seconds shorter; one trial with different generated text and
 adaptive cache state does not establish a significant advantage. The helper
 was 33.66% slower at decode and 14.42% slower at prefill on that request.
 Neither result establishes that all multi-GPU arrangements are slower.
+Re-measured on 0.1.44.1 with `parallel` 2 at C1 and C2: the split was 8–40%
+slower on every measure; see [Upgrade, 2026-10-15](#upgrade-2026-10-15).
 
 Minimum sampled free VRAM across the measured request phases:
 
@@ -816,3 +824,103 @@ unchanged. The installed server is byte-identical to the benchmarked arm.
 Rollback: stop the server, re-extract
 `runtime/strata-nvfp4-v0.1.40.2-nvfp4.1-windows-x64.zip` over the runtime, and
 restore the previous installer pin from Git.
+
+## Upgrade, 2026-10-15
+
+Runtime 0.1.41-nvfp4.4 → 0.1.44.1-nvfp4.1 (`3fa66b43`), upgraded in place with
+the same ModelOpt pack. Curated results:
+[strata-04411-upgrade-split.json](../benchmarks/qwen38_flash_next/2026-10-15/strata-04411-upgrade-split.json);
+raw: `benchmarks/raw/qwen38-strata/2026-10-15/`. Every arm ran from the
+production launcher's config on `127.0.0.1:1921` with nothing else on the
+5090, one trial per case, so a few percent is noise.
+
+| 5090 alone, `parallel` 1 | 0.1.41 (2026-10-10) | **0.1.44.1** (two runs) |
+|---|---:|---:|
+| Chinese / English chat decode, tok/s | 162.6 / 164.9 | **166.1 / 165.7**, 163.3 / 165.8 |
+| 4K prompt read / decode, tok/s | 2,349 / 169.5 | **2,331 / 167.6**, 2,363 / 169.0 |
+| 128K prompt read / decode, tok/s | 8,136 / 156.1 | **8,459 / 162.4**, 8,451 / 161.5 |
+| Two agents switching 32K histories, s per turn | 0.90 | **0.90**, 0.90 |
+| Retrieval, smoke, `</think>` 12/12, exact answers | pass | **pass** (one run answered 堪培拉 for Canberra) |
+| Long thinking: 3 hard prompts, greedy, 16K cap | 2/3 | **2/3**, 2/3 |
+
+Chat and 4K are level; 128K is +4% in both directions. The reason to take it
+is not speed: since 0.1.41 the fork and upstream fixed several things the
+conversation cache depends on. A picture in a long conversation no longer
+loses its cached state (#2228). The Windows stall watchdog no longer ends the
+engine while it parks a conversation (#2049, #2065). Under the
+`--conversation-cache-min-free-mib` floor, parked conversations now give RAM
+back, oldest first. Quoted `<tool_call>` / `<tool_response>` literals reach the
+model as text (#2026), and a stop token the model writes as text no longer
+cuts the reply (`stop_token_text`). The disk tier (`--conversation-disk-dir`)
+stays off.
+
+**Installer.** Since 0.1.42-nvfp4.2 the release downloads ready-made models
+and ships no `requirements-convert.txt`. This model is still converted here,
+so the 0.1.41-nvfp4.4 pins are kept as `scripts/strata-requirements-convert.txt`.
+The converters `prepare-qwen38-strata.py` runs, `data/` and the serve
+requirements (plus psutil, now pinned upstream) are unchanged, so the prepared
+assets were reused.
+
+**Server patches.** The `thinking_token_budget` alias still applies; upstream
+has no such field. strata-think-echo v4 applies unchanged: its three anchors
+match once in the new parser, and upstream's own narrow #537 rule
+(`_quoted_think_end`) only ever sees the tags the wrapper passes on as the
+real close, which are followed by a line break, so the two never disagree.
+The replay of 720 recorded replies leaves all 1,260 normal runs unchanged and
+recovers all 42 leaked ones (14 replies × 3 streaming modes); the stock
+0.1.44.1 parser alone recovers 4 of the 14. The fork's suite at `3fa66b43`
+(924 tests with `tools/`) has 1 error unpatched; patched, 10 more. Six are
+the costs listed under [Locations](#locations): the 512-character answer hold
+(`test_abort_then_the_next_request`), a stop string stopping late (4) and the
+newline in `reasoning_tokens`. Four are new: when an output ends right on a
+`</think>` with nothing after it, upstream's server checks for that tag held
+in the parser's buffer, but the wrapper holds it instead. A reply ending on a
+quoted `"</think>` is then closed and continued by `reasoning_close_retry`
+(upstream: an empty answer), and a forced `tool_choice` call does not open
+there (the reply ends with no call). The model has not produced that output
+shape in the recorded replies.
+
+**5090 + 4090 layer split, `parallel` 2.** The fork's 0.1.44 release reworked
+the split (both cards read a prompt at once, per-card pinned memory on
+Windows) and fixed `"parallel"` (each slot's K/V grows with its conversation
+instead of taking the full context). The launcher gained `-Parallel N`
+(default 1) and no longer refuses the conversation cache on a split:
+checkpoints now save every card's state. The split arm used the automatic
+split (layers 0–30 on the 5090, 31–47 on the 4090), `parallel` 2 with
+full-context slots and the production conversation cache.
+
+- **Per-card pinning fails on this PC.** The engine pinned the expert arena in
+  each card's own context (40.87 GiB for the 5090's layers, 22.41 GiB for the
+  4090's) and then read 0 GiB free VRAM on both cards: no expert cache, and the
+  engine exited before it was ready. The fork notes that this path had never
+  run on a Windows PC with several GPUs (sergqwer/strata-nvfp4#7).
+  `STRATA_ARENA_PIN_PER_STAGE=0` restores the old shared pin, which pinned
+  only 3 GiB, as on 0.1.37. The launcher sets it in both multi-GPU modes.
+- **With that switch it loads and loses on every measure.** C1 is the probe's
+  chat answers one at a time; C2 the same pairs sent together. On the 5090
+  alone the second request queues, so C2 equals C1.
+
+| Same session | 5090 alone, `parallel` 1 | 5090 + 4090, `parallel` 2 | Change |
+|---|---:|---:|---:|
+| C1, wall tok/s (engine decode) | 149.3 (161.4) | 117.6 (133.8) | −21% |
+| C2, total tok/s (per stream) | 149.4 (160.8, queued) | 122.8 (69.2) | −18% |
+| Chinese / English chat decode, tok/s | 163.3 / 165.8 | 138.6 / 141.2 | −15% |
+| 4K prompt read / decode, tok/s | 2,363 / 169.0 | 1,416 / 153.8 | −40% / −9% |
+| 128K prompt read / decode, tok/s | 8,451 / 161.5 | 7,420 / 148.2 | −12% / −8% |
+| Two agents switching 32K histories, s per turn | 0.90 | 1.36 | +51% |
+| Checks, long thinking | pass, 2/3 | pass, 2/3 | |
+
+On the split, `--batch-groups auto` pipelines two groups of one slot, and the
+pipelined batch windows run no MTP drafts, so two streams at once decode at
+~70 tok/s each and add up to less than one stream alone on the 5090 with its
+drafts. The first C2 pair, while the expert caches were still adapting, made
+94.5 tok/s; the next two 138 and 136. The 5090 alone keeps more expert slots
+on the card that runs every layer's first pass (8,066 against 7,177, plus 4,076
+on the 4090), and its prompt reads never cross the 4090's 13.3 GB/s link.
+`parallel` 2 on the 5090 alone was not measured; the fork measured −10% for a
+single dialog with it, so production stays at `parallel` 1 for now.
+
+Rollback: stop the server, re-extract
+`runtime/strata-nvfp4-v0.1.41-nvfp4.4-windows-x64.zip` over the runtime, and
+restore the previous installer pin from Git, then run the installer, which
+re-applies both patches.

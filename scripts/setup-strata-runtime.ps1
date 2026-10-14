@@ -5,16 +5,16 @@ $ErrorActionPreference = 'Stop'
 $workspace = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeRoot = Join-Path $workspace 'runtime'
 $runtime = Join-Path $runtimeRoot 'strata-nvfp4'
-$version = '0.1.41-nvfp4.4'
-$commit = 'ec1ea2d0'
+$version = '0.1.44.1-nvfp4.1'
+$commit = '3fa66b43'
 $archiveName = "strata-nvfp4-v$version-windows-x64.zip"
 $archive = Join-Path $runtimeRoot $archiveName
-$expectedHash = 'ffddc598cff0de516acf9247a43e01a3c19aa9cd456f822143817dd37b830a15'
+$expectedHash = '4545b4dd3dca294f97518e031a6878e1987ae2c7b0bd3f081d147155582f48bd'
 # Earlier pinned releases upgraded in place, as the release notes direct ("unzip over the previous folder"): the
 # virtual environments, configs and models outside the zip stay. Their requirements, data files and the converters
-# behind the prepared model assets are identical to this release's (checked 2026-10-06, 2026-10-08 and 2026-10-10;
-# 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does not use).
-$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1')
+# behind the prepared model assets are identical to this release's (checked 2026-10-06, 2026-10-08, 2026-10-10 and
+# 2026-10-15; 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does not use).
+$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1', '0.1.41-nvfp4.4')
 
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
     Invoke-WebRequest -Uri "https://github.com/sergqwer/strata-nvfp4/releases/download/v$version/$archiveName" -OutFile "$archive.partial"
@@ -69,6 +69,12 @@ if (-not $server.Contains('req.get("thinking_token_budget")')) {
 & python (Join-Path $PSScriptRoot 'patches\strata-think-echo.py') (Join-Path $runtime 'serve\frontend.py') $archive
 if ($LASTEXITCODE -ne 0) { throw 'Cannot apply strata-think-echo to the Strata server.' }
 
+# Since 0.1.42-nvfp4.2 the release downloads ready-made models and no longer ships requirements-convert.txt; this model
+# is still converted here (prepare-qwen38-strata.py), so the converters' pins from 0.1.41-nvfp4.4 are kept in scripts/.
+$requirements = @{
+    convert = Join-Path $PSScriptRoot 'strata-requirements-convert.txt'
+    serve = Join-Path $runtime 'requirements-serve.txt'
+}
 foreach ($role in @('convert', 'serve')) {
     $environment = Join-Path $runtime ".venv-$role"
     $python = Join-Path $environment 'Scripts\python.exe'
@@ -76,7 +82,7 @@ foreach ($role in @('convert', 'serve')) {
         & python -m venv $environment
         if ($LASTEXITCODE -ne 0) { throw "Could not create $environment" }
     }
-    & $python -m pip install --disable-pip-version-check -r (Join-Path $runtime "requirements-$role.txt")
+    & $python -m pip install --disable-pip-version-check -r $requirements[$role]
     if ($LASTEXITCODE -ne 0) { throw "Strata $role dependency installation failed." }
     if ($role -eq 'serve') {
         # Local addition: the server converts images its vision decoder cannot read (WebP, which DSH sends for

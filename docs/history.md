@@ -325,6 +325,22 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-10) and
   [curated results](../benchmarks/qwen38_flash_next/2026-10-10/strata-0141-ab.json).
 
+### 2026-10-15 — Strata 0.1.44.1-nvfp4.1; the layer split rejected again
+
+- Upstream fixed only a narrow case of the quoted `</think>` (#1526, 0.1.42):
+  a tag right after a quote mark or backtick. This model quotes it after a
+  space, so strata-think-echo stays; v4 applies unchanged to the new parser.
+- Upgraded in place (assets reused; the converters' requirements now live in
+  `scripts/`). Against the 0.1.41 record: chat and 4K level, 128K +4%, every
+  check passing. Taken for the conversation-cache and watchdog fixes.
+- 5090 + 4090 auto layer split with `parallel` 2, against the 5090 alone in
+  the same session: C1 −21%, C2 total −18%, 4K prompt −40%, 128K −8 to −12%.
+  The fork's per-card pinning made both cards report no free VRAM on this PC;
+  the split only ran with `STRATA_ARENA_PIN_PER_STAGE=0`. Production stays on
+  the 5090 alone at `parallel` 1; the launcher gained `-Parallel`.
+- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-15) and
+  [curated results](../benchmarks/qwen38_flash_next/2026-10-15/strata-04411-upgrade-split.json).
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

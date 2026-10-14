@@ -1,4 +1,7 @@
 """Same-session A/B of the production Strata runtime against a staged candidate, one at a time on 127.0.0.1:1921.
+Without --candidate it benchmarks production alone (after an in-place upgrade, to compare with the last record).
+--candidate-args instead runs production's runtime with other launcher switches (a layer split, "parallel") as the
+candidate. Each arm also runs probe-qwen38-strata-concurrency.py (the same chat requests one at a time, then two at once).
 
 Stage the candidate beside production first (unzip the release into runtime/strata-nvfp4-<version>, create its
 .venv-serve with requirements-serve.txt, pillow and psutil, and apply the alias and strata-think-echo as
@@ -38,9 +41,9 @@ def log(msg):
     print(time.strftime("%H:%M:%S"), msg, flush=True)
 
 
-def production_config() -> dict:
+def production_config(extra: list[str] = ()) -> dict:
     out = subprocess.run(["pwsh", "-NoProfile", "-File", str(LAUNCHER), "-Port", str(PORT), "-BindAddress", "127.0.0.1",
-                          "-DryRun"], capture_output=True, text=True, encoding="utf-8", check=True).stdout
+                          "-DryRun", *extra], capture_output=True, text=True, encoding="utf-8", check=True).stdout
     return json.loads(out[out.index("{"):out.rindex("}") + 1])
 
 
@@ -128,6 +131,8 @@ def probes(out: Path, engine_log: Path) -> dict:
         "cache32k": run_probe("cache32k", [py, s("probe-qwen38-strata-cache.py"), "--base-url", BASE,
                                            "--output", str(out / "cache32k"), "--tokens", "32768", "--rounds", "3",
                                            "--engine-log", str(engine_log)], out, 1800),
+        "concurrency": run_probe("concurrency", [py, s("probe-qwen38-strata-concurrency.py"), "--base-url", BASE + "/v1",
+                                                 "--output", str(out / "concurrency.json")], out, 1200),
         "smoke": run_probe("smoke", [py, s("probe-qwen38-strata.py"), "--base-url", BASE,
                                      "--output", str(out / "smoke.json")], out, 900),
         "think_tags": run_probe("think_tags", [py, s("probe-qwen38-strata-think-tags.py"), "--base-url", BASE,
@@ -162,6 +167,10 @@ def summarize(out: Path) -> dict:
         sw = [c for c in cache["cases"] if "switch" in c["label"]]
         s["cache_passed"] = cache.get("passed")
         s["cache_switch_wall_s_mean"] = round(sum(c["wall_s"] for c in sw) / len(sw), 2) if sw else None
+    conc = load(out / "concurrency.json")
+    if conc:
+        for k in ("c1_tok_s", "c2_total_tok_s", "c2_stream_engine_decode_tok_s"):
+            s[k] = conc["summary"][k]
     smoke = load(out / "smoke.json")
     if smoke:
         s["smoke_passed"] = smoke.get("passed")
@@ -181,14 +190,25 @@ def summarize(out: Path) -> dict:
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--candidate", required=True, help="the staged runtime folder under runtime\\, e.g. strata-nvfp4-0.1.42")
+    ap.add_argument("--candidate", help="the staged runtime folder under runtime\\, e.g. strata-nvfp4-0.1.42; without "
+                    "it, production runs alone")
+    ap.add_argument("--candidate-args", default="", help="launcher switches for the candidate arm, e.g. "
+                    "'-GpuMode LayerSplit -Parallel 2'; the candidate runtime is production's unless --candidate")
+    ap.add_argument("--candidate-env", action="append", default=[], metavar="NAME=VALUE",
+                    help="an environment variable for the candidate's engine (repeatable)")
+    ap.add_argument("--candidate-only", action="store_true", help="skip the production arm (it ran earlier this session)")
     ap.add_argument("--output", type=Path, default=WORKSPACE / "benchmarks/raw/qwen38-strata" / time.strftime("%Y-%m-%d") / "ab")
     ap.add_argument("--dry-run", action="store_true", help="write both configs and check them, start nothing")
     args = ap.parse_args()
     args.output = args.output.resolve()      # the server runs from its runtime folder: every path it gets is absolute
     args.output.mkdir(parents=True, exist_ok=True)
-    arms = {"production": PRODUCTION, "candidate": args.candidate}
-    template = production_config()
+    extra = args.candidate_args.split()
+    arms = {"production": PRODUCTION,
+            **({"candidate": args.candidate or PRODUCTION} if args.candidate or extra else {})}
+    templates = {"production": production_config(), "candidate": production_config(extra)}
+    templates["candidate"]["env"].update(kv.split("=", 1) for kv in args.candidate_env)
+    if args.candidate_only:
+        arms.pop("production")
     problems = sorted({p for rt in arms.values() for p in check_runtime(rt)})
     if problems:
         raise SystemExit("not ready:\n  " + "\n  ".join(problems))
@@ -200,8 +220,8 @@ def main():
         out.mkdir(parents=True, exist_ok=True)
         engine_log = out / "engine.log"
         cfg_path = out / "config.json"
-        cfg_path.write_text(json.dumps(arm_config(template, runtime, engine_log), indent=1), encoding="utf-8")
-        log(f"{arm}: runtime\\{runtime}")
+        cfg_path.write_text(json.dumps(arm_config(templates[arm], runtime, engine_log), indent=1), encoding="utf-8")
+        log(f"{arm}: runtime\\{runtime}" + (f" {args.candidate_args}" if arm == "candidate" and extra else ""))
         if args.dry_run:
             continue
         python = WORKSPACE / "runtime" / runtime / ".venv-serve" / "Scripts" / "python.exe"
@@ -225,9 +245,10 @@ def main():
         (args.output / "summary.json").write_text(json.dumps(results, indent=1), encoding="utf-8")
     keys = ["engine", "gpu_expert_slots", "zh_decode_tok_s", "en_decode_tok_s", "bench4k_prefill_tok_s",
             "bench4k_decode_tok_s", "bench128k_prefill_tok_s", "bench128k_decode_tok_s", "bench128k_retrieval",
+            "c1_tok_s", "c2_total_tok_s", "c2_stream_engine_decode_tok_s",
             "cache_passed", "cache_switch_wall_s_mean", "smoke_passed", "think_tags", "long_thinking", "exact_answers",
             "error"]
-    lines = ["| | production | candidate |", "|---|---:|---:|"]
+    lines = ["| | " + " | ".join(arms) + " |", "|---|" + "---:|" * len(arms)]
     lines += [f"| {k} | " + " | ".join(str(results.get(a, {}).get(k, "")) for a in arms) + " |" for k in keys]
     (args.output / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
     print("\n".join(lines))
