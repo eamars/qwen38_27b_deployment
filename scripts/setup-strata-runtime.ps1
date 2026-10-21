@@ -76,6 +76,24 @@ if (-not $server.Contains('req.get("thinking_token_budget")')) {
     Write-Host "Applied the thinking_token_budget alias: $serverPath"
 }
 
+# Local change to the pinned server: since 0.2.0 a bind beyond loopback without an API key refuses to start. The
+# launcher binds the LAN (0.0.0.0) and its clients send no key, as through 0.1.44.1; the Host check (DNS rebinding)
+# and the server's "no API key" warning stay. Set "api_key" in the launcher instead to drop this change.
+$server = [System.IO.File]::ReadAllText($serverPath)
+$refusal = [regex]::Matches($server,
+    '(?m)^( *)if a\.host not in \("127\.0\.0\.1", "localhost", "::1"\) and not preflight_api_key:\r?\n' +
+    ' *print\("\[strata\] a non-loopback bind requires an inference API key".*\r?\n *return 2(\r?\n)')
+if ($refusal.Count -eq 1) {
+    $indent = $refusal[0].Groups[1].Value
+    $note = "$indent# local: a LAN bind without an API key starts, as through 0.1.44.1 (setup-strata-runtime.ps1)" +
+        $refusal[0].Groups[2].Value
+    $server = $server.Remove($refusal[0].Index, $refusal[0].Length).Insert($refusal[0].Index, $note)
+    [System.IO.File]::WriteAllText($serverPath, $server, [System.Text.UTF8Encoding]::new($false))
+    Write-Host "Allowed a LAN bind without an API key: $serverPath"
+} elseif ($server.Contains('a non-loopback bind requires an inference API key')) {
+    throw "Cannot allow a LAN bind without an API key: $serverPath has changed."
+}
+
 # Local change to the pinned server: a </think> the model writes while quoting the tag, or again inside its answer,
 # no longer leaks reasoning and a repeated reply into the answer (upstream #537, #1053). Idempotent; an earlier
 # version of the patch is replaced from the release archive. See the script.

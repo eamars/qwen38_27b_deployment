@@ -66,9 +66,16 @@ Models, virtual environments, release archives and generated configs remain
 Git-ignored. The installer records the resolved Python dependency versions in
 `runtime/strata-nvfp4/requirements-*-installed.txt`.
 
-The installer also applies two local changes to the pinned server, and the
+The installer also applies three local changes to the pinned server, and the
 launcher turns on one upstream option:
 
+- `serve/server.py`, since 0.2.0: a bind beyond loopback without an API key
+  refuses to start ("a non-loopback bind requires an inference API key"), and
+  no setting turns that off. The launcher binds `0.0.0.0` for LAN clients,
+  which send no key, so the installer removes the refusal, as through
+  0.1.44.1. The Host check (DNS rebinding) is unchanged from 0.1.44.1, and the
+  server still warns at start that it has no key. To require a key instead,
+  set `"api_key"` in the launcher's config and give it to every client.
 - `serve/server.py`: `reasoning_budget()` accepts `thinking_token_budget` (the
   field pi-ai/DSH clients send) when `reasoning_budget_tokens` is absent. The
   launcher refuses to start a server without it.
@@ -925,7 +932,7 @@ single dialog with it, so production stays at `parallel` 1 for now.
 Rollback: stop the server, re-extract
 `runtime/strata-nvfp4-v0.1.41-nvfp4.4-windows-x64.zip` over the runtime, and
 restore the previous installer pin from Git, then run the installer, which
-re-applies both patches.
+re-applies its patches.
 
 ## Upgrade, 2026-10-22
 
@@ -1013,7 +1020,7 @@ on 1919 was not touched.
 - *Claude Code's system prompt* is rewritten for the local model. The fork's
   default; `"claude_code_prompt": "as_sent"` keeps it as sent.
 - *Update check.* The launcher sets `"update_check": false`: the notice names
-  `update.cmd`, which would unzip over `serve\` and drop both patches. The
+  `update.cmd`, which would unzip over `serve\` and drop the local patches. The
   0.1.44.1 server ignores the key. The 8791 UI stays off: it starts only with
   `STRATA_APP_UI=1`, which `start-server.cmd` sets and this launcher does not.
 
@@ -1033,4 +1040,4 @@ then deleted; the release zip stays in `runtime/`.
 Rollback: stop the server and re-extract
 `runtime/strata-nvfp4-v0.1.44.1-nvfp4.1-windows-x64.zip` over the runtime.
 Then restore the previous installer pin from Git and run the installer, which
-re-applies both patches.
+re-applies its patches.
