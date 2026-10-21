@@ -1027,8 +1027,8 @@ scripts\setup-strata-runtime.ps1
 
 The last step upgraded `runtime/strata-nvfp4` in place. Its engine,
 `server.py` and `frontend.py` are byte-identical to the staged runtime that
-was measured. The staged folder `runtime/strata-nvfp4-0.2.0-beta-nvfp4.3` can
-be deleted.
+was measured. The staged folder `runtime/strata-nvfp4-0.2.0-beta-nvfp4.3` was
+then deleted; the release zip stays in `runtime/`.
 
 Rollback: stop the server and re-extract
 `runtime/strata-nvfp4-v0.1.44.1-nvfp4.1-windows-x64.zip` over the runtime.
