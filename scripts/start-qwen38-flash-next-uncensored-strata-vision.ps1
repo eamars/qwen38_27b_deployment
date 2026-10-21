@@ -137,6 +137,9 @@ $config = [ordered]@{
     # A reply that ends inside its thinking with no answer is closed once and continued (upstream #1053, opt-in
     # since 0.1.40.2); without it an agent turn ends with empty content.
     reasoning_close_retry = $true
+    # Since 0.2.0-beta-nvfp4.2 the server checks GitHub daily and names update.cmd, which unzips over serve\ and drops
+    # the workspace's server patches; upgrades go through setup-strata-runtime.ps1. Earlier servers ignore the key.
+    update_check = $false
     host = $BindAddress
     log = Join-Path $logDirectory "engine-$Port.log"
     gpu = $monitorGpus

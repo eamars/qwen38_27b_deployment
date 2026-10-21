@@ -341,6 +341,20 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-15) and
   [curated results](../benchmarks/qwen38_flash_next/2026-10-15/strata-04411-upgrade-split.json).
 
+### 2026-10-22 — Strata 0.2.0-beta-nvfp4.3
+
+- Staged beside production (`setup-strata-runtime.ps1 -Stage`), measured
+  alone, then upgraded in place. Against the 0.1.44.1 record: chat decode and
+  C1 +4%, prompts and long decode level to +2%, every check passing, long
+  thinking 2/3 as before. The engine reports 0.1.45.3; 0.2.0 names the bundle.
+- New server behaviour: the model card's sampling when a request names none
+  (was greedy), and `answer_room` closes thinking at ¾ of `max_tokens`. The
+  quality probe now fails a long-thinking reply the server wrapped up. The
+  launcher turns off the fork's update check, whose `update.cmd` would drop
+  the local patches. Both patches apply unchanged.
+- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-22) and
+  [curated results](../benchmarks/qwen38_flash_next/2026-10-22/strata-020beta3-upgrade.json).
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

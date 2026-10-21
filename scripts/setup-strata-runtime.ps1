@@ -1,20 +1,26 @@
 [CmdletBinding()]
-param()
+param(
+    # Install beside production, in runtime\strata-nvfp4-<version>, for benchmark-qwen38-strata-ab.py --candidate:
+    # the same patches and server environment, no converter environment (the prepared model assets are shared).
+    [switch]$Stage
+)
 
 $ErrorActionPreference = 'Stop'
 $workspace = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeRoot = Join-Path $workspace 'runtime'
-$runtime = Join-Path $runtimeRoot 'strata-nvfp4'
-$version = '0.1.44.1-nvfp4.1'
-$commit = '3fa66b43'
+$version = '0.2.0-beta-nvfp4.3'
+$commit = '57293b8e'
+$runtime = Join-Path $runtimeRoot ($(if ($Stage) { "strata-nvfp4-$version" } else { 'strata-nvfp4' }))
 $archiveName = "strata-nvfp4-v$version-windows-x64.zip"
 $archive = Join-Path $runtimeRoot $archiveName
-$expectedHash = '4545b4dd3dca294f97518e031a6878e1987ae2c7b0bd3f081d147155582f48bd'
+$expectedHash = '1417c28baefc3c18d2d346fed53bf7f940eb5f2d1ab369fb550d2ffce77d2ad3'
 # Earlier pinned releases upgraded in place, as the release notes direct ("unzip over the previous folder"): the
 # virtual environments, configs and models outside the zip stay. Their requirements, data files and the converters
-# behind the prepared model assets are identical to this release's (checked 2026-10-06, 2026-10-08, 2026-10-10 and
-# 2026-10-15; 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does not use).
-$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1', '0.1.41-nvfp4.4')
+# behind the prepared model assets are identical to this release's (checked 2026-10-06, 2026-10-08, 2026-10-10,
+# 2026-10-15 and 2026-10-21; 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does
+# not use; 0.2.0-beta only added the Gyro family's Hadamard metadata to iq_pack.py and a --gguf source to
+# embd_bf16_pack.py, neither of which this model's --model conversion reaches).
+$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1', '0.1.41-nvfp4.4', '0.1.44.1-nvfp4.1')
 
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
     Invoke-WebRequest -Uri "https://github.com/sergqwer/strata-nvfp4/releases/download/v$version/$archiveName" -OutFile "$archive.partial"
@@ -24,9 +30,16 @@ if ((Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash -ine $expectedHa
     throw "Strata release hash mismatch: $archive"
 }
 $buildPath = Join-Path $runtime 'engine\BUILD.json'
-if (-not (Test-Path -LiteralPath $buildPath)) {
+if ($Stage -and -not (Test-Path -LiteralPath $buildPath)) {
+    # The zip holds one strata-nvfp4\ folder: unpack it aside, then move it to the staged name.
+    $unpack = Join-Path $runtimeRoot ".stage-$version"
+    if (Test-Path -LiteralPath $unpack) { Remove-Item -LiteralPath $unpack -Recurse -Force }
+    Expand-Archive -LiteralPath $archive -DestinationPath $unpack
+    Move-Item -LiteralPath (Join-Path $unpack 'strata-nvfp4') -Destination $runtime
+    Remove-Item -LiteralPath $unpack -Recurse -Force
+} elseif (-not (Test-Path -LiteralPath $buildPath)) {
     Expand-Archive -LiteralPath $archive -DestinationPath $runtimeRoot
-} else {
+} elseif (-not $Stage) {
     $installed = Get-Content -LiteralPath $buildPath -Raw | ConvertFrom-Json
     if ($installed.version -ne $version -and $installed.version -in $upgradeFrom -and -not $installed.dirty) {
         if (@(Get-Process -Name strata, strata-vision -ErrorAction SilentlyContinue).Count -gt 0) {
@@ -75,7 +88,7 @@ $requirements = @{
     convert = Join-Path $PSScriptRoot 'strata-requirements-convert.txt'
     serve = Join-Path $runtime 'requirements-serve.txt'
 }
-foreach ($role in @('convert', 'serve')) {
+foreach ($role in $(if ($Stage) { @('serve') } else { @('convert', 'serve') })) {
     $environment = Join-Path $runtime ".venv-$role"
     $python = Join-Path $environment 'Scripts\python.exe'
     if (-not (Test-Path -LiteralPath $python)) {
@@ -97,4 +110,8 @@ foreach ($role in @('convert', 'serve')) {
     & $python -m pip freeze | Set-Content -LiteralPath (Join-Path $runtime "requirements-$role-installed.txt")
 }
 Write-Host "Pinned Strata $version installed: $runtime"
-Write-Host 'Next: run scripts/stage-qwen38-strata.py, then scripts/prepare-qwen38-strata.py.'
+if ($Stage) {
+    Write-Host "Next, with every Strata server stopped: python scripts\benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-$version"
+} else {
+    Write-Host 'Next: run scripts/stage-qwen38-strata.py, then scripts/prepare-qwen38-strata.py.'
+}

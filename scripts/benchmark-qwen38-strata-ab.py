@@ -181,6 +181,7 @@ def summarize(out: Path) -> dict:
     if q:
         s["long_thinking"] = f"{q['long_thinking']['passed']}/{q['long_thinking']['total']}"
         s["exact_answers"] = f"{q['qa']['correct']}/{q['qa']['total']}"
+        s["exact_answers_wrapped_up"] = q["qa"].get("wrapped_up")      # since 0.1.45: thinking closed by answer_room
     server_log = out / "server.log"
     if server_log.exists():
         m = re.findall(r"filling the GPU's expert cache \((\d+) experts", server_log.read_text(encoding="utf-8", errors="replace"))
@@ -247,7 +248,7 @@ def main():
             "bench4k_decode_tok_s", "bench128k_prefill_tok_s", "bench128k_decode_tok_s", "bench128k_retrieval",
             "c1_tok_s", "c2_total_tok_s", "c2_stream_engine_decode_tok_s",
             "cache_passed", "cache_switch_wall_s_mean", "smoke_passed", "think_tags", "long_thinking", "exact_answers",
-            "error"]
+            "exact_answers_wrapped_up", "error"]
     lines = ["| | " + " | ".join(arms) + " |", "|---|" + "---:|" * len(arms)]
     lines += [f"| {k} | " + " | ".join(str(results.get(a, {}).get(k, "")) for a in arms) + " |" for k in keys]
     (args.output / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")

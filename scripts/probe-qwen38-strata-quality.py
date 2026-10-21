@@ -1,8 +1,9 @@
 """A short quality check for comparing Strata weights or runtimes on the same model (not a benchmark of the model).
 
 1. Long thinking: three hard prompts with full thinking, greedy, a 16K-token cap. The fork withdrew a pack that
-   looped in long thinking; a pass ends on its own with an answer. Repeated reasoning is measured as the share of
-   sentences that occur three times or more.
+   looped in long thinking; a pass ends on its own with an answer. Since 0.1.45 the server closes thinking at 3/4 of
+   max_tokens with a wrap-up sentence ("answer_room"), so a reply carrying that sentence did not end on its own and
+   fails. Repeated reasoning is measured as the share of sentences that occur three times or more.
 2. Twelve questions with one exact answer (Chinese and English arithmetic, logic and knowledge), greedy, thinking
    on. The count right is a sanity check: a quantization that broke something shows here, small differences do not.
 """
@@ -40,6 +41,9 @@ QA = [
     ("从 1 加到 100 的和是多少？", "5050"),
 ]
 SUFFIX = "\n\n最后一行只写：答案：<你的答案>（Last line only: Answer: <your answer>）"
+# The server's REASONING_WRAP_UP: what it writes into the reasoning when it closes the thinking itself (a budget, or
+# answer_room since 0.1.45).
+WRAP_UP = "I have thought about this long enough; time to give my answer."
 
 
 def chat(url, prompt, max_tokens):
@@ -51,7 +55,7 @@ def chat(url, prompt, max_tokens):
     m = d["choices"][0]["message"]
     return {"content": m.get("content") or "", "reasoning": m.get("reasoning_content") or "",
             "finish": d["choices"][0]["finish_reason"], "completion_tokens": d["usage"]["completion_tokens"],
-            "seconds": round(time.time() - t, 1)}
+            "wrapped_up": WRAP_UP in (m.get("reasoning_content") or ""), "seconds": round(time.time() - t, 1)}
 
 
 def repeated_share(text):
@@ -79,19 +83,21 @@ def main():
     for i, p in enumerate(LONG):
         r = chat(url, p, 16384)
         r.update(case=f"long-{i + 1}", answered=bool(r["content"].strip()), repeated_share=repeated_share(r["reasoning"]))
-        r["passed"] = r["finish"] == "stop" and r["answered"]
+        r["passed"] = r["finish"] == "stop" and r["answered"] and not r["wrapped_up"]
         long_rows.append(r)
         print(f"{r['case']} {'PASS' if r['passed'] else 'FAIL'} {r['finish']} {r['completion_tokens']} tokens "
-              f"{r['seconds']} s repeated {r['repeated_share']}", flush=True)
+              f"{r['seconds']} s repeated {r['repeated_share']}{' wrapped up' if r['wrapped_up'] else ''}", flush=True)
     for q, want in QA:
         r = chat(url, q + SUFFIX, 4096)
         got = final_answer(r["content"])
         r.update(question=q, expected=want, got=got, correct=want in got.replace(",", "").replace(" ", ""))
         qa_rows.append(r)
-        print(f"{'OK ' if r['correct'] else 'BAD'} {want!r:12} got {got!r}", flush=True)
+        print(f"{'OK ' if r['correct'] else 'BAD'} {want!r:12} got {got!r}{' (wrapped up)' if r['wrapped_up'] else ''}",
+              flush=True)
     out = {"base_url": args.base_url,
            "long_thinking": {"passed": sum(r["passed"] for r in long_rows), "total": len(long_rows), "rows": long_rows},
-           "qa": {"correct": sum(r["correct"] for r in qa_rows), "total": len(qa_rows), "rows": qa_rows}}
+           "qa": {"correct": sum(r["correct"] for r in qa_rows), "total": len(qa_rows),
+                  "wrapped_up": sum(r["wrapped_up"] for r in qa_rows), "rows": qa_rows}}
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(out, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"long thinking {out['long_thinking']['passed']}/{len(long_rows)}, questions {out['qa']['correct']}/{len(qa_rows)}")

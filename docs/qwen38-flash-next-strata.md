@@ -13,7 +13,9 @@ the same requests; see [Upgrade, 2026-10-08](#upgrade-2026-10-08). On
 2026-10-10 it moved to 0.1.41-nvfp4.4: another 7–11% faster chat; see
 [Upgrade, 2026-10-10](#upgrade-2026-10-10). On 2026-10-15 it moved to
 0.1.44.1-nvfp4.1: chat level, 128K +4%, and the conversation-cache fixes; see
-[Upgrade, 2026-10-15](#upgrade-2026-10-15). Earlier measurements below were
+[Upgrade, 2026-10-15](#upgrade-2026-10-15). On 2026-10-22 it moved to
+0.2.0-beta-nvfp4.3 (engine 0.1.45.3): chat decode +4%, the rest level; see
+[Upgrade, 2026-10-22](#upgrade-2026-10-22). Earlier measurements below were
 made on earlier runtimes.
 
 It follows this workspace's normal layout: model assets in `models/`, the
@@ -24,9 +26,9 @@ validation evidence in `benchmarks/raw/qwen38-strata/`.
 
 | Input | Pin |
 |---|---|
-| Runtime | [sergqwer/strata-nvfp4 v0.1.44.1-nvfp4.1](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.1.44.1-nvfp4.1), commit `3fa66b43` (until 2026-10-15: v0.1.41-nvfp4.4, `ec1ea2d0`; until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
-| Windows release SHA-256 | `4545b4dd3dca294f97518e031a6878e1987ae2c7b0bd3f081d147155582f48bd` |
-| Engine SHA-256 | `3dc869fb8bd9ef8456622cc14be0b0f02c353960707ecdf09d9e972e234265e5` |
+| Runtime | [sergqwer/strata-nvfp4 v0.2.0-beta-nvfp4.3](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.0-beta-nvfp4.3), commit `57293b8e`; the engine reports itself as 0.1.45.3 (until 2026-10-22: v0.1.44.1-nvfp4.1, `3fa66b43`; until 2026-10-15: v0.1.41-nvfp4.4, `ec1ea2d0`; until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
+| Windows release SHA-256 | `1417c28baefc3c18d2d346fed53bf7f940eb5f2d1ab369fb550d2ffce77d2ad3` |
+| Engine SHA-256 | `56042c6e79cf312d8148dc5b6a2dbf1395ca472f0b97e0a0e75fec9166cb3aba` |
 | Bundled llama.cpp converter | `3cf03257f219afbe7334045ff7c6a06ac68c627d` |
 | Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) |
 | Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
@@ -923,4 +925,112 @@ single dialog with it, so production stays at `parallel` 1 for now.
 Rollback: stop the server, re-extract
 `runtime/strata-nvfp4-v0.1.41-nvfp4.4-windows-x64.zip` over the runtime, and
 restore the previous installer pin from Git, then run the installer, which
+re-applies both patches.
+
+## Upgrade, 2026-10-22
+
+Runtime 0.1.44.1-nvfp4.1 → 0.2.0-beta-nvfp4.3, staged on 2026-10-21, measured
+and upgraded in place on 2026-10-22 with the same ModelOpt pack. Curated
+results: [strata-020beta3-upgrade.json](../benchmarks/qwen38_flash_next/2026-10-22/strata-020beta3-upgrade.json);
+raw: `benchmarks/raw/qwen38-strata/2026-10-22/upgrade/`. The candidate ran
+alone from the production launcher's config on `127.0.0.1:1921` with nothing
+else on the 5090, one trial per case, against the 2026-10-15 same-session
+5090 baseline.
+
+| 5090 alone, `parallel` 1 | 0.1.44.1 (2026-10-15) | **0.2.0-beta-nvfp4.3** |
+|---|---:|---:|
+| Chinese / English chat decode, tok/s | 163.3 / 165.8 | **171.7 / 172.5** |
+| 4K prompt read / decode, tok/s | 2,363 / 169.0 | **2,368 / 172.3** |
+| 128K prompt read / decode, tok/s | 8,451 / 161.5 | **8,464 / 164.7** |
+| C1 wall tok/s (C2 total, queued) | 149.3 (149.4) | **155.1 (155.2)** |
+| Two agents switching 32K histories, s per turn | 0.90 | **0.87** |
+| Retrieval, cache, smoke, `</think>` 12/12 | pass | **pass** |
+| Exact answers | 11/12 (堪培拉) | **12/12**, none wrapped up |
+| Long thinking: 3 hard prompts, greedy, 16K cap | 2/3 | **2/3** |
+
+Chat decode is +4% and C1 +4%; prompts and long decode are level to +2%.
+The fork's +13% (180 → 203 tok/s) was measured on its GPTQ pack; this pack
+with MTP gains less. The failing long-thinking case is long-3 both times. On
+0.1.44.1 it ran to the 16K cap; here it looped (87% of its sentences
+repeated) and `answer_room` closed it at 12,288 tokens with the wrap-up
+sentence, so it ended `stop` with an answer. The probe's new rule counts it
+as a fail. Without that rule it would have scored 3/3. `answer_room` limited
+the thinking on all 27 requests with a cap of 4K or more; none of the 12 exact
+answers was cut short.
+
+**Version names.** Upstream 0.2.0 is a bundle (app, Terminal, engine), and
+the engine kept its own numbering. `/v1/status` and the harness's `engine`
+field therefore say `0.1.45.3` for this release. `engine/BUILD.json` says
+`0.2.0-beta-nvfp4.3`.
+
+**Prepared on 2026-10-21.**
+
+Runtime 0.1.44.1-nvfp4.1 → [0.2.0-beta-nvfp4.3](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.0-beta-nvfp4.3)
+(`57293b8e`, engine `56042c6e`; release SHA-256 `1417c28b…d2d346fe`).
+The engine is upstream 0.2.0-beta's (its engine package is 0.1.45.3) with the
+fork's kernels on top. The fork measured decode at 203 vs 180 tok/s on a 5090,
+with the same output bits at 2K and 32K. Releases .2 and .3 change only the
+server: a daily update check and a browser UI on port 8791.
+`scripts/setup-strata-runtime.ps1 -Stage` installed it beside production in
+`runtime/strata-nvfp4-0.2.0-beta-nvfp4.3` (serve environment only). Production
+on 1919 was not touched.
+
+**Checked without the GPU.**
+- Converters: of the files `prepare-qwen38-strata.py` runs, only
+  `tools/iq_pack.py` (the Gyro family's `prism.hadamard` metadata) and
+  `tools/embd_bf16_pack.py` (a new `--gguf` source) changed. This model's
+  `--model` conversion reaches neither, so the prepared assets are reused.
+  `data/expert-profile.bin`, `draft_vocab.bin` and `requirements-serve.txt`
+  are unchanged.
+- The staged `serve/` is the tag plus our two patches. The
+  `thinking_token_budget` alias anchor matches once. strata-think-echo v4
+  applies unchanged. The 720-reply replay leaves all 1,260 normal runs
+  unchanged and recovers all 42 leaked ones. The stock 0.2.0 parser alone
+  still leaks 10 of the 14 leaked replies.
+- The fork's `serve` suite at `57293b8e` (1,029 tests): 1,008 pass stock.
+  Patched, the same 10 fail as at 0.1.44.1 and no others: the six costs
+  under [Locations](#locations) and the four outputs that end right on a
+  `</think>` (see [Upgrade, 2026-10-15](#upgrade-2026-10-15)).
+- The forced closes this release adds (`REASONING_CLOSE`, the budget's
+  wrap-up) write `\n</think>\n\n`, which the wrapper takes as the model's own
+  close.
+
+**Behaviour that changes for clients.**
+- *Default sampling.* With no `sampling` block in the config, a request that
+  names no sampling was greedy until now. 0.2.0 applies the model card's
+  values per thinking state: thinking 1.0 / 0.95 / top-k 20; no thinking
+  0.7 / 0.8 / 20 with presence penalty 1.5. A request's own fields still win.
+  Every probe sets its own sampling, so the benchmark is unaffected. This is
+  taken as intended; add a `sampling` block to the launcher only if a client
+  turns out to need greedy.
+- *`answer_room`.* A thinking request with `max_tokens` ≥ 1024 and no budget
+  of its own now has its thinking closed at ¾ of the cap, with the wrap-up
+  sentence. Agent turns then get an answer instead of a cut-off. The quality
+  probe now fails a long-thinking reply that carries the wrap-up sentence,
+  because it did not end on its own; otherwise a loop would score as a pass.
+  It also counts wrapped-up exact answers. Anthropic `budget_tokens` is now a
+  real budget too.
+- *Claude Code's system prompt* is rewritten for the local model. The fork's
+  default; `"claude_code_prompt": "as_sent"` keeps it as sent.
+- *Update check.* The launcher sets `"update_check": false`: the notice names
+  `update.cmd`, which would unzip over `serve\` and drop both patches. The
+  0.1.44.1 server ignores the key. The 8791 UI stays off: it starts only with
+  `STRATA_APP_UI=1`, which `start-server.cmd` sets and this launcher does not.
+
+**How it was run** (about 12 minutes; every Strata server stopped):
+
+```powershell
+scripts\setup-strata-runtime.ps1 -Stage
+python .\scripts\benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-0.2.0-beta-nvfp4.3 --candidate-only --output benchmarks/raw/qwen38-strata/2026-10-22/upgrade
+scripts\setup-strata-runtime.ps1
+```
+
+The last step upgraded `runtime/strata-nvfp4` in place. Its engine,
+`server.py` and `frontend.py` are byte-identical to the staged runtime that
+was measured. The staged folder `runtime/strata-nvfp4-0.2.0-beta-nvfp4.3` can
+be deleted.
+
+Rollback: stop the server and re-extract
+`runtime/strata-nvfp4-v0.1.44.1-nvfp4.1-windows-x64.zip` over the runtime.
+Then restore the previous installer pin from Git and run the installer, which
 re-applies both patches.

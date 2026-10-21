@@ -1,0 +1,105 @@
+{
+ "date": "2026-10-22",
+ "question": "Is 0.2.0-beta-nvfp4.3 at least as good as the 0.1.44.1-nvfp4.1 record on the 5090 alone?",
+ "decision": "Production runs 0.2.0-beta-nvfp4.3 (engine 0.1.45.3) on the 5090 alone, parallel 1, upgraded in place.",
+ "method": "scripts/benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-0.2.0-beta-nvfp4.3 --candidate-only on 127.0.0.1:1921, production launcher config, nothing else on the 5090; one trial per case. Compared with the 2026-10-15 record (5090 alone, same probes). The quality probe now fails a long-thinking reply the server wrapped up (answer_room, new in 0.1.45).",
+ "record_04411": {
+  "zh_decode_tok_s": 163.3,
+  "en_decode_tok_s": 165.8,
+  "bench4k_prefill_tok_s": 2363.1,
+  "bench4k_decode_tok_s": 169.0,
+  "bench128k_prefill_tok_s": 8450.8,
+  "bench128k_decode_tok_s": 161.5,
+  "c1_tok_s": 149.3,
+  "c2_total_tok_s": 149.4,
+  "cache_switch_wall_s_mean": 0.9,
+  "think_tags": "12/12",
+  "long_thinking": "2/3",
+  "exact_answers": "11/12",
+  "source": "../2026-10-15/strata-04411-upgrade-split.json (baseline_5090_same_session)"
+ },
+ "upgrade_020beta3": {
+  "engine": "0.1.45.3",
+  "probes": {
+   "lang": {
+    "exit": 0,
+    "seconds": 55.3
+   },
+   "bench4k": {
+    "exit": 0,
+    "seconds": 25.8
+   },
+   "bench128k": {
+    "exit": 0,
+    "seconds": 40.8
+   },
+   "cache32k": {
+    "exit": 0,
+    "seconds": 13.8
+   },
+   "concurrency": {
+    "exit": 0,
+    "seconds": 57.9
+   },
+   "smoke": {
+    "exit": 0,
+    "seconds": 5.3
+   },
+   "think_tags": {
+    "exit": 0,
+    "seconds": 13.0
+   },
+   "quality": {
+    "exit": 0,
+    "seconds": 163.2
+   }
+  },
+  "zh_decode_tok_s": 171.7,
+  "en_decode_tok_s": 172.5,
+  "bench4k_prefill_tok_s": 2367.9,
+  "bench4k_decode_tok_s": 172.3,
+  "bench4k_retrieval": true,
+  "bench128k_prefill_tok_s": 8464.0,
+  "bench128k_decode_tok_s": 164.7,
+  "bench128k_retrieval": true,
+  "cache_passed": true,
+  "cache_switch_wall_s_mean": 0.87,
+  "c1_tok_s": 155.1,
+  "c2_total_tok_s": 155.2,
+  "c2_stream_engine_decode_tok_s": 167.9,
+  "smoke_passed": true,
+  "think_tags": "12/12",
+  "long_thinking": "2/3",
+  "exact_answers": "12/12",
+  "exact_answers_wrapped_up": 0,
+  "gpu_expert_slots": 8060,
+  "long_thinking_rows": [
+   {
+    "case": "long-1",
+    "finish": "stop",
+    "completion_tokens": 12198,
+    "wrapped_up": false,
+    "repeated_share": 0.035,
+    "seconds": 70.9
+   },
+   {
+    "case": "long-2",
+    "finish": "stop",
+    "completion_tokens": 3150,
+    "wrapped_up": false,
+    "repeated_share": 0.0,
+    "seconds": 19.0
+   },
+   {
+    "case": "long-3",
+    "finish": "stop",
+    "completion_tokens": 14493,
+    "wrapped_up": true,
+    "repeated_share": 0.867,
+    "seconds": 59.4
+   }
+  ],
+  "what": "0.2.0-beta-nvfp4.3, 5090 alone, parallel 1"
+ },
+ "raw": "benchmarks/raw/qwen38-strata/2026-10-22/upgrade/"
+}
