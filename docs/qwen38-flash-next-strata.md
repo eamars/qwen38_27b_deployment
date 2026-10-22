@@ -1041,3 +1041,43 @@ Rollback: stop the server and re-extract
 `runtime/strata-nvfp4-v0.1.44.1-nvfp4.1-windows-x64.zip` over the runtime.
 Then restore the previous installer pin from Git and run the installer, which
 re-applies its patches.
+
+## First-token stalls in shared use, 2026-10-22 (observed; nothing changed)
+
+Asuna's home chat waited about two minutes for a reply at 12:41:56 NZDT. The
+Strata log and the GPU showed nothing during the wait. Read from Asuna's DSH
+session logs (each step's `assistant/message` stream times) and
+`benchmarks/raw/qwen38-strata/server/engine-1919.log` (lines 249,690–249,745),
+whose `prompt N tokens = R reused + X read` line identifies the same request:
+
+- **Step 1: first token 68.9 s after the request; the engine's own work was
+  about 7 s.** Just before it, a small request (822 tokens, a summary) ran on a
+  K/V trimmed to 8,192 cells. Her 122,204-token conversation then needed
+  `K/V grown to 122880 cells (1.57 GiB); the expert cache gave 553 slots for it,
+  529 hotter experts moved to colder ones' slots`, followed by `restored 117854
+  tokens (live) in 550.9 ms` and the prompt (4,350 read in 2,892 ms, 495
+  generated in 4,066 ms). Nothing else is logged in between, so about 62 s fall
+  on the growth and its expert moves, which the engine does not time.
+- **Step 2: first token 28.5 s for 56 new tokens.** Between her steps the
+  engine served a request from the DSH host at `.10`: 181,466 tokens, 0 reused,
+  read in 26,019 ms. One request is served at a time, so hers queued behind it.
+
+The same shapes appear before 0.2.0. In Asuna's records from 10-20 11:00Z to
+10-21 22:50Z, 96 of 3,437 steps (2.8%) waited over 20 s for the first token
+with under 10K new tokens (after the upgrade: 3 of 175). Six were matched to
+the engine log. Five came right after a growth that moved 259 to 729 experts.
+The two cleanest followed only a sub-second request and moved about 260 experts
+(stalls of 29 and 34 s); one more followed a 7.7 s request and moved 586 (25 s).
+In the other two (56 and 34 s) a long generation of another conversation ran
+just before (103 and 31 s), so part of those waits may be queueing. The sixth
+queued behind another client's cold 152,073-token read (22 s). The attribution
+rests on line order and the idle GPU, not on a timed measurement.
+
+Not changed (owner's decision, 2026-10-22). If it is revisited:
+- `--no-kv-grow` allocates the whole window at start, so there is no trim,
+  growth or expert move. It costs the window's K/V in VRAM permanently (196,608
+  cells are 2.54 GiB in this log; 262,144 would be about 3.4 GiB) out of the
+  expert cache. Judge it by the share of first-token stalls and by decode speed.
+- The conversation cache (24 GiB, 16 slots) is shared by both hosts' clients.
+  An evicted conversation comes back as a cold read and queues the other host's
+  requests behind it.
