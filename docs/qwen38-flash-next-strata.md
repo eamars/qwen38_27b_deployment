@@ -15,7 +15,9 @@ the same requests; see [Upgrade, 2026-10-08](#upgrade-2026-10-08). On
 0.1.44.1-nvfp4.1: chat level, 128K +4%, and the conversation-cache fixes; see
 [Upgrade, 2026-10-15](#upgrade-2026-10-15). On 2026-10-22 it moved to
 0.2.0-beta-nvfp4.3 (engine 0.1.45.3): chat decode +4%, the rest level; see
-[Upgrade, 2026-10-22](#upgrade-2026-10-22). Earlier measurements below were
+[Upgrade, 2026-10-22](#upgrade-2026-10-22). On 2026-11-12 it moved to
+0.2.13-nvfp4.1 (engine 0.1.59): speed level, every check passing; see
+[Upgrade, 2026-11-12](#upgrade-2026-11-12). Earlier measurements below were
 made on earlier runtimes.
 
 It follows this workspace's normal layout: model assets in `models/`, the
@@ -26,9 +28,9 @@ validation evidence in `benchmarks/raw/qwen38-strata/`.
 
 | Input | Pin |
 |---|---|
-| Runtime | [sergqwer/strata-nvfp4 v0.2.0-beta-nvfp4.3](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.0-beta-nvfp4.3), commit `57293b8e`; the engine reports itself as 0.1.45.3 (until 2026-10-22: v0.1.44.1-nvfp4.1, `3fa66b43`; until 2026-10-15: v0.1.41-nvfp4.4, `ec1ea2d0`; until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
-| Windows release SHA-256 | `1417c28baefc3c18d2d346fed53bf7f940eb5f2d1ab369fb550d2ffce77d2ad3` |
-| Engine SHA-256 | `56042c6e79cf312d8148dc5b6a2dbf1395ca472f0b97e0a0e75fec9166cb3aba` |
+| Runtime | [sergqwer/strata-nvfp4 v0.2.13-nvfp4.1](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.13-nvfp4.1), commit `b08a70078`; the engine reports itself as 0.1.59 (until 2026-11-12: v0.2.0-beta-nvfp4.3, `57293b8e`; until 2026-10-22: v0.1.44.1-nvfp4.1, `3fa66b43`; until 2026-10-15: v0.1.41-nvfp4.4, `ec1ea2d0`; until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
+| Windows release SHA-256 | `b928050dc13a7b1ac68e70488b4017b6bd6ffdc643a62632e6a0200e05aa1d19` |
+| Engine SHA-256 | `47b03dc52a5837a6e8665332ab4ee27fbc0f4f4b0e5d765a38cd4e2e678f6142` |
 | Bundled llama.cpp converter | `3cf03257f219afbe7334045ff7c6a06ac68c627d` |
 | Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) |
 | Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
@@ -66,20 +68,15 @@ Models, virtual environments, release archives and generated configs remain
 Git-ignored. The installer records the resolved Python dependency versions in
 `runtime/strata-nvfp4/requirements-*-installed.txt`.
 
-The installer also applies three local changes to the pinned server, and the
-launcher turns on one upstream option:
+The installer also applies two local changes to the pinned server, and the
+launcher sets two upstream options. (Through 0.2.0 a third change let a
+keyless server bind the LAN; 0.2.13 only warns, so it is gone.)
 
-- `serve/server.py`, since 0.2.0: a bind beyond loopback without an API key
-  refuses to start ("a non-loopback bind requires an inference API key"), and
-  no setting turns that off. The launcher binds `0.0.0.0` for LAN clients,
-  which send no key, so the installer removes the refusal, as through
-  0.1.44.1. The Host check (DNS rebinding) is unchanged from 0.1.44.1, and the
-  server still warns at start that it has no key. To require a key instead,
-  set `"api_key"` in the launcher's config and give it to every client.
 - `serve/server.py`: `reasoning_budget()` accepts `thinking_token_budget` (the
-  field pi-ai/DSH clients send) when `reasoning_budget_tokens` is absent. The
+  field pi-ai/DSH clients send) when `reasoning_budget_tokens` and llama.cpp's
+  `thinking_budget_tokens` (read since 0.2.13) are absent. The
   launcher refuses to start a server without it.
-- `serve/frontend.py`, by `scripts/patches/strata-think-echo.py` (v4): the
+- `serve/frontend.py`, by `scripts/patches/strata-think-echo.py` (v5): the
   model writes `</think>` as one token whether it ends its thinking or quotes
   the tag, and the stock parser switches to the answer at the first one
   (upstream #537, #1053). Since 0.1.42 upstream keeps a tag in the reasoning
@@ -104,13 +101,26 @@ launcher turns on one upstream option:
   quote, v3 at a quote that started a line. Costs, seen in the fork's
   own tests: a thinking reply's answer streams only after 512 characters or
   its end, a stop string inside that window stops the engine late, and
-  `reasoning_tokens` counts the newline after the close.
+  `reasoning_tokens` counts the newline after the close. v5 (0.2.13) keeps two
+  upstream additions working under the wrapper: #4077 still restarts the
+  answer's code-fence tracking at a repeated `</think>` (a fence the thinking
+  opened would otherwise hide the tool call after it) but hands the tag to the
+  rule above instead of dropping it, and a `</think>` right after a call
+  written in the thinking (`</tool_call>`) is the close. A family whose own
+  close runs straight into the answer (DeepSeek-V4.1's `text</think>Text`)
+  reads as a quote; this server runs Qwen3.8 only.
+  `scripts/patches/test-strata-think-echo.py` replays the 16 recorded leak
+  shapes, whole, a character at a time and in random chunks; run it after
+  every port.
 - `"reasoning_close_retry": true` in the launcher's config (upstream #1053,
   opt-in since 0.1.40.2): a reply that ends on its end-of-turn token still
   inside the thinking, with no answer and no tool call, is continued once with
   the thinking closed, so the client gets an answer instead of empty content.
   A reply that quoted `</think>` and then stopped is closed this way too,
   before strata-think-echo's fallback applies.
+- `"undeclared_tool_calls": "call"` in the launcher's config (since 0.2.13): a
+  well-formed call to a tool the request did not declare reaches the client
+  as a call, as through 0.2.0, instead of as text that ends an agent's turn.
 
 Reruns skip the changes once present.
 
@@ -1041,6 +1051,86 @@ Rollback: stop the server and re-extract
 `runtime/strata-nvfp4-v0.1.44.1-nvfp4.1-windows-x64.zip` over the runtime.
 Then restore the previous installer pin from Git and run the installer, which
 re-applies its patches.
+
+## Upgrade, 2026-11-12
+
+Runtime 0.2.0-beta-nvfp4.3 → [0.2.13-nvfp4.1](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.13-nvfp4.1)
+(`b08a70078`, engine `47b03dc5`, reports 0.1.59; release SHA-256
+`b928050d…`), the fork's port to upstream 0.2.13. Staged, checked without
+the GPU, measured alone and upgraded in place on 2026-11-12 with the same
+ModelOpt pack. Curated results:
+[strata-0213-upgrade.json](../benchmarks/qwen38_flash_next/2026-11-12/strata-0213-upgrade.json);
+raw: `benchmarks/raw/qwen38-strata/2026-11-12/upgrade/`.
+
+| 5090 alone, `parallel` 1 | 0.2.0-beta-nvfp4.3 (2026-10-22) | **0.2.13-nvfp4.1** |
+|---|---:|---:|
+| Chinese / English chat decode, tok/s | 171.7 / 172.5 | **170.7 / 175.0** |
+| 4K prompt read / decode, tok/s | 2,368 / 172.3 | **2,345 / 167.7** |
+| 128K prompt read / decode, tok/s | 8,464 / 164.7 | **8,450 / 160.7** |
+| C1 wall tok/s (C2 total, queued) | 155.1 (155.2) | **155.7 (158.5)** |
+| Two agents switching 32K histories, s per turn | 0.87 | **0.89** |
+| Retrieval, cache, smoke, `</think>` 12/12 | pass | **pass** |
+| Exact answers | 12/12 | **12/12**, none wrapped up |
+| Long thinking: 3 hard prompts, greedy, 16K cap | 2/3 | **1/3**, no loop |
+
+Every speed is within ±3%. Long thinking misses the 2/3 rule set beforehand,
+but neither miss is a loop: long-1 and long-3 thought past the 12,288-token
+`answer_room` line with 3.5% and 1.6% of sentences repeated, so the server
+wrapped them up. On 0.2.0 long-1 had ended on its own at 12,198 tokens and
+long-3 was an 87% loop. The owner accepted the upgrade on that reading. The
+expert cache has 7,950 GPU slots (was 8,060).
+
+**Checked without the GPU.**
+- Converters: of the files `prepare-qwen38-strata.py` runs, only
+  `tools/iq_pack.py` changed (it resumes an interrupted write) with its
+  readers (`gguf_reader.py`: other families' types and bounds checks;
+  `strata_tokenizer.py`: the DeepSeek pre-tokenizer, and a refusal of an
+  unknown one). This pack's pre-tokenizer is `qwen35`, so the prepared assets
+  are reused. `data/expert-profile.bin`, `draft_vocab.bin` and
+  `requirements-serve.txt` are unchanged.
+- Patches: the `thinking_token_budget` alias moved next to upstream's new
+  `thinking_budget_tokens` (a different name; DSH still needs ours). The
+  LAN-bind change was dropped (upstream: "recommended on a network, never
+  required"). strata-think-echo was ported to v5 (see [Locations](#locations)).
+  The 720-reply corpus behind the earlier replays had lived in a session's
+  temporary folder and was gone, so the leak shapes it held are now a test in
+  the repo (`scripts/patches/test-strata-think-echo.py`): v5 passes 48 of 48
+  runs; the stock 0.2.13 parser still gets 6 of the 16 shapes wrong.
+- The fork's `serve` suite at `b08a70078` (1,637 tests): all pass stock.
+  Patched, 11 fail: the same 10 as at 0.2.0 (the six costs and the four
+  outputs that end right on a `</think>`) and DeepSeek-V4.1's own close. A
+  first v5 that switched #4077 off failed 10 more, all tool calls after a
+  repeated `</think>`; that is why v5 keeps its fence reset.
+
+**Behaviour that changes for clients.**
+- *Tool calls.* A call to an undeclared tool would now arrive as text; the
+  launcher keeps it a call (`"undeclared_tool_calls": "call"`). Tool-call
+  recovery (a call written in a form next to the template's) is on by
+  default since upstream 0.2.8, where 0.2.0 had it off; taken as is.
+  Upstream's tool-name aliases replace the fork's `tool_name_repair`.
+- *Penalties* count only the reply's tokens (upstream #4590, a fix). It
+  matters for no-thinking requests, which default to presence penalty 1.5.
+- Upstream's new defaults that change answers (the PCIe share that follows
+  the CPU, its pool-sized start, the wider verify window, the async adaptive
+  tier) stay at 0.2.0's behaviour in the fork. NVFP4 configs keep `--mtp`;
+  upstream's DFlash2 drafter is not used for this pack.
+
+**How it was run** (about 8 minutes on the GPU; every Strata server stopped):
+
+```powershell
+scripts\setup-strata-runtime.ps1 -Stage
+python .\scripts\benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-0.2.13-nvfp4.1 --candidate-only --output benchmarks/raw/qwen38-strata/2026-11-12/upgrade
+scripts\setup-strata-runtime.ps1
+```
+
+The last step upgraded `runtime/strata-nvfp4` in place. Its engine,
+`server.py`, `frontend.py` and expert profile are byte-identical to the staged
+runtime that was measured.
+
+Rollback: stop the server and re-extract
+`runtime/strata-nvfp4-v0.2.0-beta-nvfp4.3-windows-x64.zip` over the runtime.
+Then restore the previous installer pin, launcher and strata-think-echo v4
+from Git and run the installer, which re-applies its patches.
 
 ## First-token stalls in shared use, 2026-10-22 (observed; nothing changed)
 

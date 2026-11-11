@@ -140,6 +140,10 @@ $config = [ordered]@{
     # Since 0.2.0-beta-nvfp4.2 the server checks GitHub daily and names update.cmd, which unzips over serve\ and drops
     # the workspace's server patches; upgrades go through setup-strata-runtime.ps1. Earlier servers ignore the key.
     update_check = $false
+    # Since 0.2.13 a well-formed call to a tool the request did not declare arrives as text (upstream #804/#4622), which
+    # ends an agent's turn on prose. "call" keeps 0.2.0's behaviour: the client gets the call and can answer it with an
+    # error. Earlier servers ignore the key.
+    undeclared_tool_calls = 'call'
     host = $BindAddress
     log = Join-Path $logDirectory "engine-$Port.log"
     gpu = $monitorGpus

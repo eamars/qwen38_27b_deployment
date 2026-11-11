@@ -355,6 +355,26 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-22) and
   [curated results](../benchmarks/qwen38_flash_next/2026-10-22/strata-020beta3-upgrade.json).
 
+### 2026-11-12 — Strata 0.2.13-nvfp4.1
+
+- Staged, measured alone, then upgraded in place. Against the 0.2.0 record
+  every speed is within ±3% and every check passes. Long thinking scored 1/3
+  (was 2/3), but neither miss looped; both thought past the wrap-up line. The
+  owner accepted that reading. The engine reports 0.1.59.
+- strata-think-echo ported to v5: it keeps upstream's new fence reset at a
+  repeated `</think>` (switching it off lost tool calls in 10 of the fork's
+  tests). The LAN-bind patch is gone (0.2.13 only warns). The replay corpus
+  had been lost with a temporary folder; its leak shapes are now
+  `scripts/patches/test-strata-think-echo.py`.
+- The launcher sets `"undeclared_tool_calls": "call"` to keep 0.2.0's
+  behaviour for agents.
+- Xiaoman's four broken tool-call JSONs (11-07 to 11-11) were replayed through
+  both releases: the model drops a `>` from its own markup and upstream's
+  streaming parser passes that on as JSON no one can parse. Neither the
+  upgrade nor the local patch changes it.
+- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-11-12) and
+  [curated results](../benchmarks/qwen38_flash_next/2026-11-12/strata-0213-upgrade.json).
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

@@ -65,8 +65,10 @@ def check_runtime(runtime: str) -> list:
     read = lambda p: p.read_text(encoding="utf-8") if p.exists() else ""   # noqa: E731
     if 'req.get("thinking_token_budget")' not in read(rt / "serve" / "server.py"):
         problems.append(f"{runtime}: no thinking_token_budget alias")
-    if "# local: strata-think-echo v4" not in read(rt / "serve" / "frontend.py"):
-        problems.append(f"{runtime}: no strata-think-echo v4")
+    # the version the workspace's patch script writes (it changes with each port)
+    mark = re.search(r'^MARK = "(.+)"$', read(SCRIPTS / "patches" / "strata-think-echo.py"), re.M).group(1)
+    if mark not in read(rt / "serve" / "frontend.py"):
+        problems.append(f"{runtime}: no {mark.removeprefix('# local: ')}")
     return problems
 
 

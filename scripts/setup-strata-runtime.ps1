@@ -8,19 +8,21 @@ param(
 $ErrorActionPreference = 'Stop'
 $workspace = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeRoot = Join-Path $workspace 'runtime'
-$version = '0.2.0-beta-nvfp4.3'
-$commit = '57293b8e'
+$version = '0.2.13-nvfp4.1'
+$commit = 'b08a70078'
 $runtime = Join-Path $runtimeRoot ($(if ($Stage) { "strata-nvfp4-$version" } else { 'strata-nvfp4' }))
 $archiveName = "strata-nvfp4-v$version-windows-x64.zip"
 $archive = Join-Path $runtimeRoot $archiveName
-$expectedHash = '1417c28baefc3c18d2d346fed53bf7f940eb5f2d1ab369fb550d2ffce77d2ad3'
+$expectedHash = 'b928050dc13a7b1ac68e70488b4017b6bd6ffdc643a62632e6a0200e05aa1d19'
 # Earlier pinned releases upgraded in place, as the release notes direct ("unzip over the previous folder"): the
 # virtual environments, configs and models outside the zip stay. Their requirements, data files and the converters
 # behind the prepared model assets are identical to this release's (checked 2026-10-06, 2026-10-08, 2026-10-10,
-# 2026-10-15 and 2026-10-21; 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does
+# 2026-10-15, 2026-10-21 and 2026-11-12; 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does
 # not use; 0.2.0-beta only added the Gyro family's Hadamard metadata to iq_pack.py and a --gguf source to
-# embd_bf16_pack.py, neither of which this model's --model conversion reaches).
-$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1', '0.1.41-nvfp4.4', '0.1.44.1-nvfp4.1')
+# embd_bf16_pack.py, neither of which this model's --model conversion reaches; 0.2.13 (checked 2026-11-12) only made
+# iq_pack.py resume an interrupted write and taught its readers other families' types and pre-tokenizers, while
+# this pack's `qwen35` pre-tokenizer reads as before).
+$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1', '0.1.41-nvfp4.4', '0.1.44.1-nvfp4.1', '0.2.0-beta-nvfp4.3')
 
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
     Invoke-WebRequest -Uri "https://github.com/sergqwer/strata-nvfp4/releases/download/v$version/$archiveName" -OutFile "$archive.partial"
@@ -59,16 +61,18 @@ if ((Get-FileHash -LiteralPath (Join-Path $runtime 'engine\strata.exe')).Hash -i
 
 # Local change to the pinned server: also read the thinking budget from `thinking_token_budget`, the field
 # pi-ai/DSH clients send (compat.thinkingTokenBudgetField). Without it their budget is ignored and one step can
-# think through all of its output tokens. Reapplied here because runtime/ is ignored, freshly extracted code.
+# think through all of its output tokens. Since 0.2.13 the server reads llama.cpp's `thinking_budget_tokens` (plural
+# "budget tokens"), a different name; the alias goes right after it. Reapplied here because runtime/ is ignored,
+# freshly extracted code.
 $serverPath = Join-Path $runtime 'serve\server.py'
 $server = [System.IO.File]::ReadAllText($serverPath)
 if (-not $server.Contains('req.get("thinking_token_budget")')) {
     $anchor = [regex]::Matches($server,
-        '(?m)^( *)value = \(req or \{\}\)\.get\("reasoning_budget_tokens"\) if isinstance\(req, dict\) else None(\r?\n)')
+        '(?m)^( *)if value is None:[^\r\n]*\r?\n *value = req\.get\("thinking_budget_tokens"\)(\r?\n)')
     if ($anchor.Count -ne 1) { throw "Cannot apply the thinking_token_budget alias: $serverPath has changed." }
     $indent = $anchor[0].Groups[1].Value
     $newline = $anchor[0].Groups[2].Value
-    $alias = "${indent}if value is None and isinstance(req, dict):$newline" +
+    $alias = "${indent}if value is None:$newline" +
         "$indent    # The same budget under the name pi-ai/DSH clients send (compat.thinkingTokenBudgetField).$newline" +
         "$indent    value = req.get(`"thinking_token_budget`")$newline"
     $server = $server.Insert($anchor[0].Index + $anchor[0].Length, $alias)
@@ -76,23 +80,8 @@ if (-not $server.Contains('req.get("thinking_token_budget")')) {
     Write-Host "Applied the thinking_token_budget alias: $serverPath"
 }
 
-# Local change to the pinned server: since 0.2.0 a bind beyond loopback without an API key refuses to start. The
-# launcher binds the LAN (0.0.0.0) and its clients send no key, as through 0.1.44.1; the Host check (DNS rebinding)
-# and the server's "no API key" warning stay. Set "api_key" in the launcher instead to drop this change.
-$server = [System.IO.File]::ReadAllText($serverPath)
-$refusal = [regex]::Matches($server,
-    '(?m)^( *)if a\.host not in \("127\.0\.0\.1", "localhost", "::1"\) and not preflight_api_key:\r?\n' +
-    ' *print\("\[strata\] a non-loopback bind requires an inference API key".*\r?\n *return 2(\r?\n)')
-if ($refusal.Count -eq 1) {
-    $indent = $refusal[0].Groups[1].Value
-    $note = "$indent# local: a LAN bind without an API key starts, as through 0.1.44.1 (setup-strata-runtime.ps1)" +
-        $refusal[0].Groups[2].Value
-    $server = $server.Remove($refusal[0].Index, $refusal[0].Length).Insert($refusal[0].Index, $note)
-    [System.IO.File]::WriteAllText($serverPath, $server, [System.Text.UTF8Encoding]::new($false))
-    Write-Host "Allowed a LAN bind without an API key: $serverPath"
-} elseif ($server.Contains('a non-loopback bind requires an inference API key')) {
-    throw "Cannot allow a LAN bind without an API key: $serverPath has changed."
-}
+# Through 0.2.0 this installer also removed the server's refusal of a keyless LAN bind. 0.2.13 no longer refuses one
+# (it warns once), so the launcher's 0.0.0.0 bind for keyless clients needs no change.
 
 # Local change to the pinned server: a </think> the model writes while quoting the tag, or again inside its answer,
 # no longer leaks reasoning and a repeated reply into the answer (upstream #537, #1053). Idempotent; an earlier

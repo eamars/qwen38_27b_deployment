@@ -3,7 +3,7 @@ its answer, no longer leaks reasoning and a repeated reply into `content`.
 
 Qwen3.8 writes `</think>` as one token (248069) whether it ends its thinking or quotes the tag, and the pinned
 `OutputParser` switches to the answer at the first one (upstream #537, #1053; since 0.1.42 it keeps only a tag right
-after a quote mark or backtick, #1526, which none of 65 recorded quotes was; v4 applies unchanged to 0.1.44.1). The model's
+after a quote mark or backtick, #1526, which none of 65 recorded quotes was; v4 applied unchanged to 0.1.44.1 and 0.2.0). The model's
 own close is a `</think>` alone on its line: on 0.1.39, 420 of 420 real closes followed a newline and 13 of 14
 quoted tags did not, and the template writes "\n</think>\n\n". Two rules wrap the parser:
 
@@ -21,7 +21,14 @@ B. After it, in the answer: a `</think>` alone on its line ("X\n</think>\n\nX") 
    a quote that started a line: "...\n</think> 是手滑" lost the answer's first half).
 
 v4 ports v3 to the 0.1.40.2 parser, whose own `pending` and `_release` it must not touch, and adds the "alone on
-its line" test to both rules.
+its line" test to both rules. v5 ports v4 to the 0.2.13 parser: feed() now first joins a held tool-name tail
+(`_held`), and two upstream additions are bent to the wrapper. #4077 drops a `</think>` that starts a line of the
+answer but sends the thinking before it as answer text. #4077 still finds the tag and starts the answer's code tracking
+over there (a fence the thinking opened would otherwise hide the call after it), but passes the tag on as answer text
+for rule B to decide. Rule A also takes a `</think>` right after a call written in the thinking (`</tool_call>`) as
+the close: no quote ever followed a call. `clean` (the server's point to close the thinking at a budget) also counts
+the text rule A holds back. Known cost: a family whose own close runs straight into the answer (DeepSeek-V4.1's
+`text</think>Text`) reads as a quote; this server runs Qwen3.8 only.
 
 Usage: python strata-think-echo.py <runtime>/serve/frontend.py [release.zip]
 Idempotent; refuses a changed file. With the release archive, a file carrying an earlier version of this patch is
@@ -31,17 +38,17 @@ import sys
 import zipfile
 from pathlib import Path
 
-MARK = "# local: strata-think-echo v4"
+MARK = "# local: strata-think-echo v5"
 OLD_MARK = "# local: strata-think-echo"
 
 REPLACEMENTS = [
     # __init__: the patch's state
-    (r'''        self.batch = False           # the call being finished is followed by another in the same wrapper
+    (r'''        self._held = ""              # #5276/#5409: the end of a misspelt opener or a prefixed name still arriving (see _prefixed)
         self._reset_scan()
-''', r'''        self.batch = False           # the call being finished is followed by another in the same wrapper
+''', r'''        self._held = ""              # #5276/#5409: the end of a misspelt opener or a prefixed name still arriving (see _prefixed)
         self._reset_scan()
         ''' + MARK + r''': rule A runs while the model thinks (pre_on) on text not yet decided (pre_buf) after
-        # pre_prev; quoted is the reasoning since the last quoted </think> (None: none).  Rule B, once the thinking
+        # pre_prev (its last few characters); quoted is the reasoning since the last quoted </think> (None: none).  Rule B, once the thinking
         # has closed: the answer held back (held; None: not holding), the text before a repeated </think> that waits
         # for what follows it (echo), the answer text not yet decided (cpend), and the last answer character (clast)
         self.pre_on, self.pre_buf, self.pre_prev, self.quoted = thinking, "", "", None
@@ -49,7 +56,7 @@ REPLACEMENTS = [
 '''),
     # the wrapper and its rules, before the parser's own feed
     (r'''    def feed(self, delta: str) -> list[Event]:
-        self.buf += delta
+        if self._held:
 ''', r'''    ''' + MARK + r'''
     ANSWER_HOLD = 512    # characters of the answer held back for a repeated </think> (rule B)
     QUOTE = "\U000F0E12"  # a </think> taken for a quote, inside the parser (private use, as #537's marks)
@@ -78,8 +85,9 @@ REPLACEMENTS = [
                 out.append(s[:e])
                 s = s[e:]
                 break
-            before = s[e - 1] if e else prev
+            before = s[e - 1] if e else prev[-1:]
             starts = before in ("", "\n")
+            called = (prev + s[:e]).rstrip().endswith(CALL_END)     # right after a call written in the thinking
             if not starts and after == "\n" and not final:     # a blank line after it would make it the close
                 out.append(s[:e])
                 s = s[e:]
@@ -87,15 +95,15 @@ REPLACEMENTS = [
             out.append(s[:e])
             # the model's own close ends its line, and starts it or is followed by a blank line ("ok</think>\n\n", the
             # template's close after text); a quote is neither (13 of 13 recorded quotes were followed by text)
-            if (starts and (not after or after[0] == "\n")) or after.startswith("\n\n"):
+            if (starts and (not after or after[0] == "\n")) or after.startswith("\n\n") or called:
                 out.append(THINK_END + after)
                 s, self.pre_on, self.closed, self.held = "", False, True, ""
                 break
             out.append(self.QUOTE)
-            s, prev = after, self.QUOTE
+            s, prev = after, (prev + s[:e] + self.QUOTE)[-16:]
         self.pre_buf = s
         text = "".join(out)
-        self.pre_prev = text[-1] if text else prev
+        self.pre_prev = (self.pre_prev + text)[-16:]
         return text
 
     def _unquote(self, v):
@@ -207,7 +215,19 @@ REPLACEMENTS = [
         return out + ([Event("content", held)] if held else [])
 
     def _feed_raw(self, delta: str) -> list[Event]:
-        self.buf += delta
+        if self._held:
+'''),
+    # clean: the text rule A holds back is held too, so a budget's close never lands inside a </think> being decided
+    (r'''        return not self.buf and not self._held
+''', r'''        return not self.buf and not self._held and not self.pre_buf    ''' + MARK + r'''
+'''),
+    # #4077: the answer's code tracking still starts over at the tag, but the tag goes on to rule B, which decides it
+    # (#4077 would drop it and send the thinking before it as the answer)
+    (r'''                    self._reset_track()
+                    self.lead = True
+                    self.stray_think += 1
+''', r'''                    self._reset_track()
+                    out.append(Event("content", THINK_END))     ''' + MARK + r''': rule B decides it (_content)
 '''),
     (r'''    def finish(self, reason: str | None = None) -> list[Event]:
         """End of generation''', r'''    def _finish_raw(self, reason: str | None = None) -> list[Event]:

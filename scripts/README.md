@@ -17,6 +17,7 @@ canonical launch and profiling entry points are:
 | Flash-Next uncensored native Windows Strata vision/MTP launch/stop | `start-qwen38-flash-next-uncensored-strata-vision.ps1` |
 | Install the pinned Windows Strata runtime and Python environments | `setup-strata-runtime.ps1` |
 | Strata server patch: quoted or repeated `</think>` stays out of the answer (applied by the installer) | `patches/strata-think-echo.py` |
+| Replay the recorded `</think>` leak shapes through a runtime's patched parser (run after every port) | `patches/test-strata-think-echo.py` |
 | Download and verify the ModelOpt NVFP4 checkpoint for Strata | `stage-qwen38-strata.py` |
 | Convert the verified Strata checkpoint into workspace model assets | `prepare-qwen38-strata.py` |
 | Strata real API, image, tool and retrieval/cache checks | `probe-qwen38-strata.py` |
