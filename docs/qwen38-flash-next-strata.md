@@ -1268,7 +1268,7 @@ The same thing happened once on 10-13, hidden by 0.2.0's leniency. Asuna's
 end-of-turn check caught today's pair and repaired them; nothing with markup
 reached anyone.
 
-Left as is, as recommended here and by the Asuna session (2026-11-12): a call
+Left as is (owner's decision, 2026-11-12, on this session's and the Asuna session's recommendation): a call
 to a tool the request did not offer should not come back as a call, and the
 race is to be fixed in Asuna. Restoring 0.2.0's leniency would take a one-line
 local change (`declared_only` off when `"undeclared_tool_calls"` is
