@@ -141,8 +141,9 @@ $config = [ordered]@{
     # the workspace's server patches; upgrades go through setup-strata-runtime.ps1. Earlier servers ignore the key.
     update_check = $false
     # Since 0.2.13 a well-formed call to a tool the request did not declare arrives as text (upstream #804/#4622), which
-    # ends an agent's turn on prose. "call" keeps 0.2.0's behaviour: the client gets the call and can answer it with an
-    # error. Earlier servers ignore the key.
+    # ends an agent's turn on prose. "call" keeps 0.2.0's behaviour when the request declares tools: the client gets the
+    # call and can answer it with an error. A request with no tools still gets it as text (upstream #3075), on purpose
+    # (docs/qwen38-flash-next-strata.md, 2026-11-12). Earlier servers ignore the key.
     undeclared_tool_calls = 'call'
     host = $BindAddress
     log = Join-Path $logDirectory "engine-$Port.log"

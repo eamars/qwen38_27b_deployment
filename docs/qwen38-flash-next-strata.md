@@ -131,9 +131,13 @@ keyless server bind the LAN; 0.2.13 only warns, so it is gone.)
   the thinking closed, so the client gets an answer instead of empty content.
   A reply that quoted `</think>` and then stopped is closed this way too,
   before strata-think-echo's fallback applies.
-- `"undeclared_tool_calls": "call"` in the launcher's config (since 0.2.13): a
-  well-formed call to a tool the request did not declare reaches the client
-  as a call, as through 0.2.0, instead of as text that ends an agent's turn.
+- `"undeclared_tool_calls": "call"` in the launcher's config (since 0.2.13): in a
+  request that declares tools, a well-formed call to one it did not list
+  reaches the client as a call, as through 0.2.0, instead of as text that ends
+  an agent's turn. It does not cover a request that declares no tools at all:
+  0.2.13 returns a call there as text (upstream #3075), where 0.2.0 returned a
+  call. That is kept on purpose; see
+  [Tool calls in requests without tools, 2026-11-12](#tool-calls-in-requests-without-tools-2026-11-12).
 
 Reruns skip the changes once present.
 
@@ -1121,7 +1125,10 @@ expert cache has 7,950 GPU slots (was 8,060).
 
 **Behaviour that changes for clients.**
 - *Tool calls.* A call to an undeclared tool would now arrive as text; the
-  launcher keeps it a call (`"undeclared_tool_calls": "call"`). Tool-call
+  launcher keeps it a call (`"undeclared_tool_calls": "call"`) when the request
+  declares other tools. A request with no tools gets the call back as text;
+  this was missed here and found live the same day (see
+  [Tool calls in requests without tools](#tool-calls-in-requests-without-tools-2026-11-12)). Tool-call
   recovery (a call written in a form next to the template's) is on by
   default since upstream 0.2.8, where 0.2.0 had it off; taken as is.
   Upstream's tool-name aliases replace the fork's `tool_name_repair`.
@@ -1241,6 +1248,31 @@ feature, was the cause. Reported upstream as
 Why the slips started on 11-07 is not known. The
 Asuna session found the same markup inside earlier calls whose JSON happened
 to stay valid.
+
+## Tool calls in requests without tools, 2026-11-12
+
+About 11 minutes after 1919 started on 0.2.13, two of Xiaoman's
+character-lane replies (turns 3641 and 3642, step 1) came back as text: a
+complete, well-formed `think` call. `/metrics` counted them as
+`tool_calls_unread: 2`. With `"undeclared_tool_calls": "call"` that counter
+rises only for a request that declares no tools, and the Asuna session
+confirmed it from DSH's record. Both requests had no `tools` key; the steps
+around them declared 25 tools. Replaying the reply gives a call with `think`
+declared and text without tools. The 0.2.0 parser returns a call either way,
+so the change came with the upgrade. Neither local patch is involved.
+
+The cause is on the Asuna side. Its plugin offers the character lane tools
+only while an Asuna stage is current, and DSH ran two queued inbox turns
+before a stage was set (a race in the stage hand-off, right after a restart).
+The same thing happened once on 10-13, hidden by 0.2.0's leniency. Asuna's
+end-of-turn check caught today's pair and repaired them; nothing with markup
+reached anyone.
+
+Left as is, as recommended here and by the Asuna session (2026-11-12): a call
+to a tool the request did not offer should not come back as a call, and the
+race is to be fixed in Asuna. Restoring 0.2.0's leniency would take a one-line
+local change (`declared_only` off when `"undeclared_tool_calls"` is
+`"call"`).
 
 ## First-token stalls in shared use, 2026-10-22 (observed; nothing changed)
 
