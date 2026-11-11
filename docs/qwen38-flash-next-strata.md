@@ -822,7 +822,7 @@ pack. The fork also offers a ready-made GPTQ pack of the same OrcaRouter model
 (`Maximilian228/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-NVFP4-GPTQ-Strata` at
 `34c2fc2c`, 120 GiB) were deleted on 2026-11-12; their stage manifest with
 every file's SHA-256 is kept as `orca-gptq-stage-manifest.json` in the raw
-folder. The fork itself withdrew that pack the same day it was measured. Curated results:
+folder. The fork withdrew that pack in 0.1.41-nvfp4.5 (2026-10-11 NZDT). Curated results:
 [strata-0141-ab.json](../benchmarks/qwen38_flash_next/2026-10-10/strata-0141-ab.json);
 raw: `benchmarks/raw/qwen38-strata/2026-10-10/ab/`.
 `scripts/benchmark-qwen38-strata-ab.py` ran every arm from the production
