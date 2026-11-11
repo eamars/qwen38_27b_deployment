@@ -1180,6 +1180,8 @@ A tie. The candidate is level on speed: +1% chat, +7% 128K decode, −2% on the
 fork's figure comes from its measurement, not from the weights. Thinking
 length showed no consistent difference. What would decide it, the fork's
 agent-quality claim, these probes do not test.
+The owner kept OrcaRouter (2026-11-12). The pack stays in
+`models/qwen-nvfp4-gptq/` for a later live trial.
 
 - *think-tags* first scored production 11/12. The failing reply started a
   line of its answer with `</think>` followed by text, explaining the tag.
