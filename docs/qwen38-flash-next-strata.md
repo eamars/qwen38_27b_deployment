@@ -1183,8 +1183,11 @@ A tie. The candidate is level on speed: +1% chat, +7% 128K decode, −2% on the
 fork's figure comes from its measurement, not from the weights. Thinking
 length showed no consistent difference. What would decide it, the fork's
 agent-quality claim, these probes do not test.
-The owner kept OrcaRouter (2026-11-12). The pack stays in
-`models/qwen-nvfp4-gptq/` for a later live trial.
+The owner kept OrcaRouter (2026-11-12) and, with Qwen4 expected soon, had
+the pack deleted the same day; the record stays. To repeat the A/B, download
+the repo at `9b70ad3f` into `models/qwen-nvfp4-gptq/` (about 120 GiB, checked
+against the `SHA256SUMS` kept in the raw folder), rebuild `mtp/rt/` with the
+CJK draft vocabulary as above, and run the harness with `--candidate-model`.
 
 - *think-tags* first scored production 11/12. The failing reply started a
   line of its answer with `</think>` followed by text, explaining the tag.

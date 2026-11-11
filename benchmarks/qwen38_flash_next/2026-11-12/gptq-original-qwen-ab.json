@@ -1,7 +1,7 @@
 {
  "date": "2026-11-12",
  "question": "Should production switch from the OrcaRouter ModelOpt pack to the fork's GPTQ of the original Qwen3.8 with its 'disable censorship' vector on?",
- "decision": "Production stays on the OrcaRouter ModelOpt pack (owner, 2026-11-12); the GPTQ pack is kept for a later live trial.",
+ "decision": "Production stays on the OrcaRouter ModelOpt pack (owner, 2026-11-12). The GPTQ pack was deleted the same day (Qwen4 expected); its SHA256SUMS stay in the raw folder.",
  "method": "scripts/benchmark-qwen38-strata-ab.py --candidate-model models/qwen-nvfp4-gptq --candidate-engine-args '<the fork's control-vector flags>' --candidate-set uncensored=true; both arms on runtime 0.2.13-nvfp4.1 with both local patches, production launcher config, 127.0.0.1:1921, 5090 alone, one trial per case, same session. The candidate's MTP draft vocabulary was rebuilt with CJK as for production (byte-identical to production's); the repo ships the base one.",
  "arms": {
   "production": "OrcaRouter Qwen3.8-Flash-Next Uncensored, ModelOpt NVFP4 (jpezzulli f24d2b68), converted here",
