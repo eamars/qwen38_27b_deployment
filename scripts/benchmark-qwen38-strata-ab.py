@@ -57,6 +57,26 @@ def arm_config(template: dict, runtime: str, engine_log: Path) -> dict:
     return cfg
 
 
+def with_model(cfg: dict, model: Path) -> dict:
+    """The arm's config with another prepared model's files (pack, dense GGUF, PLE, embeddings, MTP draft); the
+    launcher's own settings stay. The dense GGUF is the folder's one GGUF that is not ple-, token-embd- or mmproj-."""
+    dense = [p for p in model.glob("*.gguf") if not p.name.startswith(("ple-", "token-embd-", "mmproj"))]
+    if len(dense) != 1:
+        raise SystemExit(f"{model}: expected one dense GGUF, found {[p.name for p in dense]}")
+    mtp = model / "mtp" / ("rt" if (model / "mtp" / "rt").is_dir() else "")
+    files = {"--pack": model / "pack", "--native": dense[0], "--native-dense-gguf": dense[0],
+             "--ple-gguf": model / "ple-fp8.gguf", "--embd-gguf": model / "token-embd-bf16.gguf", "--mtp": mtp}
+    a = cfg["args"]
+    for flag, path in files.items():
+        if flag in a:
+            if not path.exists():
+                raise SystemExit(f"{model}: missing {path.name}")
+            a[a.index(flag) + 1] = str(path)
+    cfg["tokenizer"] = str(model / "pack" / "tokenizer")
+    cfg["vision"]["model"] = str(dense[0])
+    return cfg
+
+
 def check_runtime(runtime: str) -> list:
     rt = WORKSPACE / "runtime" / runtime
     problems = [f"{runtime}: missing {need}" for need in
@@ -65,10 +85,11 @@ def check_runtime(runtime: str) -> list:
     read = lambda p: p.read_text(encoding="utf-8") if p.exists() else ""   # noqa: E731
     if 'req.get("thinking_token_budget")' not in read(rt / "serve" / "server.py"):
         problems.append(f"{runtime}: no thinking_token_budget alias")
-    # the version the workspace's patch script writes (it changes with each port)
-    mark = re.search(r'^MARK = "(.+)"$', read(SCRIPTS / "patches" / "strata-think-echo.py"), re.M).group(1)
-    if mark not in read(rt / "serve" / "frontend.py"):
-        problems.append(f"{runtime}: no {mark.removeprefix('# local: ')}")
+    # the versions the workspace's frontend patches write (they change with each port)
+    for patch in ("strata-think-echo.py", "strata-tool-tags.py"):
+        mark = re.search(r'^MARK = "(.+)"$', read(SCRIPTS / "patches" / patch), re.M).group(1)
+        if mark not in read(rt / "serve" / "frontend.py"):
+            problems.append(f"{runtime}: no {mark.removeprefix('# local: ')}")
     return problems
 
 
@@ -199,6 +220,12 @@ def main():
                     "'-GpuMode LayerSplit -Parallel 2'; the candidate runtime is production's unless --candidate")
     ap.add_argument("--candidate-env", action="append", default=[], metavar="NAME=VALUE",
                     help="an environment variable for the candidate's engine (repeatable)")
+    ap.add_argument("--candidate-model", type=Path, help="another prepared model folder for the candidate (pack/, the "
+                    "dense GGUF, ple-fp8.gguf, token-embd-bf16.gguf, mtp/), e.g. models/qwen-nvfp4-gptq")
+    ap.add_argument("--candidate-engine-args", default="", help="engine arguments appended for the candidate, e.g. "
+                    "the control-vector flags (a path starting runtime\\ is made absolute)")
+    ap.add_argument("--candidate-set", action="append", default=[], metavar="KEY=JSON",
+                    help="a server config key for the candidate, e.g. uncensored=true (repeatable)")
     ap.add_argument("--candidate-only", action="store_true", help="skip the production arm (it ran earlier this session)")
     ap.add_argument("--output", type=Path, default=WORKSPACE / "benchmarks/raw/qwen38-strata" / time.strftime("%Y-%m-%d") / "ab")
     ap.add_argument("--dry-run", action="store_true", help="write both configs and check them, start nothing")
@@ -206,10 +233,19 @@ def main():
     args.output = args.output.resolve()      # the server runs from its runtime folder: every path it gets is absolute
     args.output.mkdir(parents=True, exist_ok=True)
     extra = args.candidate_args.split()
+    changes = extra or args.candidate_model or args.candidate_engine_args or args.candidate_set
     arms = {"production": PRODUCTION,
-            **({"candidate": args.candidate or PRODUCTION} if args.candidate or extra else {})}
+            **({"candidate": args.candidate or PRODUCTION} if args.candidate or changes else {})}
     templates = {"production": production_config(), "candidate": production_config(extra)}
-    templates["candidate"]["env"].update(kv.split("=", 1) for kv in args.candidate_env)
+    cand = templates["candidate"]
+    cand["env"].update(kv.split("=", 1) for kv in args.candidate_env)
+    if args.candidate_model:
+        with_model(cand, (WORKSPACE / args.candidate_model).resolve())
+    cand["args"] += [str(WORKSPACE / x) if x.startswith("runtime\\") or x.startswith("runtime/") else x
+                     for x in args.candidate_engine_args.split()]
+    for kv in args.candidate_set:
+        key, value = kv.split("=", 1)
+        cand[key] = json.loads(value)
     if args.candidate_only:
         arms.pop("production")
     problems = sorted({p for rt in arms.values() for p in check_runtime(rt)})

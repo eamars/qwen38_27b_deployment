@@ -1142,6 +1142,56 @@ Rollback: stop the server and re-extract
 Then restore the previous installer pin, launcher and strata-think-echo v4
 from Git and run the installer, which re-applies its patches.
 
+## Original-Qwen GPTQ pack A/B, 2026-11-12 (not switched)
+
+The fork's ~200 tok/s (203.3 decode on 0.2.0-beta-nvfp4.1) was measured on
+its own `qwen-nvfp4-gptq` pack, a GPTQ of the original Qwen3.8, and since
+0.1.41-nvfp4.5 (10-10) that is the fork's default. It withdrew OrcaRouter's
+weights, saying the abliteration (it edits all 149 residual-writing matrices)
+makes a much weaker agent: 10–70 steps against 175 on one Claude Code task, and
+shorter thinking. Censorship is turned off instead by a refusal-direction
+vector (`data/uncensor`, `"uncensored": true`). The 10-10 test here had
+rejected the fork's GPTQ *of OrcaRouter*; the original-Qwen pack was not tried.
+
+Same session, runtime 0.2.13-nvfp4.1 with both local patches, production's
+launcher config, 5090 alone. The candidate is
+[Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata](https://huggingface.co/Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata)
+`9b70ad3f` in `models/qwen-nvfp4-gptq/` (all 17 files checked against its
+`SHA256SUMS`), with the fork's vector flags and `"uncensored": true`. Its PLE
+and token embedding are not OrcaRouter's (same sizes, other hashes), so they
+were downloaded too. The repo ships the base MTP draft vocabulary; `mtp/rt/`
+holds the CJK one built as `prepare-qwen38-strata.py` builds production's
+(byte-identical to it), with the head files hard-linked. Curated:
+[gptq-original-qwen-ab.json](../benchmarks/qwen38_flash_next/2026-11-12/gptq-original-qwen-ab.json);
+raw: `benchmarks/raw/qwen38-strata/2026-11-12/gptq/`.
+
+| 5090 alone, `parallel` 1 | OrcaRouter ModelOpt (production) | Original Qwen GPTQ + vector |
+|---|---:|---:|
+| Chinese / English chat decode, tok/s | 172.6 / 170.4 | 174.5 / 172.5 |
+| 4K prompt read / decode, tok/s | 2,315 / 170.3 | 2,344 / 172.2 |
+| 128K prompt read / decode, tok/s | 8,431 / 161.2 | 8,225 / 172.0 |
+| C1 wall tok/s (C2 total, queued) | 155.8 (156.6) | 154.2 (153.0) |
+| Two agents switching 32K histories, s per turn | 0.91 | 0.88 |
+| Retrieval, cache, smoke, `</think>` 12/12 | pass | pass |
+| Exact answers / long thinking | 12/12 / 2/3 | 12/12 / 2/3 |
+
+A tie. The candidate is level on speed: +1% chat, +7% 128K decode, −2% on the
+128K prompt and C2. Neither model reaches ~200 tok/s on these probes, so the
+fork's figure comes from its measurement, not from the weights. Thinking
+length showed no consistent difference. What would decide it, the fork's
+agent-quality claim, these probes do not test.
+
+- *think-tags* first scored production 11/12. The failing reply started a
+  line of its answer with `</think>` followed by text, explaining the tag.
+  strata-think-echo rightly keeps that as text. The probe now fails only a
+  tag alone on its line; rescored 12/12, and none of 120 earlier replies
+  changes.
+- *Refusals.* Eight companion boundary requests (crude roasts, gory fiction,
+  dark jokes, swearing, Chinese and English) were answered by production, by
+  the candidate, and by the candidate with the vector off. They do not tell
+  the switch apart, so the probe was dropped. The vector's effect rests on the
+  fork's own measurement (0/104 refusals on, 102/104 off).
+
 ## Broken tool-call arguments, 2026-11-12
 
 Xiaoman's DSH records show four tool calls (11-07 19:51, 11-09 22:36, 11-11

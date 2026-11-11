@@ -20,8 +20,13 @@ PLAIN = "[群主] 今天群里好热闹啊，你在忙啥"
 MID = re.compile(r"[\s`'\"”）)。，？！是]")
 
 
+ALONE = re.compile(r"(^|\n)[ \t]*</think>[ \t]*(\n|$)")     # a leaked close: the tag alone on its line
+
+
 def whole(c: str) -> bool:
-    return bool(c.strip()) and "\n</think>" not in c and "需要" not in c and not MID.match(c)
+    # A </think> that starts a line of text ("</think> 刚才是标签手滑") is the reply quoting it (strata-think-echo's
+    # rule B), not a leak; 2026-11-12 one such reply failed the earlier "\n</think>" test.
+    return bool(c.strip()) and not ALONE.search(c) and "需要" not in c and not MID.match(c)
 
 
 def body(user: str, seed: int, stream: bool) -> dict:
