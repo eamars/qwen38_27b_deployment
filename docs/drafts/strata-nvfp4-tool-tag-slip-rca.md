@@ -1,5 +1,5 @@
 <!--
-Draft for sergqwer/strata-nvfp4 (not posted). Written 2026-11-12 from this workspace's investigation.
+Posted as https://github.com/sergqwer/strata-nvfp4/issues/24 on 2026-11-12 (by the owner). Kept as sent. Written 2026-11-12 from this workspace's investigation.
 Nothing below quotes the agent's text: outputs were rebuilt from their structure with filler characters.
 Before posting: decide whether to also open a short issue on Niko1221/Strata for the parameter-tag half (it is
 upstream's parser; the EOS-literal half is this fork's).

@@ -121,6 +121,9 @@ keyless server bind the LAN; 0.2.13 only warns, so it is gone.)
   drift do (#3441, #5276, #5409). Text outside a call is left as written. A
   call that never closes is not repaired, so it still fails at the client.
   See [Broken tool-call arguments, 2026-11-12](#broken-tool-call-arguments-2026-11-12).
+  Reported as [sergqwer/strata-nvfp4#24](https://github.com/sergqwer/strata-nvfp4/issues/24).
+  Exit: drop this patch when `test-strata-tool-tags.py <runtime> --stock <release.zip>`
+  shows the stock parser getting no case wrong; check at every upgrade.
   `scripts/patches/test-strata-tool-tags.py` replays the recorded shapes.
 - `"reasoning_close_retry": true` in the launcher's config (upstream #1053,
   opt-in since 0.1.40.2): a reply that ends on its end-of-turn token still
@@ -1226,7 +1229,9 @@ ends at the slipped tag, and the model's first end-of-turn token ends the
 reply, so the `<|im_end|>` run does not happen. D still fails at the client;
 the Asuna side owns a retry for it. `stop_token_text` stays on: it exists for
 a model that writes `<|im_end|>` into a file argument, and the slip, not the
-feature, was the cause. Why the slips started on 11-07 is not known. The
+feature, was the cause. Reported upstream as
+[sergqwer/strata-nvfp4#24](https://github.com/sergqwer/strata-nvfp4/issues/24).
+Why the slips started on 11-07 is not known. The
 Asuna session found the same markup inside earlier calls whose JSON happened
 to stay valid.
 
