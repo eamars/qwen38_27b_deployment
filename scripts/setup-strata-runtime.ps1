@@ -89,6 +89,13 @@ if (-not $server.Contains('req.get("thinking_token_budget")')) {
 & python (Join-Path $PSScriptRoot 'patches\strata-think-echo.py') (Join-Path $runtime 'serve\frontend.py') $archive
 if ($LASTEXITCODE -ne 0) { throw 'Cannot apply strata-think-echo to the Strata server.' }
 
+# Local change to the pinned server, on top of strata-think-echo (it wraps that patch's feed and finish): inside a tool
+# call, a parameter tag whose `>` the model dropped (`<parameter=NAME` or `</parameter` before a line break) is read as
+# the tag. Without it upstream's streaming parser sends arguments no client can parse (Xiaoman, 2026-11-07 to 11-11).
+# See the script.
+& python (Join-Path $PSScriptRoot 'patches\strata-tool-tags.py') (Join-Path $runtime 'serve\frontend.py')
+if ($LASTEXITCODE -ne 0) { throw 'Cannot apply strata-tool-tags to the Strata server.' }
+
 # Since 0.1.42-nvfp4.2 the release downloads ready-made models and no longer ships requirements-convert.txt; this model
 # is still converted here (prepare-qwen38-strata.py), so the converters' pins from 0.1.41-nvfp4.4 are kept in scripts/.
 $requirements = @{

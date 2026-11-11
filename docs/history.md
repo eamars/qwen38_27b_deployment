@@ -371,7 +371,10 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - Xiaoman's four broken tool-call JSONs (11-07 to 11-11) were replayed through
   both releases: the model drops a `>` from its own markup and upstream's
   streaming parser passes that on as JSON no one can parse. Neither the
-  upgrade nor the local patch changes it.
+  upgrade nor strata-think-echo changes it. A new local patch,
+  strata-tool-tags, reads such a slipped parameter tag as the tag and repairs
+  three of the four; the fourth (a reply written into the `think` argument)
+  still fails at the client, which owns a retry.
 - See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-11-12) and
   [curated results](../benchmarks/qwen38_flash_next/2026-11-12/strata-0213-upgrade.json).
 

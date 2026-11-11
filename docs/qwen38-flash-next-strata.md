@@ -68,7 +68,7 @@ Models, virtual environments, release archives and generated configs remain
 Git-ignored. The installer records the resolved Python dependency versions in
 `runtime/strata-nvfp4/requirements-*-installed.txt`.
 
-The installer also applies two local changes to the pinned server, and the
+The installer also applies three local changes to the pinned server, and the
 launcher sets two upstream options. (Through 0.2.0 a third change let a
 keyless server bind the LAN; 0.2.13 only warns, so it is gone.)
 
@@ -112,6 +112,16 @@ keyless server bind the LAN; 0.2.13 only warns, so it is gone.)
   `scripts/patches/test-strata-think-echo.py` replays the 16 recorded leak
   shapes, whole, a character at a time and in random chunks; run it after
   every port.
+- `serve/frontend.py`, by `scripts/patches/strata-tool-tags.py` (v1, applied
+  after strata-think-echo, whose `feed()` it wraps): inside a `<tool_call>`, a
+  parameter tag whose `>` the model dropped is read as the tag:
+  `<parameter=NAME` before a line break becomes `<parameter=NAME>`, and
+  `</parameter` before a line break becomes `</parameter>`. The repair runs on
+  the raw text before every parser, as upstream's own repairs of `<function=`
+  drift do (#3441, #5276, #5409). Text outside a call is left as written. A
+  call that never closes is not repaired, so it still fails at the client.
+  See [Broken tool-call arguments, 2026-11-12](#broken-tool-call-arguments-2026-11-12).
+  `scripts/patches/test-strata-tool-tags.py` replays the recorded shapes.
 - `"reasoning_close_retry": true` in the launcher's config (upstream #1053,
   opt-in since 0.1.40.2): a reply that ends on its end-of-turn token still
   inside the thinking, with no answer and no tool call, is continued once with
@@ -1131,6 +1141,42 @@ Rollback: stop the server and re-extract
 `runtime/strata-nvfp4-v0.2.0-beta-nvfp4.3-windows-x64.zip` over the runtime.
 Then restore the previous installer pin, launcher and strata-think-echo v4
 from Git and run the installer, which re-applies its patches.
+
+## Broken tool-call arguments, 2026-11-12
+
+Xiaoman's DSH records show four tool calls (11-07 19:51, 11-09 22:36, 11-11
+01:12 and 11-11 23:21 NZDT) whose streamed arguments were not JSON
+(`MALFORMED_RESPONSE`). On the character lane each one ended her turn with an
+error. There were none from 10-05 to 11-06, across tens of thousands of calls.
+The Asuna session sent their structure only (her text replaced by lengths),
+and each output was rebuilt with filler text and streamed through the
+parsers. Nothing on this server changed between 10-22 and 11-12. All four ran
+with 80K–175K tokens of context.
+
+- **A (`write_file`), B (`think`):** the model wrote `<parameter=NAME` without
+  its `>`. Upstream's streaming parser read everything up to the next `>`, the
+  one in `</parameter>`, as the name, and sent `"thought\n…\n</parameter":` as
+  a JSON key whose value never came.
+- **C (`write_document`):** the model wrote `</parameter` without its `>`, so
+  the value never ended. When the model then wrote its end-of-turn token, the
+  fork's "EOS literal" (`stop_token_text`, on by default) took it for a
+  literal inside an open argument: it wrote the token out as text and let the
+  reply go on, up to its cap of 64 per reply. The value collected
+  `</function>`, `</tool_call>` and exactly 64 `<|im_end|>`.
+- **D (`think`):** no slip. The model wrote `</think>` and its reply inside the
+  `think` argument, then the same `<|im_end|>` run. Nothing on the server can
+  turn that into the call it meant.
+
+The 0.2.0 parser that served them and the 0.2.13 parser give the same broken
+arguments, stock or with strata-think-echo, so neither the upgrade nor that
+patch was involved. strata-tool-tags repairs A, B and C. With it, C's value
+ends at the slipped tag, and the model's first end-of-turn token ends the
+reply, so the `<|im_end|>` run does not happen. D still fails at the client;
+the Asuna side owns a retry for it. `stop_token_text` stays on: it exists for
+a model that writes `<|im_end|>` into a file argument, and the slip, not the
+feature, was the cause. Why the slips started on 11-07 is not known. The
+Asuna session found the same markup inside earlier calls whose JSON happened
+to stay valid.
 
 ## First-token stalls in shared use, 2026-10-22 (observed; nothing changed)
 

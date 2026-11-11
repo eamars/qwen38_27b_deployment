@@ -18,6 +18,8 @@ canonical launch and profiling entry points are:
 | Install the pinned Windows Strata runtime and Python environments | `setup-strata-runtime.ps1` |
 | Strata server patch: quoted or repeated `</think>` stays out of the answer (applied by the installer) | `patches/strata-think-echo.py` |
 | Replay the recorded `</think>` leak shapes through a runtime's patched parser (run after every port) | `patches/test-strata-think-echo.py` |
+| Strata server patch: a tool call's parameter tag that lost its `>` is read as the tag (applied by the installer, after think-echo) | `patches/strata-tool-tags.py` |
+| Replay the recorded slipped-tag tool calls through a runtime's patched parser (run after every port) | `patches/test-strata-tool-tags.py` |
 | Download and verify the ModelOpt NVFP4 checkpoint for Strata | `stage-qwen38-strata.py` |
 | Convert the verified Strata checkpoint into workspace model assets | `prepare-qwen38-strata.py` |
 | Strata real API, image, tool and retrieval/cache checks | `probe-qwen38-strata.py` |
