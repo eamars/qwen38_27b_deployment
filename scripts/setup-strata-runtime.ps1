@@ -8,21 +8,22 @@ param(
 $ErrorActionPreference = 'Stop'
 $workspace = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
 $runtimeRoot = Join-Path $workspace 'runtime'
-$version = '0.2.13-nvfp4.1'
-$commit = 'b08a70078'
+$version = '0.2.15-nvfp4.7'
+$commit = '4442f2d53'
 $runtime = Join-Path $runtimeRoot ($(if ($Stage) { "strata-nvfp4-$version" } else { 'strata-nvfp4' }))
 $archiveName = "strata-nvfp4-v$version-windows-x64.zip"
 $archive = Join-Path $runtimeRoot $archiveName
-$expectedHash = 'b928050dc13a7b1ac68e70488b4017b6bd6ffdc643a62632e6a0200e05aa1d19'
+$expectedHash = '84bd404b27b8a3982538294d9547a25fd1c3e483c749856a275a9a8cabed5759'
 # Earlier pinned releases upgraded in place, as the release notes direct ("unzip over the previous folder"): the
 # virtual environments, configs and models outside the zip stay. Their requirements, data files and the converters
 # behind the prepared model assets are identical to this release's (checked 2026-10-06, 2026-10-08, 2026-10-10,
-# 2026-10-15, 2026-10-21 and 2026-11-12; 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does
+# 2026-10-15, 2026-10-21, 2026-11-12 and 2026-11-23; 0.1.40.2 only added PLE key formats to tools/iq_pack.py that this model's BF16 key does
 # not use; 0.2.0-beta only added the Gyro family's Hadamard metadata to iq_pack.py and a --gguf source to
 # embd_bf16_pack.py, neither of which this model's --model conversion reaches; 0.2.13 (checked 2026-11-12) only made
 # iq_pack.py resume an interrupted write and taught its readers other families' types and pre-tokenizers, while
-# this pack's `qwen35` pre-tokenizer reads as before).
-$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1', '0.1.41-nvfp4.4', '0.1.44.1-nvfp4.1', '0.2.0-beta-nvfp4.3')
+# this pack's `qwen35` pre-tokenizer reads as before; 0.2.15 (checked 2026-11-23) only moved the converters onto its vendored
+# gguf library, with the same profile, draft vocabulary and serve requirements).
+$upgradeFrom = @('0.1.37-nvfp4.2', '0.1.39-nvfp4.3', '0.1.40.2-nvfp4.1', '0.1.41-nvfp4.4', '0.1.44.1-nvfp4.1', '0.2.0-beta-nvfp4.3', '0.2.13-nvfp4.1')
 
 if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) {
     Invoke-WebRequest -Uri "https://github.com/sergqwer/strata-nvfp4/releases/download/v$version/$archiveName" -OutFile "$archive.partial"
@@ -89,12 +90,9 @@ if (-not $server.Contains('req.get("thinking_token_budget")')) {
 & python (Join-Path $PSScriptRoot 'patches\strata-think-echo.py') (Join-Path $runtime 'serve\frontend.py') $archive
 if ($LASTEXITCODE -ne 0) { throw 'Cannot apply strata-think-echo to the Strata server.' }
 
-# Local change to the pinned server, on top of strata-think-echo (it wraps that patch's feed and finish): inside a tool
-# call, a parameter tag whose `>` the model dropped (`<parameter=NAME` or `</parameter` before a line break) is read as
-# the tag. Without it upstream's streaming parser sends arguments no client can parse (Xiaoman, 2026-11-07 to 11-11).
-# See the script.
-& python (Join-Path $PSScriptRoot 'patches\strata-tool-tags.py') (Join-Path $runtime 'serve\frontend.py')
-if ($LASTEXITCODE -ne 0) { throw 'Cannot apply strata-tool-tags to the Strata server.' }
+# Through 0.2.13 this installer also applied strata-tool-tags (a parameter tag that lost its `>` inside a tool call). The
+# fork fixed it upstream in 0.2.15-nvfp4.1 (sergqwer/strata-nvfp4#24); patches/test-strata-tool-tags.py still replays the
+# recorded calls through the installed parser at every upgrade.
 
 # Since 0.1.42-nvfp4.2 the release downloads ready-made models and no longer ships requirements-convert.txt; this model
 # is still converted here (prepare-qwen38-strata.py), so the converters' pins from 0.1.41-nvfp4.4 are kept in scripts/.

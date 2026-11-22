@@ -11,10 +11,11 @@ WORKSPACE = Path(__file__).resolve().parents[1]
 RUNTIME = WORKSPACE / "runtime" / "strata-nvfp4"
 MODEL = WORKSPACE / "models" / "qwen38-flash-next-uncensored-strata"
 REVISION = "f24d2b68ff2814f24455ae86717be276619b5664"
-RUNTIME_VERSION, RUNTIME_COMMIT = "0.1.39-nvfp4.3", "b17e5ef"
-# Releases whose converters below (and data/draft_vocab.bin) are byte-identical to the pinned one's, so assets they
-# prepared stay valid (compared 2026-10-06).
-COMPATIBLE_PREPARED = {"0.1.37-nvfp4.2", RUNTIME_VERSION}
+# Releases whose converters below (and data/draft_vocab.bin) give this checkpoint the same assets, so assets they
+# prepared stay valid and any of them may prepare missing ones: byte-identical through 0.1.39 (compared 2026-10-06);
+# later releases changed only code paths this checkpoint does not reach (setup-strata-runtime.ps1 records each check).
+COMPATIBLE_PREPARED = {"0.1.37-nvfp4.2", "0.1.39-nvfp4.3", "0.1.40.2-nvfp4.1", "0.1.41-nvfp4.4", "0.1.44.1-nvfp4.1",
+                       "0.2.0-beta-nvfp4.3", "0.2.13-nvfp4.1", "0.2.15-nvfp4.7"}
 
 
 def main():
@@ -40,7 +41,7 @@ def main():
             raise RuntimeError(f"Verified checkpoint file is now missing or has changed: {path}")
 
     build = json.loads((RUNTIME / "engine" / "BUILD.json").read_text())
-    if build["version"] != RUNTIME_VERSION or build["commit"] != RUNTIME_COMMIT:
+    if build["version"] not in COMPATIBLE_PREPARED or build.get("dirty"):
         raise RuntimeError("Unexpected runtime version; use scripts/setup-strata-runtime.ps1")
     state_path = MODEL / "preparation.json"
     state = json.loads(state_path.read_text()) if state_path.exists() else {
@@ -104,6 +105,14 @@ def main():
     # tokens a round. With CJK added (+171 MiB of draft head): Chinese 110 -> 138 tok/s, English unchanged (2026-10-06).
     step("draft_vocab", [["tools/draft_vocab.py", "--gguf", gguf, "--base", RUNTIME / "data/draft_vocab.bin",
                           "--add", "cjk", "--out", mtp / "rt/draft_vocab.bin"]], [mtp / "rt/draft_vocab.bin"])
+    # The MTP with Basalt's drafting runs Basalt's self-distilled draft layer (dense.bin, Qwen Community License 1.0),
+    # pinned and hash-checked by the fork's own fetcher (strata_control/drafting.py FORK_MTP_TUNED_*, 116 MB), beside this
+    # model's own experts.bin and CJK draft_vocab.bin (hard links). Chosen 2026-11-23: 77% of drafts accepted against 73%
+    # with this model's own layer, Chinese chat +3.7%.
+    tuned = mtp / "rt-tuned"
+    step("mtp_tuned", [["-c", "from strata_control import drafting_fetch as f; "
+                        f"f.ensure_fork_tuned_mtp(r'{mtp / 'rt'}')"]],
+         [tuned / "dense.bin", tuned / "dense.txt", tuned / "experts.bin", tuned / "draft_vocab.bin"])
     state["complete"] = True
     save()
     print(f"Prepared Strata assets: {MODEL}", flush=True)

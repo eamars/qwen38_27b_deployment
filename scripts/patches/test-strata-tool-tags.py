@@ -1,5 +1,6 @@
-r"""Replay check for strata-tool-tags: the tool calls whose parameter tag lost its `>` (Xiaoman, 2026-11-07 to 11-11),
-fed to the patched parser as the server streams them (stream_tools, recovery on, undeclared calls kept).
+r"""Replay check for the tool calls whose parameter tag lost its `>` (Xiaoman, 2026-11-07 to 11-11), fed to the installed
+parser as the server streams them (stream_tools, recovery on, undeclared calls kept). Through 0.2.13 a local patch
+(strata-tool-tags) repaired them; the fork fixed it in 0.2.15-nvfp4.1 (#24), and this replay guards that at upgrades.
 
 Each case is a raw model output rebuilt from the records' structure (her text replaced by filler). Every case runs
 whole, one character at a time and in random chunks. A call must arrive with the expected arguments, and the

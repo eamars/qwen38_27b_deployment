@@ -378,6 +378,25 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-11-12) and
   [curated results](../benchmarks/qwen38_flash_next/2026-11-12/strata-0213-upgrade.json).
 
+### 2026-11-23 — Strata 0.2.15-nvfp4.7 and the MTP with Basalt's drafting
+
+- Upgraded in place from 0.2.13-nvfp4.1 after four drafter arms on
+  127.0.0.1:1921. Production now drafts with the MTP, Basalt's two-stage head
+  and cumulative window over Basalt's self-distilled draft layer
+  (`mtp/rt-tuned`): Chinese / English chat 215 / 219 tok/s (was 171 / 175),
+  128K decode 219 (was 161), 128K prompt +31%, every check passing.
+- The upgrade alone gave most of it (RTX 50 kernels, KV streaming on by
+  default); Basalt's drafting added 3–9%, its layer another 4% on Chinese.
+  DFlash2 was the slowest drafter on this model (Chinese 170).
+- strata-tool-tags dropped: the fork fixed #24 and the stock parser gets no
+  recorded case wrong. strata-think-echo v5 and the budget alias stay.
+- The launcher writes `"drafting": "mtp"`, because the fork's drafting policy
+  misreads this model's GGUF header (draft fork issue in `docs/drafts/`).
+  `prepare-qwen38-strata.py` takes the checked releases again and fetches the
+  draft layer.
+- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-and-drafter-choice-2026-11-23) and
+  [curated results](../benchmarks/qwen38_flash_next/2026-11-23/strata-0215-drafters.json).
+
 ## Decisions retained
 
 Items 1–5 below describe the earlier Qwen27B/DFlash2 deployment. The PR #447

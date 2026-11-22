@@ -115,7 +115,10 @@ $engineArgs = @(
     '--vram-reserve-mib', "$VramReserveMiB", '--vision'
 )
 if (-not $NoMtp) {
-    $engineArgs += @('--mtp', (Join-Path $model 'mtp\rt'), '--spec', '4', '--spec-min-p', '0.5')
+    # The MTP with Basalt's drafting (fork 0.2.15-nvfp4.4): its self-distilled draft layer (mtp\rt-tuned: its dense.bin beside
+    # this model's own experts and CJK draft vocabulary), the two-stage draft head and the cumulative window rule over a
+    # window of 8. Chosen on 2026-11-23 over the plain MTP (window 4, min-p 0.5) and DFlash2 (docs/qwen38-flash-next-strata.md).
+    $engineArgs += @('--mtp', (Join-Path $model 'mtp\rt-tuned'), '--spec', '8', '--mtp-head', 'proxy', '--mtp-cum', 'auto')
 }
 if ($RamBudgetGiB -gt 0) {
     $engineArgs += @('--low-ram', '--ram-budget', "$RamBudgetGiB")
@@ -145,6 +148,9 @@ $config = [ordered]@{
     # call and can answer it with an error. A request with no tools still gets it as text (upstream #3075), on purpose
     # (docs/qwen38-flash-next-strata.md, 2026-11-12). Earlier servers ignore the key.
     undeclared_tool_calls = 'call'
+    # Since 0.2.15-nvfp4.2 the server's drafting policy may rewrite the drafter arguments (Auto). "mtp" keeps the ones
+    # above as written, whatever that policy reads from the model file. Earlier servers ignore the key.
+    drafting = $(if ($NoMtp) { 'off' } else { 'mtp' })
     host = $BindAddress
     log = Join-Path $logDirectory "engine-$Port.log"
     gpu = $monitorGpus
@@ -189,8 +195,9 @@ if (-not (Select-String -LiteralPath (Join-Path $runtime 'serve\server.py') -Sim
 }
 $preparation = Get-Content -LiteralPath (Join-Path $model 'preparation.json') -Raw | ConvertFrom-Json
 if (-not $preparation.complete) { throw 'Model preparation has not completed successfully.' }
-if (-not $NoMtp -and -not (Test-Path -LiteralPath (Join-Path $model 'mtp\rt\draft_vocab.bin'))) {
-    throw 'The matching MTP draft head is incomplete.'
+if (-not $NoMtp -and @('dense.bin', 'dense.txt', 'experts.bin', 'draft_vocab.bin' |
+        Where-Object { -not (Test-Path -LiteralPath (Join-Path $model "mtp\rt-tuned\$_")) }).Count -gt 0) {
+    throw 'The MTP draft layer in mtp\rt-tuned is incomplete. Run prepare-qwen38-strata.py.'
 }
 if (@(Get-ManagedServer).Count -gt 0) { throw "A managed Strata server already uses port $Port." }
 # Check before rewriting the per-port config or loading weights.

@@ -17,8 +17,11 @@ the same requests; see [Upgrade, 2026-10-08](#upgrade-2026-10-08). On
 0.2.0-beta-nvfp4.3 (engine 0.1.45.3): chat decode +4%, the rest level; see
 [Upgrade, 2026-10-22](#upgrade-2026-10-22). On 2026-11-12 it moved to
 0.2.13-nvfp4.1 (engine 0.1.59): speed level, every check passing; see
-[Upgrade, 2026-11-12](#upgrade-2026-11-12). Earlier measurements below were
-made on earlier runtimes.
+[Upgrade, 2026-11-12](#upgrade-2026-11-12). On 2026-11-23 it moved to
+0.2.15-nvfp4.7 (engine 0.1.61) with the MTP and Basalt's drafting: chat decode
++26% (215 against 171 tok/s), 128K prompt +31%; see
+[Upgrade and drafter choice, 2026-11-23](#upgrade-and-drafter-choice-2026-11-23).
+Earlier measurements below were made on earlier runtimes.
 
 It follows this workspace's normal layout: model assets in `models/`, the
 isolated runtime in `runtime/`, operational commands in `scripts/`, and raw
@@ -28,9 +31,10 @@ validation evidence in `benchmarks/raw/qwen38-strata/`.
 
 | Input | Pin |
 |---|---|
-| Runtime | [sergqwer/strata-nvfp4 v0.2.13-nvfp4.1](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.13-nvfp4.1), commit `b08a70078`; the engine reports itself as 0.1.59 (until 2026-11-12: v0.2.0-beta-nvfp4.3, `57293b8e`; until 2026-10-22: v0.1.44.1-nvfp4.1, `3fa66b43`; until 2026-10-15: v0.1.41-nvfp4.4, `ec1ea2d0`; until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
-| Windows release SHA-256 | `b928050dc13a7b1ac68e70488b4017b6bd6ffdc643a62632e6a0200e05aa1d19` |
-| Engine SHA-256 | `47b03dc52a5837a6e8665332ab4ee27fbc0f4f4b0e5d765a38cd4e2e678f6142` |
+| Runtime | [sergqwer/strata-nvfp4 v0.2.15-nvfp4.7](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.15-nvfp4.7), commit `4442f2d53`; the engine reports itself as 0.1.61 (until 2026-11-23: v0.2.13-nvfp4.1, `b08a70078`; until 2026-11-12: v0.2.0-beta-nvfp4.3, `57293b8e`; until 2026-10-22: v0.1.44.1-nvfp4.1, `3fa66b43`; until 2026-10-15: v0.1.41-nvfp4.4, `ec1ea2d0`; until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
+| Windows release SHA-256 | `84bd404b27b8a3982538294d9547a25fd1c3e483c749856a275a9a8cabed5759` |
+| Engine SHA-256 | `9bff87b4ee5a85c479d522fda95d8c48b649df1b74866598377e23adf78fae66` |
+| MTP draft layer | Basalt's self-distilled `dense.bin` from [Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata](https://huggingface.co/Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata) `346744eb`, SHA-256 `dfe18647…852d75` (Qwen Community License 1.0), in `mtp/rt-tuned/` beside this checkpoint's own MTP experts |
 | Bundled llama.cpp converter | `3cf03257f219afbe7334045ff7c6a06ac68c627d` |
 | Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) |
 | Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
@@ -59,6 +63,7 @@ models/qwen38-flash-next-uncensored-strata/
   token-embd-bf16.gguf             original BF16 token embeddings
   mmproj-f32.gguf                  CPU vision encoder weights
   mtp/rt/                         matching MTP draft head and draft vocabulary
+  mtp/rt-tuned/                   Basalt's draft layer (dense.bin) + rt's experts.bin, draft_vocab.bin (hard links)
 benchmarks/raw/qwen38-strata/
   2026-10-03/                      download, preparation and validation evidence
   server/engine-1919.log           engine and vision diagnostics
@@ -68,9 +73,11 @@ Models, virtual environments, release archives and generated configs remain
 Git-ignored. The installer records the resolved Python dependency versions in
 `runtime/strata-nvfp4/requirements-*-installed.txt`.
 
-The installer also applies three local changes to the pinned server, and the
-launcher sets two upstream options. (Through 0.2.0 a third change let a
-keyless server bind the LAN; 0.2.13 only warns, so it is gone.)
+The installer also applies two local changes to the pinned server, and the
+launcher sets three upstream options. (Through 0.2.0 another change let a
+keyless server bind the LAN; 0.2.13 only warns, so it is gone. Through 0.2.13
+a third, strata-tool-tags, repaired tool-call parameter tags; the fork fixed it
+in 0.2.15-nvfp4.1, so it is gone too.)
 
 - `serve/server.py`: `reasoning_budget()` accepts `thinking_token_budget` (the
   field pi-ai/DSH clients send) when `reasoning_budget_tokens` and llama.cpp's
@@ -112,19 +119,13 @@ keyless server bind the LAN; 0.2.13 only warns, so it is gone.)
   `scripts/patches/test-strata-think-echo.py` replays the 16 recorded leak
   shapes, whole, a character at a time and in random chunks; run it after
   every port.
-- `serve/frontend.py`, by `scripts/patches/strata-tool-tags.py` (v1, applied
-  after strata-think-echo, whose `feed()` it wraps): inside a `<tool_call>`, a
-  parameter tag whose `>` the model dropped is read as the tag:
-  `<parameter=NAME` before a line break becomes `<parameter=NAME>`, and
-  `</parameter` before a line break becomes `</parameter>`. The repair runs on
-  the raw text before every parser, as upstream's own repairs of `<function=`
-  drift do (#3441, #5276, #5409). Text outside a call is left as written. A
-  call that never closes is not repaired, so it still fails at the client.
-  See [Broken tool-call arguments, 2026-11-12](#broken-tool-call-arguments-2026-11-12).
-  Reported as [sergqwer/strata-nvfp4#24](https://github.com/sergqwer/strata-nvfp4/issues/24).
-  Exit: drop this patch when `test-strata-tool-tags.py <runtime> --stock <release.zip>`
-  shows the stock parser getting no case wrong; check at every upgrade.
-  `scripts/patches/test-strata-tool-tags.py` replays the recorded shapes.
+- strata-tool-tags (2026-11-12 to 11-23, not applied any more): inside a
+  `<tool_call>`, a parameter tag whose `>` the model dropped was read as the
+  tag. Reported as [sergqwer/strata-nvfp4#24](https://github.com/sergqwer/strata-nvfp4/issues/24)
+  and fixed by the fork in 0.2.15-nvfp4.1; its exit rule was met on 11-23 (the
+  stock parser gets 0 of 6 recorded cases wrong). `scripts/patches/test-strata-tool-tags.py`
+  still replays the recorded calls through the installed parser at every
+  upgrade. See [Broken tool-call arguments, 2026-11-12](#broken-tool-call-arguments-2026-11-12).
 - `"reasoning_close_retry": true` in the launcher's config (upstream #1053,
   opt-in since 0.1.40.2): a reply that ends on its end-of-turn token still
   inside the thinking, with no answer and no tool call, is continued once with
@@ -138,6 +139,11 @@ keyless server bind the LAN; 0.2.13 only warns, so it is gone.)
   0.2.13 returns a call there as text (upstream #3075), where 0.2.0 returned a
   call. That is kept on purpose; see
   [Tool calls in requests without tools, 2026-11-12](#tool-calls-in-requests-without-tools-2026-11-12).
+- `"drafting": "mtp"` in the launcher's config (since 0.2.15-nvfp4.2): the
+  server's drafting policy keeps the drafter arguments the launcher writes.
+  Without it the fork's Auto may rewrite them, and whether it does depends on
+  how it reads this model's GGUF header (see
+  [Upgrade and drafter choice, 2026-11-23](#upgrade-and-drafter-choice-2026-11-23)).
 
 Reruns skip the changes once present.
 
@@ -200,7 +206,7 @@ The launcher runs in the foreground. Its defaults are:
 | KV | Rotated INT8 with elastic growth |
 | Experts | Pinned CPU RAM with an automatic GPU expert cache |
 | VRAM reserve | 2,048 MiB |
-| MTP | Matching fine-tune head, speculative window 4, minimum probability 0.5; draft vocabulary English/code + Cyrillic + CJK (124,737 tokens) |
+| MTP | Basalt's self-distilled draft layer with this checkpoint's MTP experts, two-stage draft head (`--mtp-head proxy`), cumulative window rule (`--mtp-cum auto`), window 8; draft vocabulary English/code + Cyrillic + CJK (124,737 tokens). Until 2026-11-23: the checkpoint's own head, window 4, minimum probability 0.5 |
 | Vision | CPU encoder, at most 1,024 image tokens |
 
 All Flash launchers now default to port 1919. Stop the current backend before
@@ -1155,6 +1161,137 @@ Rollback: stop the server and re-extract
 `runtime/strata-nvfp4-v0.2.0-beta-nvfp4.3-windows-x64.zip` over the runtime.
 Then restore the previous installer pin, launcher and strata-think-echo v4
 from Git and run the installer, which re-applies its patches.
+
+## Upgrade and drafter choice, 2026-11-23
+
+Runtime 0.2.13-nvfp4.1 → [0.2.15-nvfp4.7](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.15-nvfp4.7)
+(`4442f2d53`, engine `9bff87b4`, reports 0.1.61; release SHA-256
+`84bd404b…`), the fork's port to upstream 0.2.15 plus six releases of its own:
+the #24 fix, DFlash2 for NVFP4 (nvfp4.2), KV streaming by default (nvfp4.3),
+RTX 50 kernels and Basalt's MTP drafting (nvfp4.4, nvfp4.5) and two-GPU
+pinning fixes (nvfp4.6, nvfp4.7). The fork measured its drafters only on its
+GPTQ pack and says "not measured" for NVIDIA NVFP4 packs like this one, so
+the drafter was chosen here in one session. Staged, checked without the GPU,
+four drafter arms on 127.0.0.1:1921 with 1919 stopped, then upgraded in place
+with the winner. Curated:
+[strata-0215-drafters.json](../benchmarks/qwen38_flash_next/2026-11-23/strata-0215-drafters.json);
+raw: `benchmarks/raw/qwen38-strata/2026-11-23/`.
+
+| 5090 alone, `parallel` 1 | 0.2.13 (11-12) | A: MTP as before | B: Basalt drafting | C: B + Basalt's layer | D: DFlash2 |
+|---|---:|---:|---:|---:|---:|
+| Chinese / English chat decode, tok/s | 170.7 / 175.0 | 202.9 / 199.8 | 209.0 / 214.1 | **216.4 / 215.6** | 170.0 / 196.3 |
+| 4K prompt read / decode, tok/s | 2,345 / 167.7 | 2,588 / 208.0 | 2,634 / 223.9 | **2,607 / 229.1** | 2,568 / 199.2 |
+| 128K prompt read / decode, tok/s | 8,450 / 160.7 | 11,017 / 200.6 | 10,952 / 218.4 | **10,982 / 213.2** | 10,908 / 194.0 |
+| C1 wall tok/s (C2 total, queued) | 155.7 (158.5) | 179.3 (180.1) | 186.5 (194.1) | **190.8 (194.5)** | 166.3 (169.9) |
+| Two agents switching 32K histories, s per turn | 0.89 | 0.73 | 0.73 | **0.73** | 0.75 |
+| Drafts accepted | — | 67.7% | 73.3% | **77.0%** | 68.8% |
+| GPU expert slots | 7,950 | 8,282 | 8,367 | **8,367** | 8,385 |
+| Retrieval, cache, smoke, `</think>` 12/12 | pass | pass | pass | **pass** | pass |
+| Exact answers / long thinking | 12/12 / 1/3 | 12/12 / 2/3 | 12/12 / 2/3 | **12/12 / 2/3** | 12/12 / 2/3 |
+
+- A: `--mtp mtp/rt --spec 4 --spec-min-p 0.5`, the launcher's drafter until
+  now. B: `--mtp mtp/rt --spec 8 --mtp-head proxy --mtp-cum auto` (the fork's
+  Auto for its own sets: a two-stage draft head and Basalt's cumulative window
+  rule, thresholds 0.403:0.288 on this PC). C: B over `mtp/rt-tuned`, Basalt's
+  self-distilled layer. D: DFlash2 by name, the stock pinned pack with the
+  Q4_0 selector, window 6, confidence 0.5, this model's CJK draft vocabulary.
+- B ran twice (the second run was meant as C, but its tuned-layer variable
+  reached only the engine, not the server that chooses the layer). Chat decode
+  differed by 0.4%, the 4K/128K decode by 2–4%.
+- Rule set beforehand: the fastest arm on the chat probes with every check
+  passing; under 3% goes to the simpler arm. C is +3.7% over B on Chinese chat
+  (the live workload) and +0.8% on English, and accepts 77% of drafts against
+  73%, which explains the gain. DFlash2 is slower than even A here (Chinese
+  170). It was trained on the original Qwen; why it drafts this model worse
+  than the MTP was not looked into.
+- The upgrade alone (A against 0.2.13) is +19% / +14% chat, +24% / +25% at
+  4K / 128K decode, +30% on the 128K prompt, 0.73 s per agent switch, 332
+  more expert slots. Long thinking went from 1/3 to 2/3.
+
+Production after the in-place upgrade, the launcher's own config (C's flags):
+Chinese / English 215.2 / 219.1, 4K 2,606 / 223.5, 128K 11,056 / 218.5, C1
+192.7 (C2 197.4), 0.73 s per switch, 75.3% accepted, every check passing.
+
+**What the engine now does on this card.** 33 RTX 50 speed switches are on by
+default; the fork lists four of them as changing rounding and measures 96%
+top-token agreement with its base engine, about what two runs of that engine
+agree with each other. `STRATA_NVFP4_SM120=0` in the config's env turns them
+all off. The early hyper-connection read behind fork #31's garbage output on
+smaller RTX 50 cards is off by default since nvfp4.5 and not among them. KV
+streaming is on: 32,768 cells of each attention layer stay in VRAM and the
+whole K/V is pinned in RAM (3.09 GiB at 262,144), so a growing conversation no
+longer takes VRAM from the expert cache. That growth and its expert moves were
+the 62 s first-token stall of 10-22 (see
+[First-token stalls](#first-token-stalls-in-shared-use-2026-10-22-observed-nothing-changed));
+whether it is gone in shared use is not yet observed.
+
+**Checked without the GPU.**
+- Converters: `prepare-qwen38-strata.py`'s files changed only their gguf
+  library plumbing (`_paths.gguf_lib`); the bundled llama.cpp, the expert
+  profile, `draft_vocab.bin` and `requirements-serve.txt` are byte-identical.
+  The prepared assets are reused. The preparation script had refused every
+  runtime but 0.1.39 since 10-08; it now takes the releases the installer
+  checked, and its new `mtp_tuned` step fetches Basalt's layer through the
+  fork's own pinned downloader.
+- Patches: the `thinking_token_budget` alias anchor and strata-think-echo v5
+  apply unchanged; v5 passes 48 of 48 replays and the stock parser still gets
+  6 of 16 leak shapes wrong. strata-tool-tags is dropped: the stock parser
+  gets 0 of 6 recorded cases wrong, and the installed server passes all 18
+  runs of its replay.
+- The fork's `serve` suite at `4442f2d53`, stock: 1,650 pass, 5 fail, all in
+  `test_vision_cpu_fallback.py` (Windows file locks on a temporary engine log;
+  a different set fails each run). Patched (production's `server.py` and
+  `frontend.py`): 1,647 pass, 14 fail counting subtests. Beside those flakes,
+  only strata-think-echo's known costs: the answer held back for 512
+  characters (`StatusHandover`, whose 40-character answer never streams
+  mid-way; the abort fix it guards, #266, is server code the patch does not
+  touch), a stop string caught late (`StopStrings`, 4 subtests),
+  `reasoning_tokens` counting the close's newline, and outputs that end on, or
+  close right after a quote with, a `</think>` (3 tests, 2 subtests). The same
+  classes failed at 0.2.13; DeepSeek-V4.1's close test is gone with DeepSeek.
+- The fork's drafting policy cannot read this model's GGUF header: it stops at
+  the first string array (`general.tags`, before the size keys), so it takes
+  the file for "another size of the family". It then refuses DFlash2 by name
+  and leaves Auto off. Arms B, C and D ran with the reader fixed in the staged
+  copy only; production does not need it, because the launcher writes its
+  drafter arguments itself and sets `"drafting": "mtp"` (the stock policy then
+  passes them through unchanged, checked). Draft fork issue:
+  `docs/drafts/strata-nvfp4-gguf-facts-string-array.md` (not posted).
+
+**Behaviour that changes for clients.** Tool-argument `True` / `False` follow
+upstream's #5979 rules (a declared boolean takes any case; elsewhere text stays
+text). A slipped parameter tag is repaired by the fork itself, and an open
+value no longer collects 64 `<|im_end|>`.
+
+**Not taken here.** Pictures read inside the engine (`"in_engine": true` in
+the config's `vision` section: 631 against 1,352 ms to the first token for a
+329-token picture in the fork's measurement) is a separate change, untested
+here.
+
+**How it was run** (about 30 minutes on the GPU; every Strata server stopped):
+
+```powershell
+python .\scripts\benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-0.2.15-nvfp4.7 --candidate-only --candidate-set 'drafting="mtp"' --output benchmarks/raw/qwen38-strata/2026-11-23/drafters/A-mtp
+# B: drafting="auto"; C: the same with STRATA_MTP_TUNED_DIR set in the harness's own environment; D: drafting="dflash2"
+scripts\setup-strata-runtime.ps1
+python .\scripts\prepare-qwen38-strata.py
+python .\scripts\benchmark-qwen38-strata-ab.py --output benchmarks/raw/qwen38-strata/2026-11-23/upgrade
+```
+
+The staged runtime had been unpacked into `runtime/strata-nvfp4-0.2.15-nvfp4.7`
+with its own `.venv-serve` and the installer's two patches, as `-Stage` does.
+The upgraded runtime's engine, `server.py`, `frontend.py` and expert profile
+are byte-identical to the staged one; its `drafting.py` is the release's own.
+The staged runtime and the DFlash2 pack were deleted afterwards. To repeat arm
+D, run `drafting_fetch.ensure(<model dir>)` and `drafting_fetch.convert_selector(<model dir>)`
+from the runtime folder (1.2 GB download, pinned and hash-checked, into
+`<model>/dflash2/`), and fix `gguf_facts` as in the draft issue.
+
+Rollback: stop the server and re-extract
+`runtime/strata-nvfp4-v0.2.13-nvfp4.1-windows-x64.zip` over the runtime. Then
+restore the previous installer pin, launcher, harness and preparation script
+from Git and run the installer, which re-applies its patches (strata-tool-tags
+with them).
 
 ## Original-Qwen GPTQ pack A/B, 2026-11-12 (not switched)
 

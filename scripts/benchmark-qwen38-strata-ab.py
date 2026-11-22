@@ -86,7 +86,7 @@ def check_runtime(runtime: str) -> list:
     if 'req.get("thinking_token_budget")' not in read(rt / "serve" / "server.py"):
         problems.append(f"{runtime}: no thinking_token_budget alias")
     # the versions the workspace's frontend patches write (they change with each port)
-    for patch in ("strata-think-echo.py", "strata-tool-tags.py"):
+    for patch in ("strata-think-echo.py",):
         mark = re.search(r'^MARK = "(.+)"$', read(SCRIPTS / "patches" / patch), re.M).group(1)
         if mark not in read(rt / "serve" / "frontend.py"):
             problems.append(f"{runtime}: no {mark.removeprefix('# local: ')}")
@@ -278,6 +278,12 @@ def main():
                 status = get("/v1/status")
                 log(f"{arm}: ready in {time.time() - t:.0f} s, engine {status.get('engine')}")
                 results[arm] = {"engine": status.get("engine"), "probes": probes(out, engine_log)}
+                try:
+                    totals = get("/metrics", timeout=30).get("totals", {})
+                except Exception:  # noqa: BLE001 - the acceptance is extra, not a probe
+                    totals = {}
+                if totals.get("drafts_offered"):
+                    results[arm]["drafts_accepted"] = round(totals["drafts_accepted"] / totals["drafts_offered"], 3)
             finally:
                 stop(proc)
         results.setdefault(arm, {}).update(summarize(out))
@@ -286,7 +292,7 @@ def main():
             "bench4k_decode_tok_s", "bench128k_prefill_tok_s", "bench128k_decode_tok_s", "bench128k_retrieval",
             "c1_tok_s", "c2_total_tok_s", "c2_stream_engine_decode_tok_s",
             "cache_passed", "cache_switch_wall_s_mean", "smoke_passed", "think_tags", "long_thinking", "exact_answers",
-            "exact_answers_wrapped_up", "error"]
+            "exact_answers_wrapped_up", "drafts_accepted", "error"]
     lines = ["| | " + " | ".join(arms) + " |", "|---|" + "---:|" * len(arms)]
     lines += [f"| {k} | " + " | ".join(str(results.get(a, {}).get(k, "")) for a in arms) + " |" for k in keys]
     (args.output / "summary.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
