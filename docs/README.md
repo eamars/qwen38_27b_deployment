@@ -31,8 +31,10 @@ Read the documents in this order when operating the workspace:
     RTX 5090 + 4090 TP2+EP2, 262K capacity and a completed 128K cold request:
     31.16 token/s average decode, retained launch evidence, and untested placement proposals.
 14. [Native Windows Strata Flash-Next deployment](qwen38-flash-next-strata.md) —
-    pinned ModelOpt checkpoint, workspace layout, vision/MTP, long-output and
-    multi-GPU measurements, plus two-agent tool/cache tests and Asuna findings.
+    the live port 1919: configuration in force, pins, local patches, the upgrade
+    procedure, benchmarks per update, decisions and open items. The full
+    per-upgrade record to 2026-11-23 is
+    [archived](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md).
 
 The [historical Gemma 4 26B RTX 4090 runbook](gemma4-26b-4090-vision-mtp.md)
 retains the retired profile and its measured validation. The

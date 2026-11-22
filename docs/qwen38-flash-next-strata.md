@@ -1,162 +1,121 @@
-# Qwen3.8 Flash-Next Strata NVFP4 on native Windows
+# Qwen3.8 Flash-Next on Strata (RTX 5090, native Windows)
 
-This deployment uses the RTX 5090 through the native Windows Strata engine.
-Status on 2026-10-03: verified through shared Flash port 1919 with the
-262,144-token profile, CPU vision and MTP. The launcher now defaults to LAN
-binding, matching the older Flash scripts. The longest tested input was
-249,995 tokens, followed by a successful cached repeat.
-On 2026-10-06 the runtime moved to 0.1.39-nvfp4.3, the MTP draft vocabulary
-gained the CJK scripts and the conversation cache grew to 16 slots; see
-[Upgrade and tuning, 2026-10-06](#upgrade-and-tuning-2026-10-06). On
-2026-10-08 it moved to 0.1.40.2-nvfp4.1: 7–17% faster prompts and decode on
-the same requests; see [Upgrade, 2026-10-08](#upgrade-2026-10-08). On
-2026-10-10 it moved to 0.1.41-nvfp4.4: another 7–11% faster chat; see
-[Upgrade, 2026-10-10](#upgrade-2026-10-10). On 2026-10-15 it moved to
-0.1.44.1-nvfp4.1: chat level, 128K +4%, and the conversation-cache fixes; see
-[Upgrade, 2026-10-15](#upgrade-2026-10-15). On 2026-10-22 it moved to
-0.2.0-beta-nvfp4.3 (engine 0.1.45.3): chat decode +4%, the rest level; see
-[Upgrade, 2026-10-22](#upgrade-2026-10-22). On 2026-11-12 it moved to
-0.2.13-nvfp4.1 (engine 0.1.59): speed level, every check passing; see
-[Upgrade, 2026-11-12](#upgrade-2026-11-12). On 2026-11-23 it moved to
-0.2.15-nvfp4.7 (engine 0.1.61) with the MTP and Basalt's drafting: chat decode
-+26% (215 against 171 tok/s), 128K prompt +31%; see
-[Upgrade and drafter choice, 2026-11-23](#upgrade-and-drafter-choice-2026-11-23).
-Earlier measurements below were made on earlier runtimes.
+The shared Flash endpoint, port **1919**, serves the OrcaRouter Qwen3.8-Flash-Next uncensored ModelOpt NVFP4
+checkpoint through the [sergqwer/strata-nvfp4](https://github.com/sergqwer/strata-nvfp4) fork of Strata. Asuna,
+Xiaoman and the DSH host at `192.168.2.10` use it live. This page is the current operating record. The full
+per-upgrade narratives from 2026-10-03 to 2026-11-23 are kept verbatim in
+[the archived runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md).
 
-It follows this workspace's normal layout: model assets in `models/`, the
-isolated runtime in `runtime/`, operational commands in `scripts/`, and raw
-validation evidence in `benchmarks/raw/qwen38-strata/`.
+**Current state (2026-11-23):** runtime 0.2.15-nvfp4.7 (engine 0.1.61), MTP with Basalt's drafting, KV streaming,
+one request at a time, conversation cache 24 GiB / 16 slots. Chinese / English chat decodes at 215 / 219 tok/s, a
+128K prompt reads at 11,056 tok/s. See [Benchmarks per update](#benchmarks-per-update).
+
+## Configuration in force
+
+Written by `scripts/start-qwen38-flash-next-uncensored-strata-vision.ps1` into
+`runtime/strata-nvfp4/config/workspace-1919.json` at every start. Snapshot of the 2026-11-23 start:
+[strata-0215-config-1919.json](../benchmarks/qwen38_flash_next/2026-11-23/strata-0215-config-1919.json).
+
+| Setting | Value |
+|---|---|
+| Endpoint | `http://127.0.0.1:1919/v1`, bound to `0.0.0.0`; LAN clients use `http://192.168.2.13:1919/v1` |
+| Served model name | `qwen38-next-uncensored-strata-vision`; other names are accepted (Asuna sends its own model ID) |
+| GPU | RTX 5090 alone, UUID `GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0`; the 4090 is not used |
+| Context | 262,144 tokens (`Native256K`); `-Profile Short4K` gives 8,192 |
+| Active requests | 1 (`parallel` 1); further requests queue |
+| K/V | INT8, KV streaming: 32,768 cells per attention layer in VRAM, the whole K/V in 3.09 GiB of pinned RAM |
+| Experts | 63.28 GiB loaded into RAM, part of it pinned for the GPU; automatic GPU expert cache (8,367 slots); VRAM reserve 2,048 MiB |
+| Drafter | MTP: Basalt's draft layer (`mtp/rt-tuned`), `--spec 8 --mtp-head proxy --mtp-cum auto`, CJK draft vocabulary (124,737 tokens), `"drafting": "mtp"` |
+| Conversation cache | 24,576 MiB host RAM, 16 parked conversations, physical RAM floor 2,560 MiB |
+| Vision | CPU encoder (`mmproj-f32.gguf`), at most 1,024 image tokens per picture |
+| RTX 50 kernels | the fork's 33 default speed switches; `STRATA_NVFP4_SM120=0` in the config's `env` turns them off |
+| Sampling | the model card's per thinking state when a request names none (since 0.2.0): thinking 1.0 / 0.95 / top-k 20; no thinking 0.7 / 0.8 / 20, presence penalty 1.5 |
+
+Server options the launcher sets, each for a reason:
+
+| Option | Why |
+|---|---|
+| `"reasoning_close_retry": true` | A reply that ends inside its thinking with no answer and no tool call is closed once and continued, so an agent turn gets an answer instead of empty content (upstream #1053). |
+| `"undeclared_tool_calls": "call"` | In a request that declares tools, a well-formed call to an undeclared tool reaches the client as a call (0.2.0's behaviour) instead of text that ends the agent's turn. A request that declares no tools gets such a call back as text, on purpose (owner, 2026-11-12); Asuna owns the race that sent tool-less requests. |
+| `"drafting": "mtp"` | Keeps the launcher's drafter arguments as written. The fork's drafting policy misreads this model's GGUF header ([Niko1221/Strata#6695](https://github.com/Niko1221/Strata/issues/6695)); without the key its Auto could rewrite them if that is ever fixed. |
+| `"update_check": false` | The daily notice names `update.cmd`, which unzips over `serve\` and drops the local patches. Upgrades go through `setup-strata-runtime.ps1`. |
+| `"anthropic_thinking": "on_request"` | The Anthropic API thinks only when a request asks for it. |
+
+Launcher switches: `-Stop`, `-DryRun`, `-NoMtp`, `-Port`, `-BindAddress 127.0.0.1` (local only), `-Parallel N`,
+`-ConversationCacheMiB` / `-ConversationCacheSlots`, `-VramReserveMiB` (1,024–16,384), `-RamBudgetGiB` (the fork's
+low-RAM mode), `-GpuMode LayerSplit | ExpertHelper` (measured slower; see [Decisions](#decisions-that-hold)). The
+launcher runs in the foreground; the owner starts and stops 1919 (Asuna/Xiaoman depend on it). `-Stop` waits up to
+30 s while the engine releases its pinned RAM. `STRATA_API_KEY` is optional; when set, clients must send it.
 
 ## Pinned inputs
 
 | Input | Pin |
 |---|---|
-| Runtime | [sergqwer/strata-nvfp4 v0.2.15-nvfp4.7](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.15-nvfp4.7), commit `4442f2d53`; the engine reports itself as 0.1.61 (until 2026-11-23: v0.2.13-nvfp4.1, `b08a70078`; until 2026-11-12: v0.2.0-beta-nvfp4.3, `57293b8e`; until 2026-10-22: v0.1.44.1-nvfp4.1, `3fa66b43`; until 2026-10-15: v0.1.41-nvfp4.4, `ec1ea2d0`; until 2026-10-10: v0.1.40.2-nvfp4.1, `d147ca4f`; until 2026-10-08: v0.1.39-nvfp4.3, `b17e5ef`; until 2026-10-06: v0.1.37-nvfp4.2, `69a60f5`) |
-| Windows release SHA-256 | `84bd404b27b8a3982538294d9547a25fd1c3e483c749856a275a9a8cabed5759` |
+| Runtime | [strata-nvfp4 v0.2.15-nvfp4.7](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.15-nvfp4.7), commit `4442f2d53`, engine 0.1.61 |
+| Release zip SHA-256 | `84bd404b27b8a3982538294d9547a25fd1c3e483c749856a275a9a8cabed5759` |
 | Engine SHA-256 | `9bff87b4ee5a85c479d522fda95d8c48b649df1b74866598377e23adf78fae66` |
-| MTP draft layer | Basalt's self-distilled `dense.bin` from [Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata](https://huggingface.co/Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata) `346744eb`, SHA-256 `dfe18647…852d75` (Qwen Community License 1.0), in `mtp/rt-tuned/` beside this checkpoint's own MTP experts |
 | Bundled llama.cpp converter | `3cf03257f219afbe7334045ff7c6a06ac68c627d` |
-| Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) |
-| Checkpoint revision | `f24d2b68ff2814f24455ae86717be276619b5664` |
-| Source download | 220 files, 135,253,671,102 bytes (125.965 GiB) |
+| Checkpoint | [jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4](https://huggingface.co/jpezzulli/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-ModelOpt-NVFP4) `f24d2b68ff2814f24455ae86717be276619b5664`: 220 files, 135,253,671,102 bytes ([manifest](qwen38-strata-checkpoint-manifest.json)) |
+| MTP draft layer | Basalt's self-distilled `dense.bin` from [Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata](https://huggingface.co/Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata) `346744eb`, SHA-256 `dfe18647…852d75`, Qwen Community License 1.0 |
 
-The retired FreeToken model under WSL used compressed-tensors NVFP4 and a
-different PLE representation. This installation uses the fork's documented
-ModelOpt checkpoint and converters. Its source checkpoint and generated assets
-are independent of the FreeToken runtime.
+Earlier runtimes, each upgraded in place: 0.1.37-nvfp4.2 (`69a60f5`, 10-03), 0.1.39-nvfp4.3 (`b17e5ef`, 10-06),
+0.1.40.2-nvfp4.1 (`d147ca4f`, 10-08), 0.1.41-nvfp4.4 (`ec1ea2d0`, 10-10), 0.1.44.1-nvfp4.1 (`3fa66b43`, 10-15),
+0.2.0-beta-nvfp4.3 (`57293b8e`, engine 0.1.45.3, 10-22), 0.2.13-nvfp4.1 (`b08a70078`, engine 0.1.59, 11-12). Their
+release zips stay in `runtime/` for rollback.
 
-## Locations
+## Files
 
 ```text
-runtime/strata-nvfp4/
-  engine/                         pinned engine, CPU vision encoder, CUDA DLLs
-  .venv-convert/                   checkpoint conversion dependencies
-  .venv-serve/                     small Python API server environment
-  config/workspace-1919.json       generated by the workspace launcher
-models/qwen38-flash-next-uncensored-strata/
-  checkpoint/                     complete pinned Hugging Face checkpoint
-  checkpoint-manifest.json         source hashes and download completion state
-  preparation.json                converter versions, output sizes, completed stages
-  orca-nvfp4.gguf                  NVFP4 experts and Q8/BF16 dense weights
-  pack/                           native expert pack, dense tensors, tokenizer
-  ple-fp8.gguf                     original FP8 PLE bytes, read from disk
-  token-embd-bf16.gguf             original BF16 token embeddings
-  mmproj-f32.gguf                  CPU vision encoder weights
-  mtp/rt/                         matching MTP draft head and draft vocabulary
-  mtp/rt-tuned/                   Basalt's draft layer (dense.bin) + rt's experts.bin, draft_vocab.bin (hard links)
-benchmarks/raw/qwen38-strata/
-  2026-10-03/                      download, preparation and validation evidence
-  server/engine-1919.log           engine and vision diagnostics
+runtime/strata-nvfp4/                pinned release, upgraded in place (Git-ignored)
+  engine/                            strata.exe, strata-vision.exe, CUDA DLLs, BUILD.json
+  .venv-convert/  .venv-serve/       converter and server environments
+  config/workspace-1919.json         written by the launcher
+runtime/strata-nvfp4-v<version>-windows-x64.zip   every pinned release, for rollback
+models/qwen38-flash-next-uncensored-strata/       (Git-ignored, 317 GiB with the checkpoint)
+  checkpoint/  checkpoint-manifest.json           verified source, kept
+  preparation.json                                completed preparation steps and output sizes
+  orca-nvfp4.gguf  pack/                          NVFP4 experts, Q8/BF16 dense weights, tokenizer
+  ple-fp8.gguf  token-embd-bf16.gguf              original FP8 PLE and BF16 embeddings
+  mmproj-f32.gguf                                 CPU vision encoder
+  mtp/rt/                                         the checkpoint's MTP layer and the CJK draft vocabulary
+  mtp/rt-tuned/                                   Basalt's dense.bin + rt's experts.bin, draft_vocab.bin (hard links)
+benchmarks/raw/qwen38-strata/                     raw evidence (Git-ignored); server/engine-1919.log is the live log
+benchmarks/qwen38_flash_next/<date>/              curated results, one record per update (tracked)
 ```
 
-Models, virtual environments, release archives and generated configs remain
-Git-ignored. The installer records the resolved Python dependency versions in
-`runtime/strata-nvfp4/requirements-*-installed.txt`.
+## Local patches to the release
 
-The installer also applies two local changes to the pinned server, and the
-launcher sets three upstream options. (Through 0.2.0 another change let a
-keyless server bind the LAN; 0.2.13 only warns, so it is gone. Through 0.2.13
-a third, strata-tool-tags, repaired tool-call parameter tags; the fork fixed it
-in 0.2.15-nvfp4.1, so it is gone too.)
+`setup-strata-runtime.ps1` applies two changes to the pinned server and refuses a runtime whose anchors moved.
+Reruns skip a change already present.
 
-- `serve/server.py`: `reasoning_budget()` accepts `thinking_token_budget` (the
-  field pi-ai/DSH clients send) when `reasoning_budget_tokens` and llama.cpp's
-  `thinking_budget_tokens` (read since 0.2.13) are absent. The
-  launcher refuses to start a server without it.
-- `serve/frontend.py`, by `scripts/patches/strata-think-echo.py` (v5): the
-  model writes `</think>` as one token whether it ends its thinking or quotes
-  the tag, and the stock parser switches to the answer at the first one
-  (upstream #537, #1053). Since 0.1.42 upstream keeps a tag in the reasoning
-  only when it follows `"`, `'` or a backtick and no line break follows it
-  (#1526); this model quotes it after a space (63 of 65 recorded quotes) or a
-  CJK character (2), so the stock 0.1.44.1 parser still leaks 10 of the 14
-  recorded leaked replies. Uncaught, a quoted tag leaks the
-  rest of the reasoning, a stray `</think>` and the reply written twice into
-  `content`. The model's own close ends its line, and starts it or is followed
-  by a blank line (`\n</think>\n\n`, or `text</think>\n\n`): on 0.1.39, 420 of
-  420 real closes followed a newline, and none of 13 recorded quotes was
-  followed by a blank line. While the model thinks, any other `</think>` is
-  a quote and stays reasoning. If the reply then stops still thinking, the
-  text after the last quoted tag becomes the answer. In the answer, a
-  `</think>` alone on its line (`X\n</think>\n\nX`) is decided by what
-  follows it. The answer's first 512 characters are held back: if more answer
-  follows such a tag there, the text before it was more thinking and moves to
-  the reasoning; if a tool call or the end follows, it was the answer and only
-  the tag is dropped. A later one is dropped. A `</think>` that starts or sits
-  inside a line of the answer is the model quoting it and stays text. Earlier
-  versions cut replies in half twice on live checks: v1 at a mid-sentence
-  quote, v3 at a quote that started a line. Costs, seen in the fork's
-  own tests: a thinking reply's answer streams only after 512 characters or
-  its end, a stop string inside that window stops the engine late, and
-  `reasoning_tokens` counts the newline after the close. v5 (0.2.13) keeps two
-  upstream additions working under the wrapper: #4077 still restarts the
-  answer's code-fence tracking at a repeated `</think>` (a fence the thinking
-  opened would otherwise hide the tool call after it) but hands the tag to the
-  rule above instead of dropping it, and a `</think>` right after a call
-  written in the thinking (`</tool_call>`) is the close. A family whose own
-  close runs straight into the answer (DeepSeek-V4.1's `text</think>Text`)
-  reads as a quote; this server runs Qwen3.8 only.
-  `scripts/patches/test-strata-think-echo.py` replays the 16 recorded leak
-  shapes, whole, a character at a time and in random chunks; run it after
-  every port.
-- strata-tool-tags (2026-11-12 to 11-23, not applied any more): inside a
-  `<tool_call>`, a parameter tag whose `>` the model dropped was read as the
-  tag. Reported as [sergqwer/strata-nvfp4#24](https://github.com/sergqwer/strata-nvfp4/issues/24)
-  and fixed by the fork in 0.2.15-nvfp4.1; its exit rule was met on 11-23 (the
-  stock parser gets 0 of 6 recorded cases wrong). `scripts/patches/test-strata-tool-tags.py`
-  still replays the recorded calls through the installed parser at every
-  upgrade. See [Broken tool-call arguments, 2026-11-12](#broken-tool-call-arguments-2026-11-12).
-- `"reasoning_close_retry": true` in the launcher's config (upstream #1053,
-  opt-in since 0.1.40.2): a reply that ends on its end-of-turn token still
-  inside the thinking, with no answer and no tool call, is continued once with
-  the thinking closed, so the client gets an answer instead of empty content.
-  A reply that quoted `</think>` and then stopped is closed this way too,
-  before strata-think-echo's fallback applies.
-- `"undeclared_tool_calls": "call"` in the launcher's config (since 0.2.13): in a
-  request that declares tools, a well-formed call to one it did not list
-  reaches the client as a call, as through 0.2.0, instead of as text that ends
-  an agent's turn. It does not cover a request that declares no tools at all:
-  0.2.13 returns a call there as text (upstream #3075), where 0.2.0 returned a
-  call. That is kept on purpose; see
-  [Tool calls in requests without tools, 2026-11-12](#tool-calls-in-requests-without-tools-2026-11-12).
-- `"drafting": "mtp"` in the launcher's config (since 0.2.15-nvfp4.2): the
-  server's drafting policy keeps the drafter arguments the launcher writes.
-  Without it the fork's Auto may rewrite them, and whether it does depends on
-  how it reads this model's GGUF header (see
-  [Upgrade and drafter choice, 2026-11-23](#upgrade-and-drafter-choice-2026-11-23)).
+1. **`thinking_token_budget` alias** (`serve/server.py`). pi-ai/DSH send the thinking budget under that name; the
+   server reads only `reasoning_budget_tokens` and llama.cpp's `thinking_budget_tokens`. Without it a step can think
+   through all of its output tokens. The launcher refuses to start a server without it. Exit: when upstream reads
+   the name.
+2. **strata-think-echo v5** (`serve/frontend.py`, `scripts/patches/strata-think-echo.py`). The model writes
+   `</think>` as one token whether it ends its thinking or quotes the tag. The stock parser switches to the answer
+   at the first one, so a quoted tag leaks the rest of the reasoning and the reply twice into `content` (upstream
+   #537, #1053). The model's own close is `\n</think>\n\n` or `text</think>\n\n` (420 of 420 recorded closes followed
+   a newline; no recorded quote was followed by a blank line), so the patch takes only that as the close while
+   thinking, and decides a `</think>` alone on its line in the answer by what follows. Costs, seen in the fork's
+   suite: a thinking reply's answer streams only after 512 characters or its end, a stop string inside that window
+   stops late, `reasoning_tokens` counts the close's newline, and an output that ends on, or closes right after a
+   quote with, a `</think>` is treated as a quote (this model has not produced either). Check at every upgrade:
+   `scripts/patches/test-strata-think-echo.py <runtime> --stock <release.zip>` replays the 16 recorded leak shapes
+   (whole, per character, in random chunks): v5 passes 48 of 48; the stock 0.2.15 parser still gets 6 of 16 wrong.
+   Exit: when the stock parser gets none wrong.
 
-Reruns skip the changes once present.
+Retired patches: the keyless LAN-bind change (through 0.2.0; 0.2.13 only warns) and strata-tool-tags (2026-11-12 to
+11-23; the fork fixed [#24](https://github.com/sergqwer/strata-nvfp4/issues/24) in 0.2.15-nvfp4.1).
+`scripts/patches/test-strata-tool-tags.py <runtime>` still replays those recorded tool calls through the installed
+parser at every upgrade.
 
-Known limitation, not patched: the server reads only `enable_thinking` and
-`reasoning_effort` from a request's `chat_template_kwargs`; any other key is
-dropped, although the template has more (`preserve_thinking`). Clients get the
-template's defaults for the rest. `preserve_thinking` defaults to on, as in the
-model's own template: earlier turns' reasoning stays in the prompt, which keeps
-the prefix stable for the conversation cache (89% of prompt tokens reused over
-400 Asuna requests on 2026-10-08), and also keeps a stray thought the model
-then repeats until the conversation is compacted.
+Known limitation, not patched: the server reads only `enable_thinking` and `reasoning_effort` from a request's
+`chat_template_kwargs`. `preserve_thinking` therefore stays at the template's default, on: earlier turns' reasoning
+stays in the prompt, which keeps the prefix stable for the conversation cache (89% of prompt tokens reused over 400
+Asuna requests, 2026-10-08), and also keeps a stray thought the model may repeat until the conversation is compacted.
 
-## Prepare
+## Prepare, start, check
 
 From the workspace root in PowerShell:
 
@@ -164,1292 +123,137 @@ From the workspace root in PowerShell:
 .\scripts\setup-strata-runtime.ps1
 .\runtime\strata-nvfp4\.venv-convert\Scripts\python.exe .\scripts\stage-qwen38-strata.py
 python .\scripts\prepare-qwen38-strata.py
-```
-
-Staging resumes through Hugging Face's local download cache. It verifies every
-large file against the publisher's LFS SHA-256 and small files against Git blob
-hashes. `checkpoint-manifest.json` is marked complete only after all 220 files
-pass. Preparation requires that manifest and records a stage only after its
-converter exits successfully and its expected outputs exist. A partial stage
-is rerun; completed stages are reused. `--wait-for-download` lets preparation
-wait in another process until staging completes.
-
-The [verified source inventory](qwen38-strata-checkpoint-manifest.json) is
-retained in Git; the complete 125.965 GiB download passed on 2026-10-03.
-
-The release includes the engine, cuBLAS and the CPU vision encoder; compilation
-and a separate CUDA toolkit installation are unnecessary. Conversion uses
-CPU PyTorch. Allow approximately 340 GB for the checkpoint, generated model
-files and MTP intermediates. The source checkpoint is retained locally. The
-completed model directory occupies 316.54 GiB including that checkpoint and
-the MTP intermediates.
-
-## Run
-
-```powershell
-.\scripts\start-qwen38-flash-next-uncensored-strata-vision.ps1 -DryRun
 .\scripts\start-qwen38-flash-next-uncensored-strata-vision.ps1
 ```
 
-The launcher runs in the foreground. Its defaults are:
-
-| Setting | Value |
-|---|---|
-| Endpoint | `http://127.0.0.1:1919/v1` |
-| LAN bind / intended endpoint | `0.0.0.0:1919` / `http://192.168.2.13:1919/v1`; remote connectivity is under investigation |
-| Served model | `qwen38-next-uncensored-strata-vision` |
-| GPU | RTX 5090, UUID `GPU-67921d1c-ee8e-304f-b562-d6f87617c5a0` |
-| Profile | `Native256K`: 262,144 tokens total context |
-| Short profile | `Short4K`: 8,192 total tokens, matching the FreeToken launcher's prompt/output allowance |
-| Active requests | One; Strata serializes requests |
-| Independent conversation cache | 24,576 MiB host RAM budget, 16 parked slots; physical RAM admission floor 2,560 MiB |
-| KV | Rotated INT8 with elastic growth |
-| Experts | Pinned CPU RAM with an automatic GPU expert cache |
-| VRAM reserve | 2,048 MiB |
-| MTP | Basalt's self-distilled draft layer with this checkpoint's MTP experts, two-stage draft head (`--mtp-head proxy`), cumulative window rule (`--mtp-cum auto`), window 8; draft vocabulary English/code + Cyrillic + CJK (124,737 tokens). Until 2026-11-23: the checkpoint's own head, window 4, minimum probability 0.5 |
-| Vision | CPU encoder, at most 1,024 image tokens |
-
-All Flash launchers now default to port 1919. Stop the current backend before
-switching runtimes. `-NoMtp` disables the drafter. `-RamBudgetGiB 40` selects the fork's
-low-RAM mode with a 40 GiB resident budget; zero leaves the engine's normal
-RAM selection in charge. Other applications need enough free RAM and VRAM
-for their own workloads.
-
-The VRAM reserve sizes the automatic expert cache; it is not a guarantee of
-2 GiB free after every allocation. The operating preference is approximately
-1 GiB free, as a **soft** target. The benchmark never cancels a request for
-crossing that target. `-VramReserveMiB` accepts 1,024–16,384 MiB, but the
-validated default remains 2,048 because later buffers consume part of that
-margin.
-
-The launcher also supports two opt-in multi-GPU modes. Stop the current
-instance before switching modes on the same port:
-
-```powershell
-.\scripts\start-qwen38-flash-next-uncensored-strata-vision.ps1 -Stop
-.\scripts\start-qwen38-flash-next-uncensored-strata-vision.ps1 -GpuMode LayerSplit -ConversationCacheMiB 0
-# Alternative experiment, after stopping the preceding instance:
-.\scripts\start-qwen38-flash-next-uncensored-strata-vision.ps1 -GpuMode ExpertHelper -HelperExpertSlots 8000 -ConversationCacheMiB 0
-```
-
-`LayerSplit` uses the 5090 first and the 4090 second, with `-LayerSplit auto`
-by default. `ExpertHelper` keeps the main model execution on the 5090 and
-places an additional expert cache on the 4090. `-SecondaryGpuUuid` selects
-the second card by UUID. Neither mode adds an active request slot. The
-low-RAM budget option is refused with either multi-GPU mode, as required by
-this engine version. Layer splitting also refuses conversation snapshots;
-disable them explicitly for that benchmark. Conversation snapshots were
-validated in Single mode; the helper measurements below predate enabling them.
-The helper's built-in server monitor shows the primary
-GPU; use `nvidia-smi` or the benchmark's samples to inspect both cards.
-
-Stop only the matching Strata server from another PowerShell console:
-
-```powershell
-.\scripts\start-qwen38-flash-next-uncensored-strata-vision.ps1 -Stop
-```
-
-Stopping matches the native Python server's exact per-port config path.
-Upstream's Windows job object ties the engine and vision encoder to that
-server's lifetime. `-Stop -Port 1919` targets that port's deployment.
-The stop command waits up to 30 seconds for those captured child processes
-to finish releasing pinned RAM; the validated stop took 5.73 seconds.
-
-The launcher binds to `0.0.0.0` by default, matching the older Flash scripts.
-The intended fixed LAN endpoint is `http://192.168.2.13:1919/v1`; `.232` is
-the backup adapter's DHCP address, not a replacement deployment address.
-Both interfaces are up at 1 Gbps. Source-bound probes from `.13` fail to resolve
-or reach `.10` and the router `.1`, while `.232` reaches both. The Linux DSH
-host has the correct route and cached MAC for `.13` (`10:ff:e0:bd:db:07`), but
-its capture shows unanswered ARP neighbour probes followed by `FAILED`.
-Both Windows interfaces currently have equal route metrics; source-bound route
-checks nevertheless select the correct primary adapter for `.13`.
-This establishes a neighbour-resolution failure but does not yet distinguish
-the network path from the primary adapter/driver. Strata listens on all
-interfaces and returns model metadata through either address from this PC;
-these local requests do not establish remote reachability.
-`scripts/capture-strata-lan.ps1` provides a bounded ARP-only capture and source-bound
-probes for an Administrator PowerShell. It leaves an existing Packet Monitor
-capture/filter setup alone and saves evidence under `benchmarks/raw/qwen38-strata/network/`.
-The Windows capture remains unverified because the diagnostic session cannot
-access the Packet Monitor driver without elevation.
-`-BindAddress 127.0.0.1` selects local-only access. `STRATA_API_KEY` is optional;
-when set, the upstream server requires clients to send it. The mandatory-key
-launcher guard was removed to match the user's requested older-script behavior.
-The native server uses Python 3.12; its existing Public-profile inbound firewall
-allow rules cover the current network profile. No WSL port forwarding is needed.
-This launcher change was checked with dry runs; the model was left stopped for
-the user to start, so remote-device reachability was not tested in that change.
-
-## Validate
-
-```powershell
-python .\scripts\probe-qwen38-strata.py --output benchmarks/raw/qwen38-strata/2026-10-03/smoke.json
-python .\scripts\probe-qwen38-strata.py --only-long --long-tokens 32000 --output benchmarks/raw/qwen38-strata/2026-10-03/retrieval-32k.json
-```
-
-The probe sends real API requests for arithmetic, streaming, a tool call and
-tool-result continuation, a generated image containing two colored shapes,
-and synthetic retrieval at three positions followed by an identical repeat.
-It saves answers, prompt/decode timings and cached-token counts. These checks
-measure integration and basic retrieval; they are not a broad model-quality
-evaluation or a matched performance comparison against FreeToken.
-
-## Verified results, 2026-10-03
-
-The [curated results](../benchmarks/qwen38_flash_next/2026-10-03/strata-validation.json)
-record the configuration, dependency versions, preparation times, API results
-and timings. Full logs, requests and responses remain under the raw directory.
-
-- All 220 checkpoint files passed their published hashes. The fork's full
-  scale scan checked 73,728 tensors (7.03 GiB of scale bytes): no sign-bit or
-  NaN encodings. Sampled expert repacks matched bit for bit after signed-zero
-  normalization.
-- Both Python environments passed `pip check`. Native engine startup, the
-  actual converters and a second preparation invocation passed; the second
-  invocation reused all completed stages.
-- Both context profiles passed text arithmetic, streamed arithmetic, a parsed
-  tool call and tool-result continuation, and actual image recognition. The
-  image answer identified the red circle and blue square correctly.
-- A separate `reasoning_effort: low` request returned the correct answer and
-  a distinct `reasoning_content` field.
-- Duplicate startup was refused. The updated stop command released the server,
-  engine and vision encoder; restart into the 262K profile passed.
-
-| Profile / input | Actual prompt tokens | Prompt read, seconds | Tokens reused on repeat | Retrieval |
-|---|---:|---:|---:|---|
-| Short4K | 3,988 | 1.969 | 3,981 | passed |
-| Native256K / 32K | 31,987 | 5.410 | 31,980 | passed |
-| Native256K / 128K | 127,986 | 20.171 | 127,979 | passed |
-| Native256K / 250K, fresh server | 249,995 | 45.093 | 249,988 | passed |
-
-Every first request in this table reused zero prompt tokens. The 250K final
-case ran after a fresh server start and decoded its 75-token answer at 91.0
-tokens/s; the repeat decoded at 152.3 tokens/s. Earlier cases can leave useful
-experts in the adaptive GPU cache, so their rates are not directly comparable.
-
-A separate 512-token explanatory completion measured 118.7 decode tokens/s
-(4.312 seconds decoding, 5.302 seconds total). This is one capped completion,
-not a repeated benchmark or a matched FreeToken comparison.
-
-The final memory capture covered stop, startup, the entire 250K request and
-repeat, and the subsequent generation/reasoning probes. Across 309 samples at
-a nominal 500 ms interval, the RTX 5090 had at least 1,101 MiB free. Earlier
-startup tuning briefly reached 804 MiB before the engine shrank its expert
-cache. No inference request failed or ran out of memory. The RTX 4090 was not
-used by this deployment.
-
-Windows refused large-page allocation with error 1450, so the engine used
-4 KiB pages successfully. No system policy, driver or pagefile settings were
-changed. The 262,144-token configured capacity includes input and output;
-the longest tested input was 249,995 tokens. At this initial validation stage,
-overlapping requests and long output were untested; the follow-up below
-addresses those gaps. Long image histories and sustained service load remain
-outside this validation.
-
-## Active requests and previous experiments
-
-The pinned Strata server has **one active request slot**. `/props` reports
-`total_slots: 1`, `/v1/status` reports serving/requested concurrency of one,
-and `Service.run` holds `self.fifo` throughout prefill and generation. More
-HTTP connections can wait, but they do not create additional execution slots.
-The startup message "15 expert-pool workers + the host thread" describes CPU
-expert computation, not 15 simultaneous requests. MTP's four speculative
-tokens are also unrelated to request concurrency.
-
-The user's preferred target is two active requests with approximately 1 GiB
-of free VRAM, treated as a soft target. This release has no setting that
-implements that target. Its optional conversation cache parks histories
-between requests and explicitly does not execute them concurrently. The
-workspace launcher now enables it for the user's higher-priority sequential
-two-agent workload; see the cache results below. Simply
-removing the Python lock would corrupt the shared engine protocol/state.
-Two independent resident instances would each allocate the 63.28 GiB expert
-arena, before Windows and other engine memory; that exceeds this host's
-practical RAM capacity. The shared-arena option is Linux-only and explicitly
-refuses Windows. A separate low-RAM replica design is not validated here.
-
-Relevant workspace history:
-
-- [FreeToken parallel prefill reproduction, September 19](freetoken-parallel-prefill-reproduction-2026-09-19.md):
-  two active requests, 4,600 expert slots, 12 GDN slots, 8K prefill chunks,
-  262K shared KV capacity. An incoming cold 36,919-token prompt caused a
-  **19.891-second** delivery gap in an already-decoding request; cached
-  arrival still caused 3.078 seconds. Minimum free VRAM was 1,153 MiB.
-  The scheduler prioritized prefill; two decoding sequences were one batch,
-  not independently scheduled GPU engines. The deployed default subsequently
-  returned to one active request.
-- [FreeToken PR #447, September 30](freetoken-pr447-local-experiment-2026-09-29.md):
-  TP2+EP2 on the 4090 and 5090, a different RadixArk model, 262K context,
-  131,072 input and 1,023 actual output tokens. Completed-request decode was
-  **31.16 tokens/s**, TTFT 66.066 seconds, effective prefill 1,983.95 tokens/s.
-  That result is historical context, not a matched comparison with Strata's
-  model or layer-split implementation. It did not isolate the bottleneck by GPU.
-
-The earlier Strata retrieval tests above generated only 68–75 output tokens.
-The separate 512-token completion had a short input. Neither established
-long-output performance after a 4K or 128K prompt.
-
-## Prefill, long output and multi-GPU follow-up
-
-The [performance results](../benchmarks/qwen38_flash_next/2026-10-03/strata-performance.json)
-retain complete per-request summaries, token counts, finish reasons, request
-hashes, settings and sampled memory minima. Requests, complete SSE delivery
-timestamps, generated text and engine logs are in
-`benchmarks/raw/qwen38-strata/2026-10-03/performance/`.
-
-All measured configurations kept the same pinned model, 262,144-token context,
-INT8 KV, MTP window 4, temperature zero and disabled reasoning. Input counts
-were exactly 4,096 and 131,072 tokens, with zero reused KV tokens. This does
-not mean the host file cache or adaptive expert cache was cold. Identical
-request bodies across GPU modes were verified by SHA-256. The initial 4K/128K
-matrix had two trials per size for Single and LayerSplit; the helper and the
-final neutral-topic comparison had one trial per size tested.
-
-Engine prefill time covers the engine's prompt path, including its associated
-transfers and cache refill; it is not isolated GPU-kernel time. TTFT is measured
-at the first nonempty streamed content/reasoning event and also includes API
-processing and any queuing. Client decode is `(actual output tokens - 1)`
-divided by the interval from first to last nonempty event. Events are not
-assumed to contain exactly one token. Every request was allowed to finish;
-there was no throughput or VRAM stop threshold.
-
-The inference-handbook workload occasionally ended while discussing literal
-chat/stop-marker syntax. Those shorter completions remain in the results with
-their actual lengths; they are not counted as 4,096-token completions. A
-separate gardening-handbook request avoided that topic and completed exactly
-4,096 output tokens on all three modes. All runs retrieved the three embedded
-codes correctly; this is a basic retrieval check, not a broad quality study.
-
-The overlapping-request reproduction submitted a cold 128K request B after
-request A's 128th nonempty event. A completed all 4,096 output tokens with a
-maximum delivery gap of **78.5 ms**; B remained queued in 63 of 113 status
-samples. B's TTFT was 55.995 seconds, including approximately 33.07 seconds
-outside its engine prefill. Its first output arrived 22.980 seconds after
-A's last output. This demonstrates serialization, not fair two-request
-scheduling: B's prefill starts after A finishes, so there is no simultaneous
-decode-versus-prefill test inside one Strata instance.
-
-[Layer splitting](https://github.com/sergqwer/strata-nvfp4/blob/v0.1.37-nvfp4.2/docs/MULTI_GPU.md)
-worked on the actual 5090/4090 pair. Auto selected layers 0–30 on the 5090
-and 31–47 on the 4090. The second card limited the automatic prompt chunk to
-16,384 tokens, compared with 32,768 on the 5090 alone. Each stage has its own
-weights, session buffers and expert cache; host expert weights remain a
-single arena. Windows capped CUDA pinning of that arena at 8 GiB (six whole
-layers, about 7 GiB actually pinned here), with the remainder kept resident
-via VirtualLock and streamed through staging buffers. Elastic KV growth is
-disabled for multi-GPU modes in this release.
-
-The [expert-helper mode](https://github.com/sergqwer/strata-nvfp4/blob/v0.1.37-nvfp4.2/docs/SECOND_GPU.md)
-also worked, holding 8,000 additional experts / 20.60 GiB on the 4090. It kept
-32K prefill chunks but added per-layer transfers and synchronization. The
-4K/4K-output request's log recorded 44,682 helper launches, 1,045 MiB of
-returned rows, 1.514 seconds staging/launching and 10.921 seconds waiting for
-the helper during decode. These counters identify a substantial overhead;
-they are not a complete per-device bottleneck profile.
-
-Completed 4K-input / 4K-output inference-handbook runs:
-
-| Mode | Trials | Engine prefill, tokens/s | TTFT, seconds | Client decode, tokens/s |
-|---|---:|---:|---:|---:|
-| 5090 alone | 2 | 1,905–1,994 | 2.099–2.188 | 125.0–128.6 |
-| 5090 + 4090 layer split | 2 | 1,465–1,644 | 2.544–2.841 | 125.5–130.8 |
-| 5090 + 4090 expert helper | 1 | 1,610 | 2.600 | 86.1 |
-
-Matched 128K-input / 4K-output gardening-handbook request, one completed trial
-per mode (131,072 input + 4,096 output = 135,168 tokens within the 262K limit):
-
-| Mode | Prefill, seconds | Prefill, tokens/s | TTFT, seconds | Client decode, tokens/s | Total, seconds |
-|---|---:|---:|---:|---:|---:|
-| 5090 alone | 22.281 | 5,883 | 22.672 | 117.8 | 57.435 |
-| 5090 + 4090 layer split | 22.445 | 5,840 | 22.862 | 120.0 | 56.992 |
-| 5090 + 4090 expert helper | 26.035 | 5,034 | 26.485 | 78.1 | 78.888 |
-
-The original single-GPU 128K inference-handbook run also completed 4,096
-output tokens: 22.439 seconds prefill / 5,841 tokens/s, TTFT 22.880 seconds,
-123.3 decode tokens/s. Its second trial ended at 1,757 output tokens. The
-corresponding split trials ended at 2,538 and 1,954 tokens, with 5,571–5,682
-prefill tokens/s. All shorter results remain explicit in the JSON.
-
-These observations support keeping **Single as the default**. The split was
-about 20% slower at 4K prefill on average and delivered essentially similar
-decode speed. On the final 128K request its decode was 1.86% faster and total
-time 0.443 seconds shorter; one trial with different generated text and
-adaptive cache state does not establish a significant advantage. The helper
-was 33.66% slower at decode and 14.42% slower at prefill on that request.
-Neither result establishes that all multi-GPU arrangements are slower.
-Re-measured on 0.1.44.1 with `parallel` 2 at C1 and C2: the split was 8–40%
-slower on every measure; see [Upgrade, 2026-10-15](#upgrade-2026-10-15).
-
-Minimum sampled free VRAM across the measured request phases:
-
-| Mode | 5090 | 4090 |
-|---|---:|---:|
-| Single, initial matrix + final long request | 1,267 MiB | unused by engine |
-| LayerSplit, all long-output runs | 1,365 MiB | 1,477 MiB |
-| ExpertHelper, all long-output runs | 526 MiB | 1,004 MiB |
-
-The helper fell below the soft 1 GiB preference; no request was interrupted
-and no OOM occurred. These samples cover requests, not every startup transient.
-The final default uses `-VramReserveMiB 2048`; the observed minimum is the
-useful headroom measurement, not the reserve flag's value.
-
-The updated launcher was actually used to start LayerSplit and the restored
-Single server. Generated execution arguments/environment also matched the
-manually tested configs for all three modes. RAM-budget/multi-GPU combinations
-are refused before loading. Text, streaming, tool call plus tool-result
-continuation, real image recognition and retrieval/cache reuse passed on all
-three modes. That historical performance run used temporary ports 1921/1922
-and ended on 1920. The subsequent cache investigation moved the deployment
-to the shared Flash endpoint `http://127.0.0.1:1919/v1`; new tests also use
-1919, with configurations run sequentially.
-
-Reproduce the measurements with the model already running:
-
-```powershell
-python .\scripts\benchmark-qwen38-strata.py --output benchmarks/raw/qwen38-strata/local-matrix --concurrency
-python .\scripts\benchmark-qwen38-strata.py --output benchmarks/raw/qwen38-strata/local-long --prompts 131072 --repeats 1 --handbook-topic gardening --run-id strata-long-gardening
-```
-
-Use a fresh output directory for each mode, and `--base-url` for a non-default
-port. Check the actual cached-token and output-token fields before treating a
-run as a cold 4,096-token completion. Full-context capacity remains 262,144;
-two simultaneous active requests were unsupported by 0.1.37. Upstream 0.1.39 adds an
-opt-in `"parallel": N`, which disables the fork's elastic K/V; it is not validated here.
-
-
-## Two independent agent histories and tool checkpoints
-
-The shared Flash endpoint is **`http://127.0.0.1:1919/v1`**. The final
-launcher defaults to **one active request, 24 GiB host RAM conversation cache,
-16 parked slots, Single GPU mode** (since 2026-10-06; 16 GiB and eight slots before). Parked slots store inactive histories;
-the engine still runs one request at a time. Both clients send their complete,
-separate histories to the same endpoint; no separate ports are needed.
-
-This distinction matters: the ordinary six checkpoints contain running state,
-but share the live KV history. With conversation parking disabled, switching
-to an unrelated history invalidates nonmatching checkpoints. The baseline
-reproduced full misses on every return to A or B, although an immediate tool
-result reused 8,116 of 8,157 prompt tokens.
-
-With parking enabled, Strata saves the outgoing running state, checkpoints,
-used KV pages and MTP state to host RAM, then restores the best exact-prefix
-match. Matching uses rendered tokens, images and steering mode; client or
-session names do not reserve a cache partition. Each request still has its
-own 262,144-token context limit. The two histories do not need to fit together
-inside one 262K token window, but their snapshots must fit the RAM budget.
-
-The original comparison below used an 8 GiB budget and four parked slots
-unless stated otherwise. These historical measurements are separate from the
-subsequent increase to 16 GiB and eight slots. Measured on the pinned Windows
-binary with INT8 KV and MTP:
-
-| Test | Result |
-|---|---|
-| Parking disabled, two approximately 8K histories | All four measured return switches missed; 8,157–8,288 prompt tokens reread, 2.30–2.46 s per request |
-| 8 GiB parking, approximately 8K, six tool rounds per agent | All 20 return switches hit; 28–40 tokens reread, 0.46–0.72 s per request |
-| 8 GiB parking, exact 4,096-token initial inputs | All four return switches hit; 28–40 tokens reread, 0.44–0.52 s per request |
-| 8 GiB parking, exact 131,072-token initial inputs, six rounds per agent | All 20 return switches hit; 28–58 tokens reread, 0.92–1.41 s per request; cold requests took approximately 22 s |
-| Installed Asuna DSH adapter, reasoning and streamed tool calls, six rounds per agent | All 22 return switches hit; 27–78 tokens reread, 0.53–1.06 s per request; normal replay metadata survived JSON storage round trips |
-| Waiting parent, approximately 128K per agent, installed DSH adapter | A waited through eight B tool rounds (16 requests), then reused 131,185 tokens and read 33; first token 1.36 s, complete response 1.95 s |
-| Deliberately insufficient 256 MiB snapshot budget | Engine logged skipped snapshots; all return switches missed, while immediate tool results still hit |
-| One parked slot, then an unrelated third request | Two histories worked until the third request evicted a snapshot; returning A and B both missed |
-| Four parked slots, same third-request pattern | Returning A and B reused 8,428 / 8,426 tokens and read only 30 each; 0.48 / 0.49 s |
-| Changed tool description or system prefix | Both changes caused a full miss; unchanged-history control reused 4,330 tokens |
-
-Every tested tool round returned the correct agent-specific private code and
-fixture value. Tools were deterministic local fixtures, not real Asuna action
-tools. The 128K alternating run sampled a minimum **1,273 MiB free VRAM** on
-the 5090 and **26.93 GiB available physical RAM**. Its largest logged snapshot
-was 2.76 GiB. This supports the 1 GiB VRAM soft target for that measured run;
-it is not a hard reservation or a guarantee for other applications.
-A separate observation after the final adapter run was 913 MiB free; the final
-health capture measured 1,061 MiB. Headroom varied around the soft target, and
-no request was cancelled for crossing it.
-
-The configured cache budget is shared by parked snapshots, retained active KV
-buffers and an incoming snapshot during an exchange. It is not an up-front
-16 GiB allocation. Under pressure Strata first drops optional retained buffers,
-then evicts parked entries oldest-first. Superseded versions of one history
-are removed instead of occupying every slot. A snapshot too large for the
-budget, or rejected by the physical RAM admission check, is skipped and the
-next request may prefill again. Restarting the server loses all snapshots.
-The 2,560 MiB physical RAM admission floor is separate from the GPU soft target.
-The original 8 GiB setting was validated for two 128K histories. The current
-16 GiB cap gives auxiliary histories more room, but does not promise that
-eight 128K snapshots fit together. Two histories near the full 262K limit and
-image-heavy snapshots have not been validated to fit either configuration.
-
-These rules are in the pinned upstream [conversation cache implementation](https://github.com/sergqwer/strata-nvfp4/blob/69a60f53914f92871b883e826fbb871949d30c15/include/strata/core/conversation_cache.hpp)
-and [cache documentation](https://github.com/sergqwer/strata-nvfp4/blob/69a60f53914f92871b883e826fbb871949d30c15/docs/DETAILS.md#conversation-cache).
-Whole-conversation parking is incompatible with this release's layer-split
-mode. That is an additional reason to keep Single mode for this workload,
-besides the earlier multi-GPU performance results.
-
-### 16 GiB / eight-slot configuration (2026-10-03 to 2026-10-06)
-
-The launcher defaults and running server were increased to 16,384 MiB and
-eight parked slots on 2026-10-03. The server was restarted on the same port,
-1919, and still reports one active request slot.
-
-A fresh capacity probe filled eight parked slots plus one active history,
-using nine independent 8,201-token prompts and actual model tool calls. All
-nine tool-result continuations hit the cache: 8,240 tokens reused and 41 new
-tokens read each. Every answer returned its own unique code and tool value;
-the engine reported zero evictions. The 18-request run observed 5.57 GiB of
-accounted cache storage, at least 31.04 GiB available physical RAM, and at
-least 1,051 MiB free VRAM on the 5090. The 16 GiB limit was not preallocated.
-
-Evidence: [strata-cache-expanded.json](../benchmarks/qwen38_flash_next/2026-10-03/strata-cache-expanded.json).
-This verifies the increased slot capacity with approximately 8K histories;
-it does not establish capacity for eight simultaneous 128K snapshots.
-
-### Asuna findings and LAN configuration
-
-The inspected project is `C:\workspace\asuna_cognition_core_v2`, using native
-DSH `0.2.0-rc.2` and pi-ai `0.87.1`. Its active profile is
-`.runtime/adr008/home/profiles/asuna-native/cordis.patch.yml`, not the legacy
-local model seed files. Both `asuna-character` and `asuna-action` already
-select the same `qwen38-next-uncensored-freetoken-vision` model ID and port
-1919. That model ID was accepted by the running Strata endpoint in real tests.
-The server advertises its own Strata name in metadata.
-
-**Both saved Asuna providers use `http://192.168.2.13:1919/v1`.** The initial
-localhost-only deployment refused that address. The launcher now defaults to
-`0.0.0.0`, so the existing provider URLs match its LAN configuration on the next
-start. Local clients may also use `http://127.0.0.1:1919/v1`. If
-`STRATA_API_KEY` is set for the server, configure both clients to send it.
-Asuna's saved routes, credentials, sessions and tool permissions were not changed.
-The separate DSH host at `.10` should retain `.13` as the intended fixed endpoint.
-The `.232` address is only a diagnostic workaround candidate; the successful
-same-PC Asuna connection to `.13` does not prove remote reachability through
-that adapter. See the LAN diagnostics above before changing provider URLs.
-
-The source inspection found no unavoidable cache reset from an ordinary tool
-result. Role contexts persist; action sessions are created per operation.
-A new action task can therefore be a genuinely new history. Dynamic episode
-context is appended as user input, while the common/persona system text stays
-separate. Within each continuing history, keep the system prompt, tool schema
-and ordering stable. Tool additions/removals, persona edits, compaction,
-history rewrites and image offloading can change an earlier prefix and require
-partial or full prefill. Such changes are distinct from another agent evicting
-a snapshot.
-
-DSH's normal completed-message commit preserves `source.replayState` alongside
-reasoning and tool blocks. The adapter probe uses that same commit shape;
-requests retain `reasoning_content` and the configured `high` effort maps to
-wire `xhigh`. Do not flatten reasoning into assistant text or discard replay
-metadata in a custom client. The probe with metadata passed through the actual
-installed adapter and `BlockAssembler`, using both provider identities. It did
-not drive the complete Asuna Web workflow or dispatch its real tools.
-
-Also, the checked Asuna plugin explicitly disables tools in the character lane
-and gives operation-specific capabilities to the action lane. The requested
-more general case, both independent clients making tool calls, was tested
-synthetically; enabling tools for the character lane would be a separate
-application behavior change.
-
-### Reproduce the cache checks
-
-Run one configuration at a time on port 1919. The launcher defaults are the
-current 24 GiB/16-slot configuration; stop it before changing budgets or slot
-counts. To reproduce the original comparison table, launch with
-`-ConversationCacheMiB 8192 -ConversationCacheSlots 4`.
-
-```powershell
-python scripts/probe-qwen38-strata-cache.py --tokens 131072 --rounds 6 --output benchmarks/raw/qwen38-strata/cache-repeat
-python scripts/probe-qwen38-strata-cache.py --tokens 4096 --prefix-controls --output benchmarks/raw/qwen38-strata/cache-prefix
-python scripts/probe-qwen38-strata-cache.py --third-context --output benchmarks/raw/qwen38-strata/cache-third
-node scripts/probe-asuna-strata-cache.mjs --schedule parent-idle --rounds 8 --fixture benchmarks/raw/qwen38-strata/cache-repeat --output benchmarks/raw/qwen38-strata/cache-asuna
-```
-
-Use `-ConversationCacheMiB 0` for the disabled baseline,
-`-ConversationCacheMiB 256` for the insufficient-budget control, or
-`-ConversationCacheSlots 1` for slot pressure. Restore the launcher defaults
-when finished. The probes save complete requests, responses, cached-token
-counts, engine logs, timings and (for the Python probe) RAM/VRAM samples.
-The synthetic token fixture is calibrated exactly with thinking disabled;
-DSH's system/tool framing and enabled thinking add tokens to that fixture.
-
-Curated evidence: [strata-cache.json](../benchmarks/qwen38_flash_next/2026-10-03/strata-cache.json)
-contains 139 requests across nine configurations/scenarios.
-Raw evidence: `benchmarks/raw/qwen38-strata/2026-10-03/cache/`. Intermediate
-adapter experiments lacking the normal replay metadata are not counted as
-Asuna's actual behavior in the curated results.
-
-## Upgrade and tuning, 2026-10-06
-
-Three changes, each measured before it was kept. Curated results:
-[strata-upgrade-tuning.json](../benchmarks/qwen38_flash_next/2026-10-06/strata-upgrade-tuning.json);
-raw requests and outputs: `benchmarks/raw/qwen38-strata/2026-10-06/`. A/B runs
-used a private `127.0.0.1:1921` server so that live Asuna traffic could not
-interleave; settings otherwise matched the launcher defaults.
-
-### Summary: what changed
-
-| Item | Before | After |
-|---|---|---|
-| Strata runtime | 0.1.37-nvfp4.2 (`69a60f5`) | 0.1.39-nvfp4.3 (`b17e5ef`) |
-| MTP draft vocabulary | English/code + Cyrillic, 58,963 ids (27 of 55,328 Han) | + CJK, 124,737 ids (all Han, kana, Hangul, CJK punctuation) |
-| Draft head VRAM / GPU expert slots | 152.9 MiB / 8,151 | 323.6 MiB / 8,087 |
-| Conversation cache | 8 slots, 16 GiB budget | 16 slots, 24 GiB budget |
-
-Unchanged: model assets, 262K context, INT8 KV, MTP window 4 with minimum
-probability 0.5, 2,048 MiB VRAM reserve, Single GPU, one active request, LAN
-binding.
-
-### Summary: performance, before (0.1.37, old vocabulary) and after (0.1.39, CJK vocabulary)
-
-| Same requests | Before | After | Change |
-|---|---:|---:|---:|
-| Chinese replies, decode | 105.1 tok/s (1.41 tokens/round) | 137.9–146.0 tok/s (2.04–2.11) | +31–39% |
-| English replies, decode | 130.6 tok/s | 139.2–142.3 tok/s | +7–9% |
-| English 4K input / 4K output, decode | 135.0, 133.4 tok/s | 136.7, 138.7 tok/s | +2–3% |
-| 128K input / 4K output, decode* | 131.0 tok/s | 136.9 tok/s | +4.5% |
-| 128K prompt read* | 6,625 tok/s | 6,903 tok/s | +4% |
-| Independent histories kept cached | 8 at most (291 evictions in the live log) | 12/12 resumed in testing; 16 slots | 2× capacity |
-
-\*Measured on 0.1.39 before the vocabulary change; the CJK vocabulary was
-rechecked at 4K only. Single trials vary by a few percent, so the English gains
-are small; the Chinese gain is the clear one. Attribution: the runtime gave about
-4% shorter decode rounds on every reply; the CJK vocabulary gave Chinese about
-+25% over 0.1.39 with the old vocabulary, English unchanged; the slots do not
-change decode speed but avoid 20–45 s cold rereads when an evicted history
-returns. The live-traffic effect of the slots is not yet measured.
-
-### Details
-
-**Runtime 0.1.37-nvfp4.2 → 0.1.39-nvfp4.3.** `setup-strata-runtime.ps1` now
-upgrades the earlier pin in place, as the release notes direct; the virtual
-environments, configs and models stay, and the `thinking_token_budget` alias is
-reapplied. Requirements, `data/` and every converter that `prepare-qwen38-strata.py`
-runs are byte-identical between the releases, so the prepared assets were reused.
-The release also restarts the engine after an all-NaN reply instead of serving a
-broken session. Its new Host check passes IP-address hosts, so the LAN URL works.
-
-| Same requests, one trial each | 0.1.37 | 0.1.39 |
-|---|---:|---:|
-| 4K input / 4K output, ms per round | 15.49, 15.54 | 16.87, 15.12 |
-| 128K input / 4K output, ms per round (prefill tok/s) | 16.64 (6,625) | 15.55 (6,903) |
-| Short English replies, decode tok/s | 130.6 | 155.3 |
-| Short Chinese replies, decode tok/s | 105.1 | 116.7 |
-
-Rounds were about 4% shorter overall, with run-to-run noise of similar size;
-the fork's own 7% was measured on a different pack. All retrieval checks passed.
-
-**CJK draft vocabulary.** The shipped subset held 27 of 55,328 Han tokens, so
-the MTP head could hardly draft Chinese. Live traffic below 8K context, where
-short replies dominate, averaged 1.64 tokens a round against 2.2–2.5 elsewhere.
-`prepare-qwen38-strata.py` now builds `mtp/rt/draft_vocab.bin` with
-`tools/draft_vocab.py --add cjk` (124,737 ids, draft head 153 → 324 MiB,
-8,151 → 8,087 expert slots). Three Chinese and three English prompts, two
-repeats each, 768 output tokens, 0.1.39:
-
-| | en + Cyrillic | + CJK |
-|---|---:|---:|
-| Chinese: tokens per round / decode tok/s | 1.41 / 110.4 | 2.04 / 137.9 |
-| English: ms per round / decode tok/s | 15.99 / 139.9 | 16.28 / 139.2 |
-| English 4K/4K benchmark, decode tok/s | 129.7, 137.9 | 136.7, 138.7 |
-
-Chinese decode rose 25%; English stayed within noise.
-`scripts/probe-qwen38-strata-draft-lang.py` reproduces the language probe.
-
-**Conversation cache: 16 slots, 24 GiB.** The live log to 2026-10-06 recorded
-291 evictions with all eight slots full while only 7–14 GB of the 16 GiB budget
-was parked: the slot count was the limit. 344 requests in that log reread more
-than 20K prompt tokens (6,357 s of prefill); not all were evictions. With the
-engine stopped 105.8 GiB of RAM was available; a loaded engine leaves roughly
-38 GiB, so the 24 GiB budget keeps about 14 GiB for other programs, and the
-2,560 MiB admission floor still applies. On the production server, the validated
-two-agent cache probe hit every switch (4,135–4,404 tokens reused), and twelve
-independent 3.6K histories opened in turn all resumed from their snapshots
-(12/12) with live traffic present. A sixteen-history oldest-first scan missed
-throughout: live requests took slots, and each miss parked a new entry that
-evicted the next history. That is LRU's worst case, not a fault. Eight slots
-could not have held the twelve histories at all.
-
-The production server on 1919 passed text, streaming, tool call and result
-continuation, image recognition and 4K retrieval with reuse on the new runtime.
-Rollback: re-extract `runtime/strata-nvfp4-v0.1.37-nvfp4.2-windows-x64.zip`
-over the runtime and restore the previous script pins from Git.
-
-## Upgrade, 2026-10-08
-
-Runtime 0.1.39-nvfp4.3 → 0.1.40.2-nvfp4.1 (`d147ca4f`). Curated results:
-[strata-0140-upgrade.json](../benchmarks/qwen38_flash_next/2026-10-08/strata-0140-upgrade.json);
-raw requests and outputs: `benchmarks/raw/qwen38-strata/2026-10-08/`. Both
-versions were measured the same day on a private `127.0.0.1:1921` server with
-Asuna down, with the 2026-10-06 benchmark set and launcher defaults (CJK draft
-vocabulary, 16 cache slots). One trial per case except the language probe, so
-differences of a few percent are within noise.
-
-| Same requests | 0.1.39-nvfp4.3 | 0.1.40.2-nvfp4.1 | Change |
-|---|---:|---:|---:|
-| 4K input / 4K output, prompt read | 1,817, 2,054 tok/s | 2,118, 2,364 tok/s | +15–17% |
-| 4K input / 4K output, decode | 148.4, 154.2 tok/s | 163.4, 168.9 tok/s | +10% |
-| 128K prompt read | 6,908 tok/s | 7,689 tok/s | +11% |
-| 128K input / 4K output, decode | 149.1 tok/s | 150.9 tok/s | +1% |
-| Chinese replies, decode (ms per round) | 146.9 tok/s (14.04) | 158.2 tok/s (13.02) | +8% |
-| English replies, decode (ms per round) | 149.2 tok/s (15.33) | 159.8 tok/s (14.26) | +7% |
-
-Draft acceptance and tokens per round did not change (0.59–0.64; 2.06 Chinese,
-2.28–2.29 English), so the gain is shorter rounds and faster prompt reads, as
-the fork's notes describe: expert gate/up on the FP4 tensor cores, prompt
-attention on INT8 tensor cores, the DeltaNet recurrence in chunks, and a gated
-CPU share of short prompt chunks. GPU expert slots: 8,029 before, 8,022 after.
-The same-day 0.1.39 decode was 8–12% faster than its 2026-10-06 run (148–154
-against 137–139 tok/s at 4K), so compare within this table, not across days.
-All retrieval checks and the smoke checks (text, streaming, tool round trip,
-image, 4K retrieval with reuse) passed on both.
-
-**Assets.** Requirements, `data/` and the converters that
-`prepare-qwen38-strata.py` runs are identical, except `tools/iq_pack.py`, which
-only adds IQ3_XXS and IQ4_XS to the native PLE key formats. This model's
-`ple_key` is BF16, so the prepared assets were reused.
-
-**Server patches.** The `thinking_token_budget` alias applies unchanged.
-`reasoning_close_retry` is now upstream's own option, so the launcher only sets
-it. strata-think-echo was ported as v4: the new parser keeps reasoning-held
-tool calls under names v3 used, so v3 could not be re-applied. The 0.1.39 check
-on the same day caught a v3 bug: one streamed reply quoted `</think>` at the
-start of a line and lost its first half (11/12; reproduced offline). v4 decides
-by whole lines and passed 12/12 on 0.1.40.2. Its replay of 720 recorded
-replies leaves every normal one unchanged and recovers all 42 leaked ones,
-streamed one character at a time, in random chunks and whole. The fork's test
-suite at `d147ca4f` gives 546 run, 2 errors unpatched. With v4 there are 5
-more failures and 1 more error, all from the costs listed under
-[Locations](#locations).
-
-Rollback: stop the server, re-extract
-`runtime/strata-nvfp4-v0.1.39-nvfp4.3-windows-x64.zip` over the runtime, and
-restore the previous script pins and strata-think-echo v3 from Git.
-
-## Upgrade, 2026-10-10
-
-Runtime 0.1.40.2-nvfp4.1 → 0.1.41-nvfp4.4 (`ec1ea2d0`), with the same ModelOpt
-pack. The fork also offers a ready-made GPTQ pack of the same OrcaRouter model
-(`orca-nvfp4`); it was measured and not taken. Its files
-(`Maximilian228/OrcaRouter-Qwen3.8-Flash-Next-Uncensored-NVFP4-GPTQ-Strata` at
-`34c2fc2c`, 120 GiB) were deleted on 2026-11-12; their stage manifest with
-every file's SHA-256 is kept as `orca-gptq-stage-manifest.json` in the raw
-folder. The fork withdrew that pack in 0.1.41-nvfp4.5 (2026-10-11 NZDT). Curated results:
-[strata-0141-ab.json](../benchmarks/qwen38_flash_next/2026-10-10/strata-0141-ab.json);
-raw: `benchmarks/raw/qwen38-strata/2026-10-10/ab/`.
-`scripts/benchmark-qwen38-strata-ab.py` ran every arm from the production
-launcher's config on `127.0.0.1:1921`, after a reboot, with nothing else on
-the GPU. One trial per case, so a few percent is noise.
-
-| | 0.1.40.2 + ModelOpt | **0.1.41 + ModelOpt** | 0.1.41 + GPTQ |
-|---|---:|---:|---:|
-| Chinese / English chat decode, tok/s | 152.3 / 148.7 | **162.6 / 164.9** | 164.8 / 168.3 |
-| 4K prompt read / decode, tok/s | 2,292 / 159.0 | **2,349 / 169.5** | 2,357 / 168.4 |
-| 128K prompt read / decode, tok/s | 7,690 / 149.5 | **8,136 / 156.1** | 8,399 / 164.0 |
-| Two agents switching 32K histories, s per turn | 0.99 | **0.90** | 0.89 |
-| Retrieval, smoke, `</think>` (12/12), exact answers (12/12) | pass | **pass** | pass |
-| Long thinking: 3 hard prompts, greedy, 16K cap | 2/3 | **2/3** | 1/3 |
-
-The runtime is the gain: +7% Chinese and +11% English decode, +4–6% at 128K.
-The GPTQ pack adds 1–2% on chat and fails more long-thinking prompts. On the
-12-coin puzzle it collapsed into a repeated `H?` that both ModelOpt arms
-answered. The bracket-coding prompt hit the 16K cap on every arm: production
-and GPTQ looped, 0.1.41 + ModelOpt was still writing code. The fork's
-suggested `--spec 6 --spec-min-p 0.7` was within noise of 4 / 0.5, so the
-launcher keeps 4 / 0.5.
-
-What else 0.1.41 brings here: a fix for an expert computed on the CPU from a
-stale activation just after its eviction (0.1.40.3-nvfp4.1); a full
-conversation cache that evicts old entries to make room instead of dropping
-the new snapshot; and a restart of an engine that is silent, idle and uses no
-CPU or I/O for 90 s. That watchdog needs psutil, which the installer now adds
-beside Pillow. Since 0.1.41-nvfp4.2 the engine warns below 60,000 MB of page
-file and, short of commit, shrinks the GPU expert cache (17–38% slower rounds
-in the fork's measurements). This PC now has a fixed 64,000 MB page file. The
-prepared assets were reused: requirements, `data/` and the converters are
-unchanged. The installed server is byte-identical to the benchmarked arm.
-
-Rollback: stop the server, re-extract
-`runtime/strata-nvfp4-v0.1.40.2-nvfp4.1-windows-x64.zip` over the runtime, and
-restore the previous installer pin from Git.
-
-## Upgrade, 2026-10-15
-
-Runtime 0.1.41-nvfp4.4 → 0.1.44.1-nvfp4.1 (`3fa66b43`), upgraded in place with
-the same ModelOpt pack. Curated results:
-[strata-04411-upgrade-split.json](../benchmarks/qwen38_flash_next/2026-10-15/strata-04411-upgrade-split.json);
-raw: `benchmarks/raw/qwen38-strata/2026-10-15/`. Every arm ran from the
-production launcher's config on `127.0.0.1:1921` with nothing else on the
-5090, one trial per case, so a few percent is noise.
-
-| 5090 alone, `parallel` 1 | 0.1.41 (2026-10-10) | **0.1.44.1** (two runs) |
-|---|---:|---:|
-| Chinese / English chat decode, tok/s | 162.6 / 164.9 | **166.1 / 165.7**, 163.3 / 165.8 |
-| 4K prompt read / decode, tok/s | 2,349 / 169.5 | **2,331 / 167.6**, 2,363 / 169.0 |
-| 128K prompt read / decode, tok/s | 8,136 / 156.1 | **8,459 / 162.4**, 8,451 / 161.5 |
-| Two agents switching 32K histories, s per turn | 0.90 | **0.90**, 0.90 |
-| Retrieval, smoke, `</think>` 12/12, exact answers | pass | **pass** (one run answered 堪培拉 for Canberra) |
-| Long thinking: 3 hard prompts, greedy, 16K cap | 2/3 | **2/3**, 2/3 |
-
-Chat and 4K are level; 128K is +4% in both directions. The reason to take it
-is not speed: since 0.1.41 the fork and upstream fixed several things the
-conversation cache depends on. A picture in a long conversation no longer
-loses its cached state (#2228). The Windows stall watchdog no longer ends the
-engine while it parks a conversation (#2049, #2065). Under the
-`--conversation-cache-min-free-mib` floor, parked conversations now give RAM
-back, oldest first. Quoted `<tool_call>` / `<tool_response>` literals reach the
-model as text (#2026), and a stop token the model writes as text no longer
-cuts the reply (`stop_token_text`). The disk tier (`--conversation-disk-dir`)
-stays off.
-
-**Installer.** Since 0.1.42-nvfp4.2 the release downloads ready-made models
-and ships no `requirements-convert.txt`. This model is still converted here,
-so the 0.1.41-nvfp4.4 pins are kept as `scripts/strata-requirements-convert.txt`.
-The converters `prepare-qwen38-strata.py` runs, `data/` and the serve
-requirements (plus psutil, now pinned upstream) are unchanged, so the prepared
-assets were reused.
-
-**Server patches.** The `thinking_token_budget` alias still applies; upstream
-has no such field. strata-think-echo v4 applies unchanged: its three anchors
-match once in the new parser, and upstream's own narrow #537 rule
-(`_quoted_think_end`) only ever sees the tags the wrapper passes on as the
-real close, which are followed by a line break, so the two never disagree.
-The replay of 720 recorded replies leaves all 1,260 normal runs unchanged and
-recovers all 42 leaked ones (14 replies × 3 streaming modes); the stock
-0.1.44.1 parser alone recovers 4 of the 14. The fork's suite at `3fa66b43`
-(924 tests with `tools/`) has 1 error unpatched; patched, 10 more. Six are
-the costs listed under [Locations](#locations): the 512-character answer hold
-(`test_abort_then_the_next_request`), a stop string stopping late (4) and the
-newline in `reasoning_tokens`. Four are new: when an output ends right on a
-`</think>` with nothing after it, upstream's server checks for that tag held
-in the parser's buffer, but the wrapper holds it instead. A reply ending on a
-quoted `"</think>` is then closed and continued by `reasoning_close_retry`
-(upstream: an empty answer), and a forced `tool_choice` call does not open
-there (the reply ends with no call). The model has not produced that output
-shape in the recorded replies.
-
-**5090 + 4090 layer split, `parallel` 2.** The fork's 0.1.44 release reworked
-the split (both cards read a prompt at once, per-card pinned memory on
-Windows) and fixed `"parallel"` (each slot's K/V grows with its conversation
-instead of taking the full context). The launcher gained `-Parallel N`
-(default 1) and no longer refuses the conversation cache on a split:
-checkpoints now save every card's state. The split arm used the automatic
-split (layers 0–30 on the 5090, 31–47 on the 4090), `parallel` 2 with
-full-context slots and the production conversation cache.
-
-- **Per-card pinning fails on this PC.** The engine pinned the expert arena in
-  each card's own context (40.87 GiB for the 5090's layers, 22.41 GiB for the
-  4090's) and then read 0 GiB free VRAM on both cards: no expert cache, and the
-  engine exited before it was ready. The fork notes that this path had never
-  run on a Windows PC with several GPUs (sergqwer/strata-nvfp4#7).
-  `STRATA_ARENA_PIN_PER_STAGE=0` restores the old shared pin, which pinned
-  only 3 GiB, as on 0.1.37. The launcher sets it in both multi-GPU modes.
-- **With that switch it loads and loses on every measure.** C1 is the probe's
-  chat answers one at a time; C2 the same pairs sent together. On the 5090
-  alone the second request queues, so C2 equals C1.
-
-| Same session | 5090 alone, `parallel` 1 | 5090 + 4090, `parallel` 2 | Change |
-|---|---:|---:|---:|
-| C1, wall tok/s (engine decode) | 149.3 (161.4) | 117.6 (133.8) | −21% |
-| C2, total tok/s (per stream) | 149.4 (160.8, queued) | 122.8 (69.2) | −18% |
-| Chinese / English chat decode, tok/s | 163.3 / 165.8 | 138.6 / 141.2 | −15% |
-| 4K prompt read / decode, tok/s | 2,363 / 169.0 | 1,416 / 153.8 | −40% / −9% |
-| 128K prompt read / decode, tok/s | 8,451 / 161.5 | 7,420 / 148.2 | −12% / −8% |
-| Two agents switching 32K histories, s per turn | 0.90 | 1.36 | +51% |
-| Checks, long thinking | pass, 2/3 | pass, 2/3 | |
-
-On the split, `--batch-groups auto` pipelines two groups of one slot, and the
-pipelined batch windows run no MTP drafts, so two streams at once decode at
-~70 tok/s each and add up to less than one stream alone on the 5090 with its
-drafts. The first C2 pair, while the expert caches were still adapting, made
-94.5 tok/s; the next two 138 and 136. The 5090 alone keeps more expert slots
-on the card that runs every layer's first pass (8,066 against 7,177, plus 4,076
-on the 4090), and its prompt reads never cross the 4090's 13.3 GB/s link.
-`parallel` 2 on the 5090 alone was not measured; the fork measured −10% for a
-single dialog with it, so production stays at `parallel` 1 for now.
-
-Rollback: stop the server, re-extract
-`runtime/strata-nvfp4-v0.1.41-nvfp4.4-windows-x64.zip` over the runtime, and
-restore the previous installer pin from Git, then run the installer, which
-re-applies its patches.
-
-## Upgrade, 2026-10-22
-
-Runtime 0.1.44.1-nvfp4.1 → 0.2.0-beta-nvfp4.3, staged on 2026-10-21, measured
-and upgraded in place on 2026-10-22 with the same ModelOpt pack. Curated
-results: [strata-020beta3-upgrade.json](../benchmarks/qwen38_flash_next/2026-10-22/strata-020beta3-upgrade.json);
-raw: `benchmarks/raw/qwen38-strata/2026-10-22/upgrade/`. The candidate ran
-alone from the production launcher's config on `127.0.0.1:1921` with nothing
-else on the 5090, one trial per case, against the 2026-10-15 same-session
-5090 baseline.
-
-| 5090 alone, `parallel` 1 | 0.1.44.1 (2026-10-15) | **0.2.0-beta-nvfp4.3** |
-|---|---:|---:|
-| Chinese / English chat decode, tok/s | 163.3 / 165.8 | **171.7 / 172.5** |
-| 4K prompt read / decode, tok/s | 2,363 / 169.0 | **2,368 / 172.3** |
-| 128K prompt read / decode, tok/s | 8,451 / 161.5 | **8,464 / 164.7** |
-| C1 wall tok/s (C2 total, queued) | 149.3 (149.4) | **155.1 (155.2)** |
-| Two agents switching 32K histories, s per turn | 0.90 | **0.87** |
-| Retrieval, cache, smoke, `</think>` 12/12 | pass | **pass** |
-| Exact answers | 11/12 (堪培拉) | **12/12**, none wrapped up |
-| Long thinking: 3 hard prompts, greedy, 16K cap | 2/3 | **2/3** |
-
-Chat decode is +4% and C1 +4%; prompts and long decode are level to +2%.
-The fork's +13% (180 → 203 tok/s) was measured on its GPTQ pack; this pack
-with MTP gains less. The failing long-thinking case is long-3 both times. On
-0.1.44.1 it ran to the 16K cap; here it looped (87% of its sentences
-repeated) and `answer_room` closed it at 12,288 tokens with the wrap-up
-sentence, so it ended `stop` with an answer. The probe's new rule counts it
-as a fail. Without that rule it would have scored 3/3. `answer_room` limited
-the thinking on all 27 requests with a cap of 4K or more; none of the 12 exact
-answers was cut short.
-
-**Version names.** Upstream 0.2.0 is a bundle (app, Terminal, engine), and
-the engine kept its own numbering. `/v1/status` and the harness's `engine`
-field therefore say `0.1.45.3` for this release. `engine/BUILD.json` says
-`0.2.0-beta-nvfp4.3`.
-
-**Prepared on 2026-10-21.**
-
-Runtime 0.1.44.1-nvfp4.1 → [0.2.0-beta-nvfp4.3](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.0-beta-nvfp4.3)
-(`57293b8e`, engine `56042c6e`; release SHA-256 `1417c28b…d2d346fe`).
-The engine is upstream 0.2.0-beta's (its engine package is 0.1.45.3) with the
-fork's kernels on top. The fork measured decode at 203 vs 180 tok/s on a 5090,
-with the same output bits at 2K and 32K. Releases .2 and .3 change only the
-server: a daily update check and a browser UI on port 8791.
-`scripts/setup-strata-runtime.ps1 -Stage` installed it beside production in
-`runtime/strata-nvfp4-0.2.0-beta-nvfp4.3` (serve environment only). Production
-on 1919 was not touched.
-
-**Checked without the GPU.**
-- Converters: of the files `prepare-qwen38-strata.py` runs, only
-  `tools/iq_pack.py` (the Gyro family's `prism.hadamard` metadata) and
-  `tools/embd_bf16_pack.py` (a new `--gguf` source) changed. This model's
-  `--model` conversion reaches neither, so the prepared assets are reused.
-  `data/expert-profile.bin`, `draft_vocab.bin` and `requirements-serve.txt`
-  are unchanged.
-- The staged `serve/` is the tag plus our two patches. The
-  `thinking_token_budget` alias anchor matches once. strata-think-echo v4
-  applies unchanged. The 720-reply replay leaves all 1,260 normal runs
-  unchanged and recovers all 42 leaked ones. The stock 0.2.0 parser alone
-  still leaks 10 of the 14 leaked replies.
-- The fork's `serve` suite at `57293b8e` (1,029 tests): 1,008 pass stock.
-  Patched, the same 10 fail as at 0.1.44.1 and no others: the six costs
-  under [Locations](#locations) and the four outputs that end right on a
-  `</think>` (see [Upgrade, 2026-10-15](#upgrade-2026-10-15)).
-- The forced closes this release adds (`REASONING_CLOSE`, the budget's
-  wrap-up) write `\n</think>\n\n`, which the wrapper takes as the model's own
-  close.
-
-**Behaviour that changes for clients.**
-- *Default sampling.* With no `sampling` block in the config, a request that
-  names no sampling was greedy until now. 0.2.0 applies the model card's
-  values per thinking state: thinking 1.0 / 0.95 / top-k 20; no thinking
-  0.7 / 0.8 / 20 with presence penalty 1.5. A request's own fields still win.
-  Every probe sets its own sampling, so the benchmark is unaffected. This is
-  taken as intended; add a `sampling` block to the launcher only if a client
-  turns out to need greedy.
-- *`answer_room`.* A thinking request with `max_tokens` ≥ 1024 and no budget
-  of its own now has its thinking closed at ¾ of the cap, with the wrap-up
-  sentence. Agent turns then get an answer instead of a cut-off. The quality
-  probe now fails a long-thinking reply that carries the wrap-up sentence,
-  because it did not end on its own; otherwise a loop would score as a pass.
-  It also counts wrapped-up exact answers. Anthropic `budget_tokens` is now a
-  real budget too.
-- *Claude Code's system prompt* is rewritten for the local model. The fork's
-  default; `"claude_code_prompt": "as_sent"` keeps it as sent.
-- *Update check.* The launcher sets `"update_check": false`: the notice names
-  `update.cmd`, which would unzip over `serve\` and drop the local patches. The
-  0.1.44.1 server ignores the key. The 8791 UI stays off: it starts only with
-  `STRATA_APP_UI=1`, which `start-server.cmd` sets and this launcher does not.
-
-**How it was run** (about 12 minutes; every Strata server stopped):
-
-```powershell
-scripts\setup-strata-runtime.ps1 -Stage
-python .\scripts\benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-0.2.0-beta-nvfp4.3 --candidate-only --output benchmarks/raw/qwen38-strata/2026-10-22/upgrade
-scripts\setup-strata-runtime.ps1
-```
-
-The last step upgraded `runtime/strata-nvfp4` in place. Its engine,
-`server.py` and `frontend.py` are byte-identical to the staged runtime that
-was measured. The staged folder `runtime/strata-nvfp4-0.2.0-beta-nvfp4.3` was
-then deleted; the release zip stays in `runtime/`.
-
-Rollback: stop the server and re-extract
-`runtime/strata-nvfp4-v0.1.44.1-nvfp4.1-windows-x64.zip` over the runtime.
-Then restore the previous installer pin from Git and run the installer, which
-re-applies its patches.
-
-## Upgrade, 2026-11-12
-
-Runtime 0.2.0-beta-nvfp4.3 → [0.2.13-nvfp4.1](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.13-nvfp4.1)
-(`b08a70078`, engine `47b03dc5`, reports 0.1.59; release SHA-256
-`b928050d…`), the fork's port to upstream 0.2.13. Staged, checked without
-the GPU, measured alone and upgraded in place on 2026-11-12 with the same
-ModelOpt pack. Curated results:
-[strata-0213-upgrade.json](../benchmarks/qwen38_flash_next/2026-11-12/strata-0213-upgrade.json);
-raw: `benchmarks/raw/qwen38-strata/2026-11-12/upgrade/`.
-
-| 5090 alone, `parallel` 1 | 0.2.0-beta-nvfp4.3 (2026-10-22) | **0.2.13-nvfp4.1** |
-|---|---:|---:|
-| Chinese / English chat decode, tok/s | 171.7 / 172.5 | **170.7 / 175.0** |
-| 4K prompt read / decode, tok/s | 2,368 / 172.3 | **2,345 / 167.7** |
-| 128K prompt read / decode, tok/s | 8,464 / 164.7 | **8,450 / 160.7** |
-| C1 wall tok/s (C2 total, queued) | 155.1 (155.2) | **155.7 (158.5)** |
-| Two agents switching 32K histories, s per turn | 0.87 | **0.89** |
-| Retrieval, cache, smoke, `</think>` 12/12 | pass | **pass** |
-| Exact answers | 12/12 | **12/12**, none wrapped up |
-| Long thinking: 3 hard prompts, greedy, 16K cap | 2/3 | **1/3**, no loop |
-
-Every speed is within ±3%. Long thinking misses the 2/3 rule set beforehand,
-but neither miss is a loop: long-1 and long-3 thought past the 12,288-token
-`answer_room` line with 3.5% and 1.6% of sentences repeated, so the server
-wrapped them up. On 0.2.0 long-1 had ended on its own at 12,198 tokens and
-long-3 was an 87% loop. The owner accepted the upgrade on that reading. The
-expert cache has 7,950 GPU slots (was 8,060).
-
-**Checked without the GPU.**
-- Converters: of the files `prepare-qwen38-strata.py` runs, only
-  `tools/iq_pack.py` changed (it resumes an interrupted write) with its
-  readers (`gguf_reader.py`: other families' types and bounds checks;
-  `strata_tokenizer.py`: the DeepSeek pre-tokenizer, and a refusal of an
-  unknown one). This pack's pre-tokenizer is `qwen35`, so the prepared assets
-  are reused. `data/expert-profile.bin`, `draft_vocab.bin` and
-  `requirements-serve.txt` are unchanged.
-- Patches: the `thinking_token_budget` alias moved next to upstream's new
-  `thinking_budget_tokens` (a different name; DSH still needs ours). The
-  LAN-bind change was dropped (upstream: "recommended on a network, never
-  required"). strata-think-echo was ported to v5 (see [Locations](#locations)).
-  The 720-reply corpus behind the earlier replays had lived in a session's
-  temporary folder and was gone, so the leak shapes it held are now a test in
-  the repo (`scripts/patches/test-strata-think-echo.py`): v5 passes 48 of 48
-  runs; the stock 0.2.13 parser still gets 6 of the 16 shapes wrong.
-- The fork's `serve` suite at `b08a70078` (1,637 tests): all pass stock.
-  Patched, 11 fail: the same 10 as at 0.2.0 (the six costs and the four
-  outputs that end right on a `</think>`) and DeepSeek-V4.1's own close. A
-  first v5 that switched #4077 off failed 10 more, all tool calls after a
-  repeated `</think>`; that is why v5 keeps its fence reset.
-
-**Behaviour that changes for clients.**
-- *Tool calls.* A call to an undeclared tool would now arrive as text; the
-  launcher keeps it a call (`"undeclared_tool_calls": "call"`) when the request
-  declares other tools. A request with no tools gets the call back as text;
-  this was missed here and found live the same day (see
-  [Tool calls in requests without tools](#tool-calls-in-requests-without-tools-2026-11-12)). Tool-call
-  recovery (a call written in a form next to the template's) is on by
-  default since upstream 0.2.8, where 0.2.0 had it off; taken as is.
-  Upstream's tool-name aliases replace the fork's `tool_name_repair`.
-- *Penalties* count only the reply's tokens (upstream #4590, a fix). It
-  matters for no-thinking requests, which default to presence penalty 1.5.
-- Upstream's new defaults that change answers (the PCIe share that follows
-  the CPU, its pool-sized start, the wider verify window, the async adaptive
-  tier) stay at 0.2.0's behaviour in the fork. NVFP4 configs keep `--mtp`;
-  upstream's DFlash2 drafter is not used for this pack.
-
-**How it was run** (about 8 minutes on the GPU; every Strata server stopped):
-
-```powershell
-scripts\setup-strata-runtime.ps1 -Stage
-python .\scripts\benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-0.2.13-nvfp4.1 --candidate-only --output benchmarks/raw/qwen38-strata/2026-11-12/upgrade
-scripts\setup-strata-runtime.ps1
-```
-
-The last step upgraded `runtime/strata-nvfp4` in place. Its engine,
-`server.py`, `frontend.py` and expert profile are byte-identical to the staged
-runtime that was measured.
-
-Rollback: stop the server and re-extract
-`runtime/strata-nvfp4-v0.2.0-beta-nvfp4.3-windows-x64.zip` over the runtime.
-Then restore the previous installer pin, launcher and strata-think-echo v4
-from Git and run the installer, which re-applies its patches.
-
-## Upgrade and drafter choice, 2026-11-23
-
-Runtime 0.2.13-nvfp4.1 → [0.2.15-nvfp4.7](https://github.com/sergqwer/strata-nvfp4/releases/tag/v0.2.15-nvfp4.7)
-(`4442f2d53`, engine `9bff87b4`, reports 0.1.61; release SHA-256
-`84bd404b…`), the fork's port to upstream 0.2.15 plus six releases of its own:
-the #24 fix, DFlash2 for NVFP4 (nvfp4.2), KV streaming by default (nvfp4.3),
-RTX 50 kernels and Basalt's MTP drafting (nvfp4.4, nvfp4.5) and two-GPU
-pinning fixes (nvfp4.6, nvfp4.7). The fork measured its drafters only on its
-GPTQ pack and says "not measured" for NVIDIA NVFP4 packs like this one, so
-the drafter was chosen here in one session. Staged, checked without the GPU,
-four drafter arms on 127.0.0.1:1921 with 1919 stopped, then upgraded in place
-with the winner. Curated:
-[strata-0215-drafters.json](../benchmarks/qwen38_flash_next/2026-11-23/strata-0215-drafters.json);
-raw: `benchmarks/raw/qwen38-strata/2026-11-23/`.
-
-| 5090 alone, `parallel` 1 | 0.2.13 (11-12) | A: MTP as before | B: Basalt drafting | C: B + Basalt's layer | D: DFlash2 |
-|---|---:|---:|---:|---:|---:|
-| Chinese / English chat decode, tok/s | 170.7 / 175.0 | 202.9 / 199.8 | 209.0 / 214.1 | **216.4 / 215.6** | 170.0 / 196.3 |
-| 4K prompt read / decode, tok/s | 2,345 / 167.7 | 2,588 / 208.0 | 2,634 / 223.9 | **2,607 / 229.1** | 2,568 / 199.2 |
-| 128K prompt read / decode, tok/s | 8,450 / 160.7 | 11,017 / 200.6 | 10,952 / 218.4 | **10,982 / 213.2** | 10,908 / 194.0 |
-| C1 wall tok/s (C2 total, queued) | 155.7 (158.5) | 179.3 (180.1) | 186.5 (194.1) | **190.8 (194.5)** | 166.3 (169.9) |
-| Two agents switching 32K histories, s per turn | 0.89 | 0.73 | 0.73 | **0.73** | 0.75 |
-| Drafts accepted | — | 67.7% | 73.3% | **77.0%** | 68.8% |
-| GPU expert slots | 7,950 | 8,282 | 8,367 | **8,367** | 8,385 |
-| Retrieval, cache, smoke, `</think>` 12/12 | pass | pass | pass | **pass** | pass |
-| Exact answers / long thinking | 12/12 / 1/3 | 12/12 / 2/3 | 12/12 / 2/3 | **12/12 / 2/3** | 12/12 / 2/3 |
-
-- A: `--mtp mtp/rt --spec 4 --spec-min-p 0.5`, the launcher's drafter until
-  now. B: `--mtp mtp/rt --spec 8 --mtp-head proxy --mtp-cum auto` (the fork's
-  Auto for its own sets: a two-stage draft head and Basalt's cumulative window
-  rule, thresholds 0.403:0.288 on this PC). C: B over `mtp/rt-tuned`, Basalt's
-  self-distilled layer. D: DFlash2 by name, the stock pinned pack with the
-  Q4_0 selector, window 6, confidence 0.5, this model's CJK draft vocabulary.
-- B ran twice (the second run was meant as C, but its tuned-layer variable
-  reached only the engine, not the server that chooses the layer). Chat decode
-  differed by 0.4%, the 4K/128K decode by 2–4%.
-- Rule set beforehand: the fastest arm on the chat probes with every check
-  passing; under 3% goes to the simpler arm. C is +3.7% over B on Chinese chat
-  (the live workload) and +0.8% on English, and accepts 77% of drafts against
-  73%, which explains the gain. DFlash2 is slower than even A here (Chinese
-  170). It was trained on the original Qwen; why it drafts this model worse
-  than the MTP was not looked into.
-- The upgrade alone (A against 0.2.13) is +19% / +14% chat, +24% / +25% at
-  4K / 128K decode, +30% on the 128K prompt, 0.73 s per agent switch, 332
-  more expert slots. Long thinking went from 1/3 to 2/3.
-
-Production after the in-place upgrade, the launcher's own config (C's flags):
-Chinese / English 215.2 / 219.1, 4K 2,606 / 223.5, 128K 11,056 / 218.5, C1
-192.7 (C2 197.4), 0.73 s per switch, 75.3% accepted, every check passing.
-
-**What the engine now does on this card.** 33 RTX 50 speed switches are on by
-default; the fork lists four of them as changing rounding and measures 96%
-top-token agreement with its base engine, about what two runs of that engine
-agree with each other. `STRATA_NVFP4_SM120=0` in the config's env turns them
-all off. The early hyper-connection read behind fork #31's garbage output on
-smaller RTX 50 cards is off by default since nvfp4.5 and not among them. KV
-streaming is on: 32,768 cells of each attention layer stay in VRAM and the
-whole K/V is pinned in RAM (3.09 GiB at 262,144), so a growing conversation no
-longer takes VRAM from the expert cache. That growth and its expert moves were
-the 62 s first-token stall of 10-22 (see
-[First-token stalls](#first-token-stalls-in-shared-use-2026-10-22-observed-nothing-changed));
-whether it is gone in shared use is not yet observed. A one-off scheduled task
-(`strata-1919-stall-check`, 2026-11-25 19:00 NZDT) reads 1919's `/metrics` and engine log, applies
-the rule "under 0.5% of requests with under 10K new tokens wait over 20 s, not counting
-queueing, and no K/V growth moves experts", and records the verdict here.
-
-**Checked without the GPU.**
-- Converters: `prepare-qwen38-strata.py`'s files changed only their gguf
-  library plumbing (`_paths.gguf_lib`); the bundled llama.cpp, the expert
-  profile, `draft_vocab.bin` and `requirements-serve.txt` are byte-identical.
-  The prepared assets are reused. The preparation script had refused every
-  runtime but 0.1.39 since 10-08; it now takes the releases the installer
-  checked, and its new `mtp_tuned` step fetches Basalt's layer through the
-  fork's own pinned downloader.
-- Patches: the `thinking_token_budget` alias anchor and strata-think-echo v5
-  apply unchanged; v5 passes 48 of 48 replays and the stock parser still gets
-  6 of 16 leak shapes wrong. strata-tool-tags is dropped: the stock parser
-  gets 0 of 6 recorded cases wrong, and the installed server passes all 18
-  runs of its replay.
-- The fork's `serve` suite at `4442f2d53`, stock: 1,650 pass, 5 fail, all in
-  `test_vision_cpu_fallback.py` (Windows file locks on a temporary engine log;
-  a different set fails each run). Patched (production's `server.py` and
-  `frontend.py`): 1,647 pass, 14 fail counting subtests. Beside those flakes,
-  only strata-think-echo's known costs: the answer held back for 512
-  characters (`StatusHandover`, whose 40-character answer never streams
-  mid-way; the abort fix it guards, #266, is server code the patch does not
-  touch), a stop string caught late (`StopStrings`, 4 subtests),
-  `reasoning_tokens` counting the close's newline, and outputs that end on, or
-  close right after a quote with, a `</think>` (3 tests, 2 subtests). The same
-  classes failed at 0.2.13; DeepSeek-V4.1's close test is gone with DeepSeek.
-- The fork's drafting policy cannot read this model's GGUF header: it stops at
-  the first string array (`general.tags`, before the size keys), so it takes
-  the file for "another size of the family". It then refuses DFlash2 by name
-  and leaves Auto off. Arms B, C and D ran with the reader fixed in the staged
-  copy only; production does not need it, because the launcher writes its
-  drafter arguments itself and sets `"drafting": "mtp"` (the stock policy then
-  passes them through unchanged, checked). Draft issue for upstream (Niko1221/Strata, where the reader comes from; it reads no sizes from any llama.cpp-written GGUF with `general.tags`):
-  `docs/drafts/strata-nvfp4-gguf-facts-string-array.md`, posted on 2026-11-23 as [Niko1221/Strata#6695](https://github.com/Niko1221/Strata/issues/6695).
-
-**Behaviour that changes for clients.** Tool-argument `True` / `False` follow
-upstream's #5979 rules (a declared boolean takes any case; elsewhere text stays
-text). A slipped parameter tag is repaired by the fork itself, and an open
-value no longer collects 64 `<|im_end|>`.
-
-**Not taken.** Pictures stay on the CPU encoder (owner, 2026-11-23). The fork
-can read them inside the engine (`"in_engine": true` in the config's `vision`
-section: 631 against 1,352 ms to the first token for a 329-token picture in
-its measurement); not tested here.
-
-**How it was run** (about 30 minutes on the GPU; every Strata server stopped):
-
-```powershell
-python .\scripts\benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-0.2.15-nvfp4.7 --candidate-only --candidate-set 'drafting="mtp"' --output benchmarks/raw/qwen38-strata/2026-11-23/drafters/A-mtp
-# B: drafting="auto"; C: the same with STRATA_MTP_TUNED_DIR set in the harness's own environment; D: drafting="dflash2"
-scripts\setup-strata-runtime.ps1
-python .\scripts\prepare-qwen38-strata.py
-python .\scripts\benchmark-qwen38-strata-ab.py --output benchmarks/raw/qwen38-strata/2026-11-23/upgrade
-```
-
-The staged runtime had been unpacked into `runtime/strata-nvfp4-0.2.15-nvfp4.7`
-with its own `.venv-serve` and the installer's two patches, as `-Stage` does.
-The upgraded runtime's engine, `server.py`, `frontend.py` and expert profile
-are byte-identical to the staged one; its `drafting.py` is the release's own.
-The staged runtime and the DFlash2 pack were deleted afterwards. To repeat arm
-D, run `drafting_fetch.ensure(<model dir>)` and `drafting_fetch.convert_selector(<model dir>)`
-from the runtime folder (1.2 GB download, pinned and hash-checked, into
-`<model>/dflash2/`), and fix `gguf_facts` as in the draft issue.
-
-Rollback: stop the server and re-extract
-`runtime/strata-nvfp4-v0.2.13-nvfp4.1-windows-x64.zip` over the runtime. Then
-restore the previous installer pin, launcher, harness and preparation script
-from Git and run the installer, which re-applies its patches (strata-tool-tags
-with them).
-
-## Original-Qwen GPTQ pack A/B, 2026-11-12 (not switched)
-
-The fork's ~200 tok/s (203.3 decode on 0.2.0-beta-nvfp4.1) was measured on
-its own `qwen-nvfp4-gptq` pack, a GPTQ of the original Qwen3.8, and since
-0.1.41-nvfp4.5 (10-10) that is the fork's default. It withdrew OrcaRouter's
-weights, saying the abliteration (it edits all 149 residual-writing matrices)
-makes a much weaker agent: 10–70 steps against 175 on one Claude Code task, and
-shorter thinking. Censorship is turned off instead by a refusal-direction
-vector (`data/uncensor`, `"uncensored": true`). The 10-10 test here had
-rejected the fork's GPTQ *of OrcaRouter*; the original-Qwen pack was not tried.
-
-Same session, runtime 0.2.13-nvfp4.1 with both local patches, production's
-launcher config, 5090 alone. The candidate is
-[Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata](https://huggingface.co/Maximilian228/Qwen3.8-Flash-Next-NVFP4-GPTQ-Strata)
-`9b70ad3f` in `models/qwen-nvfp4-gptq/` (all 17 files checked against its
-`SHA256SUMS`), with the fork's vector flags and `"uncensored": true`. Its PLE
-and token embedding are not OrcaRouter's (same sizes, other hashes), so they
-were downloaded too. The repo ships the base MTP draft vocabulary; `mtp/rt/`
-holds the CJK one built as `prepare-qwen38-strata.py` builds production's
-(byte-identical to it), with the head files hard-linked. Curated:
-[gptq-original-qwen-ab.json](../benchmarks/qwen38_flash_next/2026-11-12/gptq-original-qwen-ab.json);
-raw: `benchmarks/raw/qwen38-strata/2026-11-12/gptq/`.
-
-| 5090 alone, `parallel` 1 | OrcaRouter ModelOpt (production) | Original Qwen GPTQ + vector |
-|---|---:|---:|
-| Chinese / English chat decode, tok/s | 172.6 / 170.4 | 174.5 / 172.5 |
-| 4K prompt read / decode, tok/s | 2,315 / 170.3 | 2,344 / 172.2 |
-| 128K prompt read / decode, tok/s | 8,431 / 161.2 | 8,225 / 172.0 |
-| C1 wall tok/s (C2 total, queued) | 155.8 (156.6) | 154.2 (153.0) |
-| Two agents switching 32K histories, s per turn | 0.91 | 0.88 |
-| Retrieval, cache, smoke, `</think>` 12/12 | pass | pass |
-| Exact answers / long thinking | 12/12 / 2/3 | 12/12 / 2/3 |
-
-A tie. The candidate is level on speed: +1% chat, +7% 128K decode, −2% on the
-128K prompt and C2. Neither model reaches ~200 tok/s on these probes, so the
-fork's figure comes from its measurement, not from the weights. Thinking
-length showed no consistent difference. What would decide it, the fork's
-agent-quality claim, these probes do not test.
-The owner kept OrcaRouter (2026-11-12) and, with Qwen4 expected soon, had
-the pack deleted the same day; the record stays. To repeat the A/B, download
-the repo at `9b70ad3f` into `models/qwen-nvfp4-gptq/` (about 120 GiB, checked
-against the `SHA256SUMS` kept in the raw folder), rebuild `mtp/rt/` with the
-CJK draft vocabulary as above, and run the harness with `--candidate-model`.
-
-- *think-tags* first scored production 11/12. The failing reply started a
-  line of its answer with `</think>` followed by text, explaining the tag.
-  strata-think-echo rightly keeps that as text. The probe now fails only a
-  tag alone on its line; rescored 12/12, and none of 120 earlier replies
-  changes.
-- *Refusals.* Eight companion boundary requests (crude roasts, gory fiction,
-  dark jokes, swearing, Chinese and English) were answered by production, by
-  the candidate, and by the candidate with the vector off. They do not tell
-  the switch apart, so the probe was dropped. The vector's effect rests on the
-  fork's own measurement (0/104 refusals on, 102/104 off).
-
-## Broken tool-call arguments, 2026-11-12
-
-Xiaoman's DSH records show four tool calls (11-07 19:51, 11-09 22:36, 11-11
-01:12 and 11-11 23:21 NZDT) whose streamed arguments were not JSON
-(`MALFORMED_RESPONSE`). On the character lane each one ended her turn with an
-error. There were none from 10-05 to 11-06, across tens of thousands of calls.
-The Asuna session sent their structure only (her text replaced by lengths),
-and each output was rebuilt with filler text and streamed through the
-parsers. Nothing on this server changed between 10-22 and 11-12. All four ran
-with 80K–175K tokens of context.
-
-- **A (`write_file`), B (`think`):** the model wrote `<parameter=NAME` without
-  its `>`. Upstream's streaming parser read everything up to the next `>`, the
-  one in `</parameter>`, as the name, and sent `"thought\n…\n</parameter":` as
-  a JSON key whose value never came.
-- **C (`write_document`):** the model wrote `</parameter` without its `>`, so
-  the value never ended. When the model then wrote its end-of-turn token, the
-  fork's "EOS literal" (`stop_token_text`, on by default) took it for a
-  literal inside an open argument: it wrote the token out as text and let the
-  reply go on, up to its cap of 64 per reply. The value collected
-  `</function>`, `</tool_call>` and exactly 64 `<|im_end|>`.
-- **D (`think`):** no slip. The model wrote `</think>` and its reply inside the
-  `think` argument, then the same `<|im_end|>` run. Nothing on the server can
-  turn that into the call it meant.
-
-The 0.2.0 parser that served them and the 0.2.13 parser give the same broken
-arguments, stock or with strata-think-echo, so neither the upgrade nor that
-patch was involved. strata-tool-tags repairs A, B and C. With it, C's value
-ends at the slipped tag, and the model's first end-of-turn token ends the
-reply, so the `<|im_end|>` run does not happen. D still fails at the client;
-the Asuna side owns a retry for it. `stop_token_text` stays on: it exists for
-a model that writes `<|im_end|>` into a file argument, and the slip, not the
-feature, was the cause. Reported upstream as
-[sergqwer/strata-nvfp4#24](https://github.com/sergqwer/strata-nvfp4/issues/24).
-Why the slips started on 11-07 is not known. The
-Asuna session found the same markup inside earlier calls whose JSON happened
-to stay valid.
-
-## Tool calls in requests without tools, 2026-11-12
-
-About 11 minutes after 1919 started on 0.2.13, two of Xiaoman's
-character-lane replies (turns 3641 and 3642, step 1) came back as text: a
-complete, well-formed `think` call. `/metrics` counted them as
-`tool_calls_unread: 2`. With `"undeclared_tool_calls": "call"` that counter
-rises only for a request that declares no tools, and the Asuna session
-confirmed it from DSH's record. Both requests had no `tools` key; the steps
-around them declared 25 tools. Replaying the reply gives a call with `think`
-declared and text without tools. The 0.2.0 parser returns a call either way,
-so the change came with the upgrade. Neither local patch is involved.
-
-The cause is on the Asuna side. Its plugin offers the character lane tools
-only while an Asuna stage is current, and DSH ran two queued inbox turns
-before a stage was set (a race in the stage hand-off, right after a restart).
-The same thing happened once on 10-13, hidden by 0.2.0's leniency. Asuna's
-end-of-turn check caught today's pair and repaired them; nothing with markup
-reached anyone.
-
-Left as is (owner's decision, 2026-11-12, on this session's and the Asuna session's recommendation): a call
-to a tool the request did not offer should not come back as a call, and the
-race is to be fixed in Asuna. Restoring 0.2.0's leniency would take a one-line
-local change (`declared_only` off when `"undeclared_tool_calls"` is
-`"call"`).
-
-## First-token stalls in shared use, 2026-10-22 (observed; nothing changed)
-
-Asuna's home chat waited about two minutes for a reply at 12:41:56 NZDT. The
-Strata log and the GPU showed nothing during the wait. Read from Asuna's DSH
-session logs (each step's `assistant/message` stream times) and
-`benchmarks/raw/qwen38-strata/server/engine-1919.log` (lines 249,690–249,745),
-whose `prompt N tokens = R reused + X read` line identifies the same request:
-
-- **Step 1: first token 68.9 s after the request; the engine's own work was
-  about 7 s.** Just before it, a small request (822 tokens, a summary) ran on a
-  K/V trimmed to 8,192 cells. Her 122,204-token conversation then needed
-  `K/V grown to 122880 cells (1.57 GiB); the expert cache gave 553 slots for it,
-  529 hotter experts moved to colder ones' slots`, followed by `restored 117854
-  tokens (live) in 550.9 ms` and the prompt (4,350 read in 2,892 ms, 495
-  generated in 4,066 ms). Nothing else is logged in between, so about 62 s fall
-  on the growth and its expert moves, which the engine does not time.
-- **Step 2: first token 28.5 s for 56 new tokens.** Between her steps the
-  engine served a request from the DSH host at `.10`: 181,466 tokens, 0 reused,
-  read in 26,019 ms. One request is served at a time, so hers queued behind it.
-
-The same shapes appear before 0.2.0. In Asuna's records from 10-20 11:00Z to
-10-21 22:50Z, 96 of 3,437 steps (2.8%) waited over 20 s for the first token
-with under 10K new tokens (after the upgrade: 3 of 175). Six were matched to
-the engine log. Five came right after a growth that moved 259 to 729 experts.
-The two cleanest followed only a sub-second request and moved about 260 experts
-(stalls of 29 and 34 s); one more followed a 7.7 s request and moved 586 (25 s).
-In the other two (56 and 34 s) a long generation of another conversation ran
-just before (103 and 31 s), so part of those waits may be queueing. The sixth
-queued behind another client's cold 152,073-token read (22 s). The attribution
-rests on line order and the idle GPU, not on a timed measurement.
-
-Not changed (owner's decision, 2026-10-22). If it is revisited:
-- `--no-kv-grow` allocates the whole window at start, so there is no trim,
-  growth or expert move. It costs the window's K/V in VRAM permanently (196,608
-  cells are 2.54 GiB in this log; 262,144 would be about 3.4 GiB) out of the
-  expert cache. Judge it by the share of first-token stalls and by decode speed.
-- The conversation cache (24 GiB, 16 slots) is shared by both hosts' clients.
-  An evicted conversation comes back as a cold read and queues the other host's
-  requests behind it.
+- The installer downloads the pinned release, checks its SHA-256 and the engine's, and upgrades an earlier pinned
+  runtime in place (virtual environments, configs and models stay).
+- Staging verifies all 220 checkpoint files against the publisher's hashes and resumes interrupted downloads.
+  Preparation converts with CPU PyTorch, records each completed step in `preparation.json`, reruns only missing
+  ones, and fetches Basalt's draft layer (`mtp_tuned` step, hash-checked). Allow about 340 GB of disk.
+- Smoke check (text, streaming, a tool call and its answer, a picture, 4K retrieval with a cached repeat):
+  `python .\scripts\probe-qwen38-strata.py --base-url http://127.0.0.1:1919 --output <file>.json`.
+  Long retrieval: add `--only-long --long-tokens 32000`.
+- Live state: `GET /metrics` (engine version, drafter, expert slots, the last 500 requests with
+  `first_engine_token_s`, conversation-cache counters); engine log `benchmarks/raw/qwen38-strata/server/engine-1919.log`.
+
+## Upgrading
+
+The procedure every update since 10-10 followed:
+
+1. **Read** the fork's release notes and open issues, and upstream's for the same span.
+2. **Stage** beside production while 1919 keeps serving: `setup-strata-runtime.ps1 -Stage` with the new pin (or
+   unpack the zip to `runtime/strata-nvfp4-<version>`, add a `.venv-serve`, apply the two patches).
+3. **Check without the GPU:** diff the converters `prepare-qwen38-strata.py` runs, `data/expert-profile.bin`,
+   `data/draft_vocab.bin` and `requirements-serve.txt` (identical or unreachable for this checkpoint means the
+   prepared assets are reused); check the patch anchors; run both replay tests with `--stock`; run the fork's `serve`
+   suite stock and patched and account for every extra failure.
+4. **Measure** with 1919 stopped by the owner:
+   `python .\scripts\benchmark-qwen38-strata-ab.py --candidate strata-nvfp4-<version> --candidate-only --output benchmarks/raw/qwen38-strata/<date>/upgrade`.
+   It runs on `127.0.0.1:1921` only (nothing on the LAN or on 1919 can reach it) from the production launcher's own
+   config, about 6–8 minutes per arm: chat decode in Chinese and English, 4K and 128K prompt + 4K output, one and two
+   requests at once, two agents switching 32K histories, smoke, `</think>` tags, 3 long-thinking and 12 exact-answer
+   prompts. A plain upgrade is compared with the last record; A/B arms (`--candidate-set`, `--candidate-env`,
+   `--candidate-args`, `--candidate-model`) only when a setting or model is being chosen. `--candidate-env` reaches
+   the engine only; a variable the server reads must be set in the harness's own environment.
+5. **Promote** in place with `setup-strata-runtime.ps1`, confirm the engine and patched `serve/` files are
+   byte-identical to what was measured, rerun the harness without `--candidate`, and let the owner start 1919. Smoke
+   check 1919.
+6. **Record:** a curated JSON and the config snapshot in `benchmarks/qwen38_flash_next/<date>/`, a row in
+   [Benchmarks per update](#benchmarks-per-update), the history entry, and every exit condition reached.
+
+Rollback: stop 1919, re-extract the previous release zip over `runtime/strata-nvfp4`, restore the previous installer
+pin, launcher and harness from Git, and run the installer (it reapplies that version's patches).
+
+## Benchmarks per update
+
+Production as adopted at each update, RTX 5090 alone, nothing else on the GPU, one trial per case (a few percent is
+noise). Decode is the engine's tokens per second over the reply; prompt read is tokens per second.
+
+| Date | Runtime (engine) | Drafter | Chat decode zh / en | 4K read / decode | 128K read / decode | One request at a time | Agent switch, s | Long thinking / exact | GPU expert slots | Record |
+|---|---|---|---:|---:|---:|---:|---:|---:|---:|---|
+| 10-03 | 0.1.37-nvfp4.2 | MTP w4, en+Cyrillic vocab | — | 1,905–1,994 / 125–129 | 5,883 / 117.8 | — | — | — | — | [performance](../benchmarks/qwen38_flash_next/2026-10-03/strata-performance.json) |
+| 10-06 | 0.1.39-nvfp4.3 | MTP w4, + CJK vocab | 137.9 / 139.2 | 2,029–2,055 / 137 | 6,903 / 136.9 | — | — | — | 8,087 | [upgrade-tuning](../benchmarks/qwen38_flash_next/2026-10-06/strata-upgrade-tuning.json) |
+| 10-08 | 0.1.40.2-nvfp4.1 | MTP w4 | 158.2 / 159.8 | 2,118–2,364 / 163–169 | 7,689 / 150.9 | — | — | — | 8,022 | [0140-upgrade](../benchmarks/qwen38_flash_next/2026-10-08/strata-0140-upgrade.json) |
+| 10-10 | 0.1.41-nvfp4.4 | MTP w4 | 162.6 / 164.9 | 2,349 / 169.5 | 8,136 / 156.1 | — | 0.90 | 2/3 / 12/12 | 8,066 | [0141-ab](../benchmarks/qwen38_flash_next/2026-10-10/strata-0141-ab.json) |
+| 10-15 | 0.1.44.1-nvfp4.1 | MTP w4 | 166.1 / 165.7 | 2,331 / 167.6 | 8,459 / 162.4 | 149.3 | 0.90 | 2/3 / 12/12 | 8,066 | [04411-upgrade-split](../benchmarks/qwen38_flash_next/2026-10-15/strata-04411-upgrade-split.json) |
+| 10-22 | 0.2.0-beta-nvfp4.3 (0.1.45.3) | MTP w4 | 171.7 / 172.5 | 2,368 / 172.3 | 8,464 / 164.7 | 155.1 | 0.87 | 2/3 / 12/12 | 8,060 | [020beta3-upgrade](../benchmarks/qwen38_flash_next/2026-10-22/strata-020beta3-upgrade.json) |
+| 11-12 | 0.2.13-nvfp4.1 (0.1.59) | MTP w4 | 170.7 / 175.0 | 2,345 / 167.7 | 8,450 / 160.7 | 155.7 | 0.89 | 1/3 / 12/12 | 7,950 | [0213-upgrade](../benchmarks/qwen38_flash_next/2026-11-12/strata-0213-upgrade.json) |
+| **11-23** | **0.2.15-nvfp4.7 (0.1.61)** | **MTP + Basalt drafting and layer, w8** | **215.2 / 219.1** | **2,606 / 223.5** | **11,056 / 218.5** | **192.7** | **0.73** | **2/3 / 12/12** | **8,367** | [0215-drafters](../benchmarks/qwen38_flash_next/2026-11-23/strata-0215-drafters.json), [config](../benchmarks/qwen38_flash_next/2026-11-23/strata-0215-config-1919.json) |
+
+How to read it:
+- From 10-10 on every row comes from `benchmark-qwen38-strata-ab.py` with the same probes. 10-03 used a 4K / 4K and
+  128K / 4K run measured at the client (2 trials); 10-06 and 10-08 used the engine's figures on 4K / 4K and 128K / 4K
+  runs, so compare those three rows only roughly. The same runtime measured on different days has differed by up to
+  8–12% (0.1.39 on 10-06 and 10-08); each record holds its own same-session comparison.
+- Every row passed retrieval, smoke and `</think>` (12/12 since 10-08) and, from 10-10, the cache switch. Long
+  thinking fails long-3 (bracket coding) on most rows; from 0.2.0 on, the server's `answer_room` closes a thinking
+  that runs past ¾ of `max_tokens` with a wrap-up sentence, and the probe counts that as a fail.
+- From 10-03 to 11-23: chat decode +56% (Chinese, against 10-06) and the 128K prompt read +88%. The largest steps:
+  the CJK draft vocabulary (Chinese +25%, 10-06), 0.1.40.2's tensor-core kernels (+7–17%, 10-08), and 0.2.15's
+  RTX 50 kernels and KV streaming (+14–25% decode, +30% at 128K) with Basalt's drafting (+3–9% more, 11-23).
+
+## Decisions that hold
+
+Each with the evidence that decided it; the archived runbook has the measurements.
+
+- **One GPU, one active request.** Layer split over 5090 + 4090 and the expert helper were slower on every measure
+  (10-03; re-measured 10-15 with `parallel` 2: −8% to −40%, two streams at once ~70 tok/s each because pipelined
+  batch windows run no drafts). Two independent instances do not fit in RAM (63 GiB pinned arena each). Requests
+  are served one at a time; a second request queues. Per-card pinning on this PC left both cards with no free VRAM,
+  so both multi-GPU modes set `STRATA_ARENA_PIN_PER_STAGE=0`. `parallel` 2 on the 5090 alone was not measured (the
+  fork measured −10% for one dialog).
+- **Conversation cache, 24 GiB / 16 slots** (10-06). Two agents alternating histories need it: without parking
+  every return reread the full history (2.3–2.5 s per return at 8K; a cold 128K read takes about 22 s); with it
+  every return hit (28–58 tokens reread). Eight slots evicted 291 histories in live use while only 7–14 GB were parked, so slots were the limit.
+  A history is matched by its exact rendered prefix: a changed system prompt, tool schema or history rewrite misses.
+  Snapshots are lost on restart; under the RAM floor parked conversations give RAM back, oldest first.
+- **CJK draft vocabulary** (10-06). The fork's subset held 27 of 55,328 Han tokens; with CJK added Chinese drafts
+  2.04 tokens a round instead of 1.41 and decodes 25% faster, English unchanged.
+- **OrcaRouter ModelOpt pack stays.** The fork's GPTQ of OrcaRouter added 1–2% on chat and failed more long-thinking
+  prompts (10-10; the fork withdrew it 10-11). The original-Qwen GPTQ pack with the fork's uncensoring vector was a
+  tie on speed and checks (11-12); the owner kept OrcaRouter with Qwen4 expected, and both GPTQ packs were deleted
+  (their manifests stay in the raw folders).
+- **Drafter: MTP with Basalt's drafting and Basalt's layer** (11-23). Same session, Chinese / English chat: plain
+  MTP w4 203 / 200, Basalt drafting over this checkpoint's layer 209 / 214 (repeat 208 / 213), with Basalt's layer
+  216 / 216 (77% of drafts accepted against 73%), DFlash2 170 / 196. The fork's suggested `--spec 6 --spec-min-p 0.7`
+  was within noise of 4 / 0.5 on 10-10.
+- **Pictures on the CPU encoder** (owner, 11-23). The fork's in-engine reader (`"in_engine": true` under `vision`)
+  measured 631 against 1,352 ms to the first token for a 329-token picture on its PC; not tested here.
+- **Tool calls in requests without tools come back as text** (owner, 11-12). Restoring 0.2.0's leniency would be a
+  one-line local change (`declared_only` off when `"undeclared_tool_calls"` is `"call"`).
+
+## Findings worth knowing
+
+- **Broken tool-call arguments, 2026-11-07 to 11-11.** Four of Xiaoman's calls streamed arguments that were not
+  JSON. In three the model dropped the `>` of `<parameter=NAME` or `</parameter`; in one it wrote its reply inside
+  the `think` argument. With an open value the fork's EOS literal then wrote `<|im_end|>` into it up to 64 times.
+  All four ran at 80K–175K tokens of context; why the slips started on 11-07 is not known. Reported as
+  [sergqwer/strata-nvfp4#24](https://github.com/sergqwer/strata-nvfp4/issues/24) and fixed in 0.2.15-nvfp4.1 (the
+  slipped tag is read as the tag; the EOS literal no longer fires there). The reply-inside-`think` case still fails
+  at the client, which owns a retry.
+- **First-token stalls, 2026-10-22.** Asuna waited ~69 s for a first token whose engine work took ~7 s: the elastic
+  K/V grew from 8,192 to 122,880 cells and moved 529 experts, which the engine does not time. A second wait (28.5 s)
+  was queueing behind a 181K-token request from the DSH host. From 10-20 to 10-21, 96 of 3,437 Asuna steps (2.8%)
+  waited over 20 s with under 10K new tokens. 0.2.15's KV streaming removes the growth; see [Open items](#open-items).
+- **Large pages.** Windows refuses large-page allocation (error 1450); the engine uses 4 KiB pages. The PC has a fixed
+  64,000 MB page file, which the engine checks at start (it shrinks the expert cache when commit runs short).
+- **LAN.** The launcher binds `0.0.0.0`; the DSH host at `.10` reaches `.13:1919` (its requests appear in the engine
+  log). `.232` is the backup adapter's DHCP address, not a deployment address. `scripts/capture-strata-lan.ps1` is the
+  ARP capture script from the 10-03 reachability investigation (evidence in `benchmarks/raw/qwen38-strata/network/`).
+- **Client notes.** Asuna's providers and DSH send full, separate histories to the one endpoint; matching is by
+  rendered tokens, not by client. Keep the system prompt, tool schema and their order stable within a history, keep
+  `reasoning_content` and DSH's replay metadata in the history, and expect a full reread after compaction, persona
+  edits, tool changes or image offloading.
+
+## Open items
+
+- **Did KV streaming end the long first-token stalls?** A one-off scheduled task, `strata-1919-stall-check`
+  (2026-11-25 19:00 NZDT), reads 1919's `/metrics` and engine log. Rule: closed when under 0.5% of requests with
+  under 10K new tokens wait over 20 s for the first token (queueing behind another request not counted) and no K/V
+  growth moves experts. It records the verdict below and in
+  `benchmarks/qwen38_flash_next/2026-11-25/stall-check.json`.
+  - Result: not yet run.
+- **[Niko1221/Strata#6695](https://github.com/Niko1221/Strata/issues/6695)**, the GGUF header reader (posted
+  2026-11-23). Nothing here depends on it (`"drafting": "mtp"`). Exit: closed upstream, or no longer relevant when
+  the drafter is next chosen.

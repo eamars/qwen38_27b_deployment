@@ -242,7 +242,7 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   English unchanged.
 - Raised the conversation cache to 16 slots / 24 GiB after the live log showed
   291 slot-limited evictions.
-- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-and-tuning-2026-10-06)
+- See [the Strata runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md#upgrade-and-tuning-2026-10-06)
   and [curated results](../benchmarks/qwen38_flash_next/2026-10-06/strata-upgrade-tuning.json).
 
 ### 2026-10-07 — Strata quoted `</think>` patch
@@ -259,7 +259,7 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   such replies in half on the live check; the current version passed 12/12.
 - Not covered: tags other than `</think>` (Asuna's own guard), and why the
   first leaks in long agent contexts start at all. See
-  [the Strata runbook](qwen38-flash-next-strata.md#locations).
+  [the Strata runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md#locations).
 - v3, same night: v2 moved the answer to the reasoning whenever a `</think>`
   on its own line followed it, so an answer followed by a stray tag and a tool
   call (`answer\n</think>\n\n<tool_call>`) or by the end of the reply reached
@@ -286,7 +286,7 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   the patch to the new parser as v4, which decides by whole lines: 12/12 live,
   720 recorded replies replayed clean, and the fork's 546 tests differ from
   unpatched only by the patch's documented costs.
-- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-08)
+- See [the Strata runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md#upgrade-2026-10-08)
   and [curated results](../benchmarks/qwen38_flash_next/2026-10-08/strata-0140-upgrade.json).
 
 ## 2026-10-10 — FreeToken retired
@@ -322,7 +322,7 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - Upgraded production in place (assets reused); the installer now adds psutil
   for 0.1.41's frozen-engine watchdog. The page file is a fixed 64,000 MB, as
   the fork requires.
-- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-10) and
+- See [the Strata runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md#upgrade-2026-10-10) and
   [curated results](../benchmarks/qwen38_flash_next/2026-10-10/strata-0141-ab.json).
 
 ### 2026-10-15 — Strata 0.1.44.1-nvfp4.1; the layer split rejected again
@@ -338,7 +338,7 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   The fork's per-card pinning made both cards report no free VRAM on this PC;
   the split only ran with `STRATA_ARENA_PIN_PER_STAGE=0`. Production stays on
   the 5090 alone at `parallel` 1; the launcher gained `-Parallel`.
-- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-15) and
+- See [the Strata runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md#upgrade-2026-10-15) and
   [curated results](../benchmarks/qwen38_flash_next/2026-10-15/strata-04411-upgrade-split.json).
 
 ### 2026-10-22 — Strata 0.2.0-beta-nvfp4.3
@@ -352,7 +352,7 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   quality probe now fails a long-thinking reply the server wrapped up. The
   launcher turns off the fork's update check, whose `update.cmd` would drop
   the local patches. Both patches apply unchanged.
-- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-10-22) and
+- See [the Strata runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md#upgrade-2026-10-22) and
   [curated results](../benchmarks/qwen38_flash_next/2026-10-22/strata-020beta3-upgrade.json).
 
 ### 2026-11-12 — Strata 0.2.13-nvfp4.1
@@ -375,7 +375,7 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   strata-tool-tags, reads such a slipped parameter tag as the tag and repairs
   three of the four; the fourth (a reply written into the `think` argument)
   still fails at the client, which owns a retry.
-- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-2026-11-12) and
+- See [the Strata runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md#upgrade-2026-11-12) and
   [curated results](../benchmarks/qwen38_flash_next/2026-11-12/strata-0213-upgrade.json).
 
 ### 2026-11-23 — Strata 0.2.15-nvfp4.7 and the MTP with Basalt's drafting
@@ -394,8 +394,20 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
   misreads this model's GGUF header (an upstream bug, reported as [Niko1221/Strata#6695](https://github.com/Niko1221/Strata/issues/6695)).
   `prepare-qwen38-strata.py` takes the checked releases again and fetches the
   draft layer.
-- See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-and-drafter-choice-2026-11-23) and
+- See [the Strata runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md#upgrade-and-drafter-choice-2026-11-23) and
   [curated results](../benchmarks/qwen38_flash_next/2026-11-23/strata-0215-drafters.json).
+
+### 2026-11-23 — Strata runbook condensed
+
+- `docs/qwen38-flash-next-strata.md` now holds only what operates 1919 today:
+  the configuration in force, pins, local patches with their exit rules, the
+  upgrade procedure, one benchmark row per update, the decisions that hold and
+  the open items (1,455 → 259 lines). The previous text is kept verbatim as
+  [the archived runbook](archive/qwen38-flash-next-strata-2026-10-03-to-11-23.md),
+  where the links above now point.
+- The configuration of the 11-23 start is saved beside its results
+  ([strata-0215-config-1919.json](../benchmarks/qwen38_flash_next/2026-11-23/strata-0215-config-1919.json));
+  the upgrade procedure now saves one with every update.
 
 ## Decisions retained
 
