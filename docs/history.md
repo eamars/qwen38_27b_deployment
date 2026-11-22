@@ -391,7 +391,7 @@ available for recovery. See the [fork runtime record](freetoken-fork-runtime-202
 - strata-tool-tags dropped: the fork fixed #24 and the stock parser gets no
   recorded case wrong. strata-think-echo v5 and the budget alias stay.
 - The launcher writes `"drafting": "mtp"`, because the fork's drafting policy
-  misreads this model's GGUF header (an upstream bug: draft issue for Niko1221/Strata in `docs/drafts/`).
+  misreads this model's GGUF header (an upstream bug, reported as [Niko1221/Strata#6695](https://github.com/Niko1221/Strata/issues/6695)).
   `prepare-qwen38-strata.py` takes the checked releases again and fetches the
   draft layer.
 - See [the Strata runbook](qwen38-flash-next-strata.md#upgrade-and-drafter-choice-2026-11-23) and

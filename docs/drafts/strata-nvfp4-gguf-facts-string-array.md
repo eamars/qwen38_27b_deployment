@@ -1,4 +1,4 @@
-# Draft: issue for Niko1221/Strata (not posted)
+# Issue for Niko1221/Strata: posted on 2026-11-23 as [Niko1221/Strata#6695](https://github.com/Niko1221/Strata/issues/6695)
 
 Where: **upstream, Niko1221/Strata** (bug report form). The reader is upstream's (dd015b8c3, 2026-11-12, "drafting:
 decide DFlash2 by what the model file is when its name is not one setup writes") and is unchanged in v0.2.19

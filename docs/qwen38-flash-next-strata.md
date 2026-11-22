@@ -1259,7 +1259,7 @@ queueing, and no K/V growth moves experts", and records the verdict here.
   copy only; production does not need it, because the launcher writes its
   drafter arguments itself and sets `"drafting": "mtp"` (the stock policy then
   passes them through unchanged, checked). Draft issue for upstream (Niko1221/Strata, where the reader comes from; it reads no sizes from any llama.cpp-written GGUF with `general.tags`):
-  `docs/drafts/strata-nvfp4-gguf-facts-string-array.md` (not posted).
+  `docs/drafts/strata-nvfp4-gguf-facts-string-array.md`, posted on 2026-11-23 as [Niko1221/Strata#6695](https://github.com/Niko1221/Strata/issues/6695).
 
 **Behaviour that changes for clients.** Tool-argument `True` / `False` follow
 upstream's #5979 rules (a declared boolean takes any case; elsewhere text stays
