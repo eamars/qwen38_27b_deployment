@@ -1223,7 +1223,10 @@ whole K/V is pinned in RAM (3.09 GiB at 262,144), so a growing conversation no
 longer takes VRAM from the expert cache. That growth and its expert moves were
 the 62 s first-token stall of 10-22 (see
 [First-token stalls](#first-token-stalls-in-shared-use-2026-10-22-observed-nothing-changed));
-whether it is gone in shared use is not yet observed.
+whether it is gone in shared use is not yet observed. A one-off scheduled task
+(`strata-1919-stall-check`, 2026-11-25 19:00 NZDT) reads 1919's `/metrics` and engine log, applies
+the rule "under 0.5% of requests with under 10K new tokens wait over 20 s, not counting
+queueing, and no K/V growth moves experts", and records the verdict here.
 
 **Checked without the GPU.**
 - Converters: `prepare-qwen38-strata.py`'s files changed only their gguf
@@ -1255,7 +1258,7 @@ whether it is gone in shared use is not yet observed.
   and leaves Auto off. Arms B, C and D ran with the reader fixed in the staged
   copy only; production does not need it, because the launcher writes its
   drafter arguments itself and sets `"drafting": "mtp"` (the stock policy then
-  passes them through unchanged, checked). Draft fork issue:
+  passes them through unchanged, checked). Draft issue for upstream (Niko1221/Strata, where the reader comes from; it reads no sizes from any llama.cpp-written GGUF with `general.tags`):
   `docs/drafts/strata-nvfp4-gguf-facts-string-array.md` (not posted).
 
 **Behaviour that changes for clients.** Tool-argument `True` / `False` follow
@@ -1263,10 +1266,10 @@ upstream's #5979 rules (a declared boolean takes any case; elsewhere text stays
 text). A slipped parameter tag is repaired by the fork itself, and an open
 value no longer collects 64 `<|im_end|>`.
 
-**Not taken here.** Pictures read inside the engine (`"in_engine": true` in
-the config's `vision` section: 631 against 1,352 ms to the first token for a
-329-token picture in the fork's measurement) is a separate change, untested
-here.
+**Not taken.** Pictures stay on the CPU encoder (owner, 2026-11-23). The fork
+can read them inside the engine (`"in_engine": true` in the config's `vision`
+section: 631 against 1,352 ms to the first token for a 329-token picture in
+its measurement); not tested here.
 
 **How it was run** (about 30 minutes on the GPU; every Strata server stopped):
 
